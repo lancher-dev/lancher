@@ -4,6 +4,11 @@
 BINARY_NAME=lancher
 INSTALL_PATH=/usr/local/bin
 
+# Version info
+VERSION?=$(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
+COMMIT?=$(shell git rev-parse HEAD 2>/dev/null || echo "unknown")
+LDFLAGS=-ldflags "-X github.com/Kasui92/lancher/internal/version.Version=$(VERSION) -X github.com/Kasui92/lancher/internal/version.Commit=$(COMMIT)"
+
 help:
 	@echo "lancher - Development Makefile"
 	@echo ""
@@ -22,7 +27,7 @@ help:
 # Build the binary
 build:
 	@echo "Building ${BINARY_NAME}..."
-	@go build -o ${BINARY_NAME} cmd/lancher/main.go
+	@go build $(LDFLAGS) -o ${BINARY_NAME} cmd/lancher/main.go
 	@echo "Build complete: ${BINARY_NAME}"
 
 # Install the binary system-wide
@@ -64,7 +69,8 @@ deps:
 # Build for multiple platforms
 build-all:
 	@echo "Building for multiple platforms..."
-	@GOOS=linux GOARCH=amd64 go build -o ${BINARY_NAME}-linux-amd64 cmd/lancher/main.go
-	@GOOS=darwin GOARCH=amd64 go build -o ${BINARY_NAME}-darwin-amd64 cmd/lancher/main.go
-	@GOOS=darwin GOARCH=arm64 go build -o ${BINARY_NAME}-darwin-arm64 cmd/lancher/main.go
+	@GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o ${BINARY_NAME}-linux-amd64 cmd/lancher/main.go
+	@GOOS=linux GOARCH=arm64 go build $(LDFLAGS) -o ${BINARY_NAME}-linux-arm64 cmd/lancher/main.go
+	@GOOS=darwin GOARCH=amd64 go build $(LDFLAGS) -o ${BINARY_NAME}-darwin-amd64 cmd/lancher/main.go
+	@GOOS=darwin GOARCH=arm64 go build $(LDFLAGS) -o ${BINARY_NAME}-darwin-arm64 cmd/lancher/main.go
 	@echo "Multi-platform build complete."

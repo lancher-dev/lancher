@@ -80,7 +80,11 @@ install_lancher() {
     cd "${src_dir}"
 
     info "Building lancher..."
-    if ! go build -o "${BINARY_NAME}" cmd/lancher/main.go; then
+    VERSION=$(git describe --tags --always --dirty 2>/dev/null || echo "dev")
+    COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+    LDFLAGS="-X github.com/Kasui92/lancher/internal/version.Version=${VERSION} -X github.com/Kasui92/lancher/internal/version.Commit=${COMMIT}"
+
+    if ! go build -ldflags="${LDFLAGS}" -o "${BINARY_NAME}" cmd/lancher/main.go; then
         error "Failed to build lancher"
         rm -rf "${tmp_dir}"
         exit 1

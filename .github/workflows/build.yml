@@ -1,8 +1,9 @@
 name: Build and Test
 
 on:
+  workflow_dispatch:
   push:
-    branches: [main, dev]
+    branches: [main]
   pull_request:
     branches: [main]
 
@@ -41,6 +42,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -49,9 +52,14 @@ jobs:
 
       - name: Build for multiple platforms
         run: |
-          GOOS=linux GOARCH=amd64 go build -o lancher-linux-amd64 cmd/lancher/main.go
-          GOOS=darwin GOARCH=amd64 go build -o lancher-darwin-amd64 cmd/lancher/main.go
-          GOOS=darwin GOARCH=arm64 go build -o lancher-darwin-arm64 cmd/lancher/main.go
+          VERSION=$(git describe --tags --always --dirty)
+          COMMIT=$(git rev-parse HEAD)
+          LDFLAGS="-X github.com/Kasui92/lancher/internal/version.Version=${VERSION} -X github.com/Kasui92/lancher/internal/version.Commit=${COMMIT}"
+
+          GOOS=linux GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o lancher-linux-amd64 cmd/lancher/main.go
+          GOOS=linux GOARCH=arm64 go build -ldflags="${LDFLAGS}" -o lancher-linux-arm64 cmd/lancher/main.go
+          GOOS=darwin GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o lancher-darwin-amd64 cmd/lancher/main.go
+          GOOS=darwin GOARCH=arm64 go build -ldflags="${LDFLAGS}" -o lancher-darwin-arm64 cmd/lancher/main.go
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
