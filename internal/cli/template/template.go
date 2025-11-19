@@ -9,7 +9,7 @@ import (
 // RunHelp displays help for template command
 func RunHelp() error {
 	fmt.Printf("%slancher template%s\n", shared.ColorGreen+shared.ColorBold, shared.ColorReset)
-	fmt.Printf("Manage templates\n\n")
+	fmt.Printf("Manage local templates\n\n")
 
 	fmt.Printf("%sUSAGE:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
 	fmt.Printf("    lancher template <subcommand> [options]\n\n")

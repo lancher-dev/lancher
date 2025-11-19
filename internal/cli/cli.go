@@ -66,7 +66,7 @@ func Run(args []string) error {
 // runHelp displays usage information
 func runHelp() error {
 	fmt.Printf("%slancher%s %s%s%s\n", shared.ColorGreen+shared.ColorBold, shared.ColorReset, shared.ColorBold, version.Get(), shared.ColorReset)
-	fmt.Printf("Minimal local project template manager\n\n")
+	fmt.Printf("A minimal local project template manager\n\n")
 
 	fmt.Printf("%sUSAGE:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
 	fmt.Printf("    lancher <command> [options]\n")
