@@ -1,0 +1,31 @@
+# Binaries
+lancher
+lancher-*
+
+# Go build artifacts
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Dependency directories
+vendor/
+
+# IDEs
+.idea/
+*.swp
+*.swo
+*~
+.vscode/
+.DS_Store
+
+# Test coverage
+coverage.txt
+coverage.html
+*.coverprofile
+
+# Temporary files
+tmp/
+temp/
