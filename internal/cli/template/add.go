@@ -22,12 +22,37 @@ func isGitURL(source string) bool {
 
 // runAdd adds a new template from path or git repository
 func RunAdd(args []string) error {
-	if err := shared.ValidateArgs(args, 2, "lancher template add <name> <source>"); err != nil {
-		return err
-	}
+	var name, source string
 
-	name := args[0]
-	source := args[1]
+	// Interactive mode if no arguments provided
+	if len(args) == 0 {
+		nameInput, err := shared.PromptString("Enter template name:")
+		if err != nil {
+			return shared.FormatError("add", "failed to read input")
+		}
+		name = nameInput
+
+		if name == "" {
+			return shared.FormatError("add", "template name cannot be empty")
+		}
+
+		sourceInput, err := shared.PromptString("Enter source (local path or git URL):")
+		if err != nil {
+			return shared.FormatError("add", "failed to read input")
+		}
+		source = sourceInput
+
+		if source == "" {
+			return shared.FormatError("add", "source cannot be empty")
+		}
+	} else {
+		// Command-line arguments mode
+		if err := shared.ValidateArgs(args, 2, "lancher template add <name> <source>"); err != nil {
+			return err
+		}
+		name = args[0]
+		source = args[1]
+	}
 
 	// Validate template name
 	if err := shared.SanitizeTemplateName(name); err != nil {
