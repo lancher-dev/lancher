@@ -2,7 +2,11 @@ package cli
 
 import (
 	"fmt"
-	"strings"
+
+	"github.com/Kasui92/lancher/internal/cli/commands"
+	"github.com/Kasui92/lancher/internal/cli/shared"
+	"github.com/Kasui92/lancher/internal/cli/template"
+	"github.com/Kasui92/lancher/internal/version"
 )
 
 // Run executes the CLI command based on arguments
@@ -15,15 +19,44 @@ func Run(args []string) error {
 	commandArgs := args[1:]
 
 	switch command {
-	case "list", "ls":
-		return runList(commandArgs)
-	case "add":
-		return runAdd(commandArgs)
-	case "remove", "rm":
-		return runRemove(commandArgs)
-	case "new":
-		return runNew(commandArgs)
+	case "create":
+		return commands.Run(commandArgs)
+	case "template":
+		if len(commandArgs) == 0 {
+			return template.RunHelp()
+		}
+		subcommand := commandArgs[0]
+		subArgs := commandArgs[1:]
+		switch subcommand {
+		case "add":
+			return template.RunAdd(subArgs)
+		case "list", "ls":
+			return template.RunList(subArgs)
+		case "update":
+			return template.RunUpdate(subArgs)
+		case "remove", "rm":
+			return template.RunRemove(subArgs)
+		case "help", "-h", "--help":
+			return template.RunHelp()
+		default:
+			return fmt.Errorf("unknown template subcommand: %s\nRun 'lancher template help' for usage", subcommand)
+		}
+	case "info":
+		return commands.RunInfo(commandArgs)
+	case "version", "-v", "--version":
+		fmt.Printf("lancher %s\n", version.Get())
+		return nil
 	case "help", "-h", "--help":
+		if len(commandArgs) > 0 {
+			switch commandArgs[0] {
+			case "create":
+				return commands.RunHelp()
+			case "template":
+				return template.RunHelp()
+			case "info":
+				return commands.RunInfoHelp()
+			}
+		}
 		return runHelp()
 	default:
 		return fmt.Errorf("unknown command: %s\nRun 'lancher help' for usage", command)
@@ -32,63 +65,38 @@ func Run(args []string) error {
 
 // runHelp displays usage information
 func runHelp() error {
-	help := `lancher - Local project template manager
+	fmt.Printf("%slancher%s %s%s%s\n", shared.ColorGreen+shared.ColorBold, shared.ColorReset, shared.ColorBold, version.Get(), shared.ColorReset)
+	fmt.Printf("Minimal local project template manager\n\n")
 
-USAGE:
-    lancher <command> [arguments]
+	fmt.Printf("%sUSAGE:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("    lancher <command> [options]\n")
+	fmt.Printf("    lancher help <command>        Get help for a specific command\n\n")
 
-COMMANDS:
-    list, ls                    List all available templates
-    add <name> <source_dir>     Add a new template from source directory
-    remove <name>, rm <name>    Remove a template
-    new <template> <dest>       Create a new project from template
-    help                        Show this help message
+	fmt.Printf("%sCOMMANDS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("    %screate%s\n", shared.ColorGreen, shared.ColorReset)
+	fmt.Printf("        Create a new project from template\n\n")
+	fmt.Printf("    %stemplate%s\n", shared.ColorGreen, shared.ColorReset)
+	fmt.Printf("        Manage templates (add, list, update, remove)\n\n")
+	fmt.Printf("    %sinfo%s\n", shared.ColorGreen, shared.ColorReset)
+	fmt.Printf("        Show storage information\n\n")
+	fmt.Printf("    %sversion%s\n", shared.ColorGreen, shared.ColorReset)
+	fmt.Printf("        Print version information\n\n")
+	fmt.Printf("    %shelp%s\n", shared.ColorGreen, shared.ColorReset)
+	fmt.Printf("        Print this message\n\n")
 
-EXAMPLES:
-    lancher add myapp /path/to/project
-    lancher list
-    lancher new myapp ./new-project
-    lancher remove myapp
+	fmt.Printf("%sOPTIONS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("    -h, --help\n")
+	fmt.Printf("        Print this message\n\n")
+	fmt.Printf("    -v, --version\n")
+	fmt.Printf("        Print version information\n\n")
 
-TEMPLATE STORAGE:
-    Linux:  $XDG_DATA_HOME/lancher/templates (or ~/.local/share/lancher/templates)
-    macOS:  ~/Library/Application Support/lancher/templates
-`
-	fmt.Print(help)
-	return nil
-}
+	fmt.Printf("%sEXAMPLES:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("    lancher create                %s# Interactive project creation%s\n", shared.ColorGray, shared.ColorReset)
+	fmt.Printf("    lancher template add myapp .  %s# Add current directory as template%s\n", shared.ColorGray, shared.ColorReset)
+	fmt.Printf("    lancher help create           %s# Get help for create command%s\n", shared.ColorGray, shared.ColorReset)
+	fmt.Printf("    lancher help template         %s# Get help for template command%s\n\n", shared.ColorGray, shared.ColorReset)
 
-// formatError creates a user-friendly error message
-func formatError(cmd string, message string) error {
-	return fmt.Errorf("%s: %s", cmd, message)
-}
+	fmt.Printf("Run %slancher help <command>%s for more information on a command.\n", shared.ColorCyan, shared.ColorReset)
 
-// validateArgs checks if the correct number of arguments is provided
-func validateArgs(args []string, expected int, usage string) error {
-	if len(args) != expected {
-		return fmt.Errorf("invalid arguments\nUsage: %s", usage)
-	}
-	return nil
-}
-
-// validateArgsMin checks if at least the minimum number of arguments is provided
-func validateArgsMin(args []string, min int, usage string) error {
-	if len(args) < min {
-		return fmt.Errorf("insufficient arguments\nUsage: %s", usage)
-	}
-	return nil
-}
-
-// sanitizeTemplateName ensures template name is safe
-func sanitizeTemplateName(name string) error {
-	if name == "" {
-		return fmt.Errorf("template name cannot be empty")
-	}
-	if strings.Contains(name, "/") || strings.Contains(name, "\\") {
-		return fmt.Errorf("template name cannot contain path separators")
-	}
-	if name == "." || name == ".." {
-		return fmt.Errorf("invalid template name")
-	}
 	return nil
 }

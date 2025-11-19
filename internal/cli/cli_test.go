@@ -2,6 +2,8 @@ package cli
 
 import (
 	"testing"
+
+	"github.com/Kasui92/lancher/internal/cli/shared"
 )
 
 func TestSanitizeTemplateName(t *testing.T) {
@@ -22,7 +24,7 @@ func TestSanitizeTemplateName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := sanitizeTemplateName(tt.input)
+			err := shared.SanitizeTemplateName(tt.input)
 			if tt.shouldErr && err == nil {
 				t.Errorf("Expected error for input %q, got nil", tt.input)
 			}
@@ -48,7 +50,7 @@ func TestValidateArgs(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validateArgs(tt.args, tt.expected, "usage")
+			err := shared.ValidateArgs(tt.args, tt.expected, "usage")
 			if tt.shouldErr && err == nil {
 				t.Error("Expected error, got nil")
 			}

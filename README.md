@@ -44,42 +44,80 @@ sudo rm /usr/local/bin/lancher
 
 ## Commands
 
-### add
+### create
 
-Save a directory as a template:
+Create a new project from a template. Can be used interactively or with flags:
 
 ```bash
-lancher add <name> <source_dir>
+# Interactive mode
+lancher create
+
+# With flags
+lancher create -t <template_name> -d <destination_dir>
+lancher create --template myapp --destination ./new-project
 ```
 
-Example: `lancher add nextjs-starter ~/projects/my-nextjs-app`
+### template
 
-### list
+Manage templates with subcommands:
 
-List all templates:
+**add** - Add a template from local path or git repository:
 
 ```bash
-lancher list
-lancher ls
+# From local path
+lancher template add <name> <source_dir>
+lancher template add nextjs-starter ~/projects/my-nextjs-app
+
+# From git repository (https or ssh)
+lancher template add <name> <git_url>
+lancher template add nextjs https://github.com/user/nextjs-template
+lancher template add myapp git@github.com:user/my-template.git
 ```
 
-### new
-
-Create a new project from a template:
+**list** - List all templates:
 
 ```bash
-lancher new <template_name> <destination_dir>
+lancher template list
+lancher template ls
 ```
 
-Example: `lancher new nextjs-starter ~/projects/new-app`
-
-### remove
-
-Delete a template:
+**update** - Update a template:
 
 ```bash
-lancher remove <template_name>
-lancher rm <template_name>
+# Git pull (only for templates added from git)
+lancher template update <template_name>
+
+# Overwrite with new files from path
+lancher template update <template_name> -d <new_path>
+```
+
+**remove** - Delete a template:
+
+```bash
+# Interactive selection
+lancher template remove
+
+# Direct removal
+lancher template remove <template_name>
+lancher template rm <template_name>
+```
+
+### info
+
+Display storage information and list all templates with their paths:
+
+```bash
+lancher info
+```
+
+### version
+
+Print version information:
+
+```bash
+lancher version
+lancher -v
+lancher --version
 ```
 
 ### help
@@ -92,7 +130,7 @@ lancher help
 
 ## Storage
 
-Templates are stored in platform-specific directories:
+Templates are stored in platform-specific directories. Use `lancher info` to see the storage path on your system.
 
 **Linux:**
 
