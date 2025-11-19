@@ -1,11 +1,9 @@
 package commands
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/Kasui92/lancher/internal/cli/shared"
 	"github.com/Kasui92/lancher/internal/fileutil"
@@ -63,13 +61,11 @@ func Run(args []string) error {
 	}
 
 	// Interactive mode if flags not provided
-	reader := bufio.NewReader(os.Stdin)
-
 	if templateName == "" {
 		// List available templates
 		templates, err := storage.ListTemplates()
 		if err != nil {
-			return shared.FormatError("new", fmt.Sprintf("failed to list templates: %v", err))
+			return shared.FormatError("create", fmt.Sprintf("failed to list templates: %v", err))
 		}
 
 		if len(templates) == 0 {
@@ -78,26 +74,20 @@ func Run(args []string) error {
 			return nil
 		}
 
-		fmt.Printf("%sAvailable templates:%s\n", shared.ColorBold, shared.ColorReset)
-		for i, name := range templates {
-			fmt.Printf("  %s%d.%s %s\n", shared.ColorGreen, i+1, shared.ColorReset, name)
-		}
-		fmt.Printf("\n%sEnter template name:%s ", shared.ColorCyan, shared.ColorReset)
-
-		input, err := reader.ReadString('\n')
+		// Use interactive select
+		selectedTemplate, err := shared.Select("Choose a template:", templates)
 		if err != nil {
-			return shared.FormatError("new", "failed to read input")
+			return shared.FormatError("create", fmt.Sprintf("selection failed: %v", err))
 		}
-		templateName = strings.TrimSpace(input)
+		templateName = selectedTemplate
 	}
 
 	if destination == "" {
-		fmt.Printf("%sEnter destination directory:%s ", shared.ColorCyan, shared.ColorReset)
-		input, err := reader.ReadString('\n')
+		dest, err := shared.PromptString("Enter destination directory:")
 		if err != nil {
-			return shared.FormatError("new", "failed to read input")
+			return shared.FormatError("create", "failed to read input")
 		}
-		destination = strings.TrimSpace(input)
+		destination = dest
 	}
 
 	// Validate template name

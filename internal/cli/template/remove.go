@@ -1,11 +1,7 @@
 package template
 
 import (
-	"bufio"
 	"fmt"
-	"os"
-	"strconv"
-	"strings"
 
 	"github.com/Kasui92/lancher/internal/cli/shared"
 	"github.com/Kasui92/lancher/internal/fileutil"
@@ -28,29 +24,23 @@ func RunRemove(args []string) error {
 			return nil
 		}
 
-		fmt.Printf("%sSelect template to remove:%s\n", shared.ColorBold, shared.ColorReset)
+		// Use interactive select with cancel option
+		options := append([]shared.SelectOption{{Value: "", Label: "Cancel"}}, make([]shared.SelectOption, len(templates))...)
 		for i, tmpl := range templates {
-			fmt.Printf("  %s%d.%s %s\n", shared.ColorGreen, i+1, shared.ColorReset, tmpl)
+			options[i+1] = shared.SelectOption{Value: tmpl, Label: tmpl}
 		}
-		fmt.Printf("\n%sEnter number (or 0 to cancel):%s ", shared.ColorCyan, shared.ColorReset)
 
-		reader := bufio.NewReader(os.Stdin)
-		input, err := reader.ReadString('\n')
+		selected, err := shared.Select("Select template to remove:", options)
 		if err != nil {
-			return shared.FormatError("remove", "failed to read input")
+			return shared.FormatError("remove", fmt.Sprintf("selection failed: %v", err))
 		}
 
-		choice, err := strconv.Atoi(strings.TrimSpace(input))
-		if err != nil || choice < 0 || choice > len(templates) {
-			return shared.FormatError("remove", "invalid selection")
-		}
-
-		if choice == 0 {
+		if selected == "" {
 			fmt.Printf("%sCancelled.%s\n", shared.ColorYellow, shared.ColorReset)
 			return nil
 		}
 
-		name = templates[choice-1]
+		name = selected
 	} else {
 		if err := shared.ValidateArgs(args, 1, "lancher template remove [name]"); err != nil {
 			return err
