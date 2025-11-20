@@ -4,7 +4,7 @@ Minimal local project template manager written in Go.
 
 ## Overview
 
-`lancher` manages project templates stored locally. Add directories as templates, list them, and create new projects from them. No remote repositories, no git integration, no placeholder substitution—just directory copying.
+`lancher` manages project templates stored locally. Add directories as templates, list them, and create new projects from them. Templates can be added from local paths or git repositories (https/ssh). Supports template configuration via `.lancher.yaml` for metadata and post-create hooks.
 
 ## Installation
 
@@ -72,6 +72,9 @@ lancher template add nextjs-starter ~/projects/my-nextjs-app
 lancher template add <name> <git_url>
 lancher template add nextjs https://github.com/user/nextjs-template
 lancher template add myapp git@github.com:user/my-template.git
+
+# Interactive mode (prompts for name and source)
+lancher template add
 ```
 
 **list** - List all templates:
@@ -141,17 +144,49 @@ Templates are stored in platform-specific directories. Use `lancher info` to see
 
 - `~/Library/Application Support/lancher/templates`
 
-## Development
+## Template Configuration
 
-### Structure
+Templates can include a `.lancher.yaml` file for metadata and post-create hooks.
 
+### .lancher.yaml Format
+
+```yaml
+name: My Project Template
+description: A template for building awesome projects
+author: Your Name
+version: 1.0.0
+
+# Commands to run after project creation (executed in project directory)
+hooks:
+  - npm install
+  - git init
+  - chmod +x scripts/setup.sh
+
+# Files/patterns to ignore during project creation
+ignore:
+  - node_modules
+  - .git
+  - "*.log"
+  - .env.local
 ```
-cmd/lancher/          # Entry point
-internal/
-  cli/                # Command implementations
-  storage/            # Platform-specific paths
-  fileutil/           # File operations
-```
+
+### Configuration Fields
+
+- **name**: Template display name (shown during creation)
+- **description**: Brief template description
+- **author**: Template author
+- **version**: Template version
+- **hooks**: Array of shell commands to execute after project creation (requires interactive confirmation)
+- **ignore**: File patterns to exclude when copying template (supports glob patterns)
+
+### Hooks
+
+When creating a project from a template with `hooks` defined:
+
+1. Template metadata is displayed
+2. Project files are copied (respecting `ignore` patterns)
+3. Hooks are listed and require confirmation before execution
+4. Each hook executes in the project directory with output shown
 
 ### Makefile
 
