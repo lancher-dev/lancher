@@ -77,7 +77,7 @@ func RunAdd(args []string) error {
 	// Handle git URL or local path
 	if isGitURL(source) {
 		fmt.Printf("%sCloning repository...%s\n", shared.ColorYellow, shared.ColorReset)
-		cmd := exec.Command("git", "clone", source, destPath)
+		cmd := exec.Command("git", "clone", "--depth", "1", source, destPath)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		if err := cmd.Run(); err != nil {
