@@ -1,9 +1,6 @@
 #!/bin/bash
 set -e
 
-# lancher installer script
-# Usage: curl -sS https://raw.githubusercontent.com/Kasui92/lancher/main/install.sh | sh
-
 REPO="Kasui92/lancher"
 BINARY_NAME="lancher"
 INSTALL_DIR="/usr/local/bin"
@@ -32,6 +29,10 @@ warn() {
     printf "${YELLOW}⚠${NC} %s\n" "$1"
 }
 
+has() {
+    command -v "$1" >/dev/null 2>&1
+}
+
 # Compare version numbers
 version_ge() {
     # Returns 0 if $1 >= $2
@@ -40,7 +41,7 @@ version_ge() {
 
 # Check if Go is installed and meets minimum version
 check_go() {
-    if ! command -v go &> /dev/null; then
+    if ! has go; then
         error "Go is not installed"
         echo ""
         echo "Please install Go ${MIN_GO_VERSION} or later:"
@@ -84,6 +85,14 @@ install_lancher() {
     COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
     LDFLAGS="-X github.com/Kasui92/lancher/internal/version.Version=${VERSION} -X github.com/Kasui92/lancher/internal/version.Commit=${COMMIT}"
 
+    # Check if cmd/lancher directory exists
+    if [ ! -d "cmd/lancher" ]; then
+        error "Project structure not found. The repository may be outdated."
+        error "Please report this issue at: https://github.com/${REPO}/issues"
+        rm -rf "${tmp_dir}"
+        exit 1
+    fi
+
     if ! go build -ldflags="${LDFLAGS}" -o "${BINARY_NAME}" ./cmd/lancher; then
         error "Failed to build lancher"
         rm -rf "${tmp_dir}"
@@ -111,20 +120,13 @@ main() {
     echo ""
     echo "╔══════════════════════════════════════╗"
     echo "║   lancher Installer                  ║"
-    echo "║   Local Project Template Manager     ║"
     echo "╚══════════════════════════════════════╝"
     echo ""
 
     # Check for required tools
-    if ! command -v git &> /dev/null; then
+    if ! has git; then
         error "git is required but not installed."
         echo "Please install git and try again."
-        exit 1
-    fi
-
-    if ! command -v curl &> /dev/null; then
-        error "curl is required but not installed."
-        echo "Please install curl and try again."
         exit 1
     fi
 

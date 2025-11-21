@@ -1,9 +1,6 @@
 #!/bin/bash
 set -e
 
-# lancher uninstaller script
-# Usage: curl -sS https://lancher.go/uninstall.sh | sh
-
 BINARY_NAME="lancher"
 INSTALL_DIR="/usr/local/bin"
 
