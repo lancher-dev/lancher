@@ -1,10 +1,15 @@
-# lancher
+<h1 align="center">
+  <br>
+  lancher
+  <br>
+  <br>
+</h1>
 
-Minimal local project template manager written in Go.
+## What is this?
 
-## Overview
+A minimal, local project-template manager written in Go.
 
-`lancher` manages project templates stored locally. Add directories as templates, list them, and create new projects from them. Templates can be added from local paths or git repositories (https/ssh). Supports template configuration via `.lancher.yaml` for metadata and post-create hooks.
+`lancher` lets you organize and use project templates stored on your machine. You can register directories as templates, list them, and generate new projects from them. Templates can come from local paths or from git repositories (via HTTPS or SSH). Each template may include a `.lancher.yaml` file for metadata and post-creation hooks, allowing you to customize how new projects are initialized.
 
 ## Installation
 
@@ -14,33 +19,13 @@ Minimal local project template manager written in Go.
 - git
 - curl
 
-### Quick Install
+### Installation
 
 ```bash
-curl -sS https://raw.githubusercontent.com/Kasui92/lancher/main/install.sh | sh
+curl -sS https:/lancher.dev/install.sh | sh
 ```
 
 The script checks prerequisites, clones the repository, builds the binary, and installs to `/usr/local/bin`.
-
-### Manual Install
-
-```bash
-git clone https://github.com/Kasui92/lancher.git
-cd lancher
-make install
-```
-
-### Uninstall
-
-```bash
-curl -sS https://raw.githubusercontent.com/Kasui92/lancher/main/uninstall.sh | sh
-```
-
-Or manually:
-
-```bash
-sudo rm /usr/local/bin/lancher
-```
 
 ## Commands
 
