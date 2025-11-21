@@ -6,8 +6,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"syscall"
-	"unsafe"
+
+	"golang.org/x/term"
 )
 
 // SelectOption represents an option in the selection menu
@@ -17,37 +17,29 @@ type SelectOption struct {
 }
 
 // isTerminal checks if the file descriptor is a terminal
-func isTerminal(fd uintptr) bool {
-	var termios syscall.Termios
-	_, _, err := syscall.Syscall6(syscall.SYS_IOCTL, fd, syscall.TCGETS, uintptr(unsafe.Pointer(&termios)), 0, 0, 0)
-	return err == 0
+func isTerminal(fd int) bool {
+	return term.IsTerminal(fd)
 }
 
+// Terminal state for restoration
+var savedState *term.State
+
 // setRawMode sets terminal to raw mode for reading arrow keys
-func setRawMode(fd uintptr) (*syscall.Termios, error) {
-	var oldState syscall.Termios
-	if _, _, err := syscall.Syscall6(syscall.SYS_IOCTL, fd, syscall.TCGETS, uintptr(unsafe.Pointer(&oldState)), 0, 0, 0); err != 0 {
-		return nil, err
+func setRawMode(fd int) error {
+	state, err := term.MakeRaw(fd)
+	if err != nil {
+		return err
 	}
-
-	newState := oldState
-	newState.Lflag &^= syscall.ECHO | syscall.ICANON
-	newState.Cc[syscall.VMIN] = 1
-	newState.Cc[syscall.VTIME] = 0
-
-	if _, _, err := syscall.Syscall6(syscall.SYS_IOCTL, fd, syscall.TCSETS, uintptr(unsafe.Pointer(&newState)), 0, 0, 0); err != 0 {
-		return nil, err
-	}
-
-	return &oldState, nil
+	savedState = state
+	return nil
 }
 
 // restoreTerminal restores terminal to previous state
-func restoreTerminal(fd uintptr, oldState *syscall.Termios) error {
-	if _, _, err := syscall.Syscall6(syscall.SYS_IOCTL, fd, syscall.TCSETS, uintptr(unsafe.Pointer(oldState)), 0, 0, 0); err != 0 {
-		return err
+func restoreTerminal(fd int) error {
+	if savedState == nil {
+		return nil
 	}
-	return nil
+	return term.Restore(fd, savedState)
 }
 
 // readKey reads a single key or arrow key sequence
@@ -58,69 +50,65 @@ func readKey() (string, error) {
 		return "", err
 	}
 
-	if n == 1 {
-		return string(buf[0]), nil
-	}
-
-	// Arrow keys send escape sequences: ESC [ A/B/C/D
+	// Check for escape sequences (arrow keys)
 	if n == 3 && buf[0] == 27 && buf[1] == 91 {
 		switch buf[2] {
 		case 65:
 			return "up", nil
 		case 66:
 			return "down", nil
+		case 67:
+			return "right", nil
+		case 68:
+			return "left", nil
+		}
+	}
+
+	// Check for single characters
+	if n == 1 {
+		switch buf[0] {
+		case 10, 13: // Enter
+			return "enter", nil
+		case 3: // Ctrl+C
+			return "ctrl+c", nil
+		case 113: // q
+			return "q", nil
 		}
 	}
 
 	return string(buf[:n]), nil
 }
 
-// selectWithArrows displays interactive menu with arrow key navigation
-func selectWithArrows(prompt string, items []SelectOption) (string, error) {
+// selectWithArrows provides interactive selection with arrow key navigation
+func selectWithArrows(prompt string, options []SelectOption) (string, error) {
+	fd := int(os.Stdin.Fd())
 	selected := 0
 
-	// Hide cursor
-	fmt.Print("\033[?25l")
-	defer fmt.Print("\033[?25h") // Show cursor on exit
-
-	// Display initial menu
-	fmt.Printf("%s%s%s\n\n", ColorCyan+ColorBold, prompt, ColorReset)
-
-	fd := os.Stdin.Fd()
-	oldState, err := setRawMode(fd)
-	if err != nil {
-		return "", err
+	// Set terminal to raw mode
+	if err := setRawMode(fd); err != nil {
+		// Fall back to numbered selection if raw mode fails
+		return selectWithNumbers(prompt, options)
 	}
-	defer restoreTerminal(fd, oldState)
+	defer restoreTerminal(fd)
 
-	// Render function
-	render := func() {
-		// Move cursor to start of options
-		fmt.Printf("\033[%dA", len(items))
+	// Hide cursor and show initial selection
+	fmt.Print("\033[?25l")
+	defer fmt.Print("\033[?25h")
 
-		for i, item := range items {
-			label := item.Label
-			if label == "" {
-				label = item.Value
-			}
-
+	renderOptions := func() {
+		fmt.Printf("\r\033[K%s\n", prompt)
+		for i, opt := range options {
 			if i == selected {
-				// Highlighted option with background
-				fmt.Printf("\r  %s%s▸ %s%s\033[K\n", ColorGreen+ColorBold, "\033[7m", label, ColorReset)
+				fmt.Printf("\r\033[K  \033[7m▸ %s\033[0m\n", opt.Label)
 			} else {
-				// Normal option
-				fmt.Printf("\r    %s\033[K\n", label)
+				fmt.Printf("\r\033[K    %s\n", opt.Label)
 			}
 		}
+		fmt.Printf("\033[%dA", len(options)+1)
 	}
 
-	// Initial render
-	for range items {
-		fmt.Println()
-	}
-	render()
+	renderOptions()
 
-	// Event loop
 	for {
 		key, err := readKey()
 		if err != nil {
@@ -131,120 +119,114 @@ func selectWithArrows(prompt string, items []SelectOption) (string, error) {
 		case "up":
 			if selected > 0 {
 				selected--
-				render()
+				renderOptions()
 			}
 		case "down":
-			if selected < len(items)-1 {
+			if selected < len(options)-1 {
 				selected++
-				render()
+				renderOptions()
 			}
-		case "\n", "\r": // Enter key
-			fmt.Println() // Move to next line after selection
-			return items[selected].Value, nil
-		case "\x03": // Ctrl+C
-			fmt.Println()
-			return "", fmt.Errorf("cancelled by user")
-		case "q", "Q":
-			fmt.Println()
+		case "enter":
+			// Clear the display
+			for i := 0; i <= len(options); i++ {
+				fmt.Print("\r\033[K\n")
+			}
+			fmt.Printf("\033[%dA", len(options)+1)
+			return options[selected].Value, nil
+		case "ctrl+c", "q":
+			fmt.Print("\033[?25h")
+			fmt.Println("\r\033[K\nCancelled")
 			return "", fmt.Errorf("cancelled by user")
 		}
 	}
 }
 
-// selectWithNumbers displays numbered menu with numeric input
-func selectWithNumbers(prompt string, items []SelectOption) (string, error) {
-	fmt.Printf("%s%s%s\n\n", ColorCyan+ColorBold, prompt, ColorReset)
-
-	// Display numbered options
-	for i, item := range items {
-		label := item.Label
-		if label == "" {
-			label = item.Value
-		}
-		fmt.Printf("  %s%d.%s %s\n", ColorGreen, i+1, ColorReset, label)
+// selectWithNumbers provides numbered selection as fallback
+func selectWithNumbers(prompt string, options []SelectOption) (string, error) {
+	fmt.Println(prompt)
+	for i, opt := range options {
+		fmt.Printf("  %d) %s\n", i+1, opt.Label)
 	}
-	fmt.Println()
+	fmt.Print("Enter number: ")
 
-	// Read user input
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Printf("%sSelect option (1-%d):%s ", ColorYellow, len(items), ColorReset)
-
 	input, err := reader.ReadString('\n')
 	if err != nil {
-		return "", fmt.Errorf("failed to read input: %w", err)
+		return "", err
 	}
 
 	input = strings.TrimSpace(input)
-
-	// Parse selection
-	selection, err := strconv.Atoi(input)
-	if err != nil || selection < 1 || selection > len(items) {
-		return "", fmt.Errorf("invalid selection: please choose a number between 1 and %d", len(items))
+	choice, err := strconv.Atoi(input)
+	if err != nil || choice < 1 || choice > len(options) {
+		return "", fmt.Errorf("invalid selection")
 	}
 
-	return items[selection-1].Value, nil
+	return options[choice-1].Value, nil
 }
 
-// Select displays an interactive selection menu and returns the selected value
-// Tries arrow key navigation first, falls back to numbered input if not available
-// options can be either []string or []SelectOption
-func Select(prompt string, options interface{}) (string, error) {
-	var items []SelectOption
-
-	// Convert input to SelectOption slice
-	switch v := options.(type) {
-	case []string:
-		items = make([]SelectOption, len(v))
-		for i, s := range v {
-			items[i] = SelectOption{Value: s, Label: s}
-		}
-	case []SelectOption:
-		items = v
-	default:
-		return "", fmt.Errorf("invalid options type")
+// Select prompts user to select from options with arrow key navigation
+// Falls back to numbered selection if terminal doesn't support raw mode
+func Select(prompt string, choices []string) (string, error) {
+	if len(choices) == 0 {
+		return "", fmt.Errorf("no choices provided")
 	}
 
-	if len(items) == 0 {
+	// Convert string choices to SelectOption
+	options := make([]SelectOption, len(choices))
+	for i, choice := range choices {
+		options[i] = SelectOption{
+			Value: choice,
+			Label: choice,
+		}
+	}
+
+	fd := int(os.Stdin.Fd())
+	if isTerminal(fd) {
+		return selectWithArrows(prompt, options)
+	}
+
+	return selectWithNumbers(prompt, options)
+}
+
+// SelectWithOptions prompts user to select from SelectOption with custom labels
+func SelectWithOptions(prompt string, options []SelectOption) (string, error) {
+	if len(options) == 0 {
 		return "", fmt.Errorf("no options provided")
 	}
 
-	// Check if stdin is a terminal and supports interactive mode
-	if isTerminal(os.Stdin.Fd()) {
-		// Try arrow key navigation
-		result, err := selectWithArrows(prompt, items)
-		if err != nil {
-			// If arrow mode fails, fall back to numbered selection
-			fmt.Printf("\n%sFalling back to numbered selection...%s\n\n", ColorYellow, ColorReset)
-			return selectWithNumbers(prompt, items)
+	// Set default labels if empty
+	for i := range options {
+		if options[i].Label == "" {
+			options[i].Label = options[i].Value
 		}
-		return result, nil
 	}
 
-	// Not a terminal, use numbered selection
-	return selectWithNumbers(prompt, items)
+	fd := int(os.Stdin.Fd())
+	if isTerminal(fd) {
+		return selectWithArrows(prompt, options)
+	}
+
+	return selectWithNumbers(prompt, options)
 }
 
-// PromptString prompts the user for a string input
+// PromptString prompts for a text input
 func PromptString(prompt string) (string, error) {
-	reader := bufio.NewReader(os.Stdin)
 	fmt.Printf("%s%s%s ", ColorCyan, prompt, ColorReset)
-
+	reader := bufio.NewReader(os.Stdin)
 	input, err := reader.ReadString('\n')
 	if err != nil {
-		return "", fmt.Errorf("failed to read input: %w", err)
+		return "", err
 	}
-
 	return strings.TrimSpace(input), nil
 }
 
-// PromptConfirm prompts the user for a yes/no confirmation
+// PromptConfirm prompts for yes/no confirmation
 func PromptConfirm(prompt string) (bool, error) {
-	reader := bufio.NewReader(os.Stdin)
 	fmt.Printf("%s%s (y/n):%s ", ColorYellow, prompt, ColorReset)
-
+	reader := bufio.NewReader(os.Stdin)
 	input, err := reader.ReadString('\n')
 	if err != nil {
-		return false, fmt.Errorf("failed to read input: %w", err)
+		return false, err
 	}
 
 	input = strings.ToLower(strings.TrimSpace(input))

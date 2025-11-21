@@ -30,7 +30,7 @@ func RunRemove(args []string) error {
 			options[i+1] = shared.SelectOption{Value: tmpl, Label: tmpl}
 		}
 
-		selected, err := shared.Select("Select template to remove:", options)
+		selected, err := shared.SelectWithOptions("Select template to remove:", options)
 		if err != nil {
 			return shared.FormatError("remove", fmt.Sprintf("selection failed: %v", err))
 		}
