@@ -17,19 +17,19 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 info() {
-    echo -e "${BLUE}ℹ${NC} $1"
+    printf "${BLUE}ℹ${NC} %s\n" "$1"
 }
 
 success() {
-    echo -e "${GREEN}✓${NC} $1"
+    printf "${GREEN}✓${NC} %s\n" "$1"
 }
 
 error() {
-    echo -e "${RED}✗${NC} $1"
+    printf "${RED}✗${NC} %s\n" "$1"
 }
 
 warn() {
-    echo -e "${YELLOW}⚠${NC} $1"
+    printf "${YELLOW}⚠${NC} %s\n" "$1"
 }
 
 # Compare version numbers
@@ -84,7 +84,7 @@ install_lancher() {
     COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
     LDFLAGS="-X github.com/Kasui92/lancher/internal/version.Version=${VERSION} -X github.com/Kasui92/lancher/internal/version.Commit=${COMMIT}"
 
-    if ! go build -ldflags="${LDFLAGS}" -o "${BINARY_NAME}" cmd/lancher/main.go; then
+    if ! go build -ldflags="${LDFLAGS}" -o "${BINARY_NAME}" ./cmd/lancher; then
         error "Failed to build lancher"
         rm -rf "${tmp_dir}"
         exit 1
@@ -141,9 +141,9 @@ main() {
     echo ""
     info "You can now use lancher:"
     echo "  ${BINARY_NAME} help"
-    echo "  ${BINARY_NAME} add mytemplate /path/to/project"
-    echo "  ${BINARY_NAME} list"
-    echo "  ${BINARY_NAME} new mytemplate /path/to/new-project"
+    echo "  ${BINARY_NAME} template add mytemplate /path/to/project"
+    echo "  ${BINARY_NAME} template list"
+    echo "  ${BINARY_NAME} create -t mytemplate -d /path/to/new-project"
     echo ""
 }
 
