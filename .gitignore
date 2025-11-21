@@ -1,6 +1,6 @@
-# Binaries
-lancher
-lancher-*
+# Binaries (only in root directory)
+/lancher
+/lancher-*
 
 # Go build artifacts
 *.exe
