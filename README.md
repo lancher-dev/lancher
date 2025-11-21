@@ -1,11 +1,9 @@
-<h1 align="center">
+<h1 align="center" class="b">
   <br>
   lancher
   <br>
   <br>
 </h1>
-
-## What is this?
 
 A minimal, local project-template manager written in Go.
 
@@ -13,13 +11,7 @@ A minimal, local project-template manager written in Go.
 
 ## Installation
 
-### Prerequisites
-
-- Go 1.22+
-- git
-- curl
-
-### Installation
+The easiest way to install launcher is via the dedicated script:
 
 ```bash
 curl -sS https:/lancher.dev/install.sh | sh
@@ -27,9 +19,17 @@ curl -sS https:/lancher.dev/install.sh | sh
 
 The script checks prerequisites, clones the repository, builds the binary, and installs to `/usr/local/bin`.
 
-## Commands
+### Prerequisites
 
-### create
+- Go 1.22+
+- git
+- curl
+
+## Usage
+
+The following commands are provided to make it easier to manage templates and start new projects.
+
+#### create
 
 Create a new project from a template. Can be used interactively or with flags:
 
@@ -42,7 +42,7 @@ lancher create -t <template_name> -d <destination_dir>
 lancher create --template myapp --destination ./new-project
 ```
 
-### template
+#### template
 
 Manage templates with subcommands:
 
@@ -90,7 +90,7 @@ lancher template remove <template_name>
 lancher template rm <template_name>
 ```
 
-### info
+#### info
 
 Display storage information and list all templates with their paths:
 
@@ -173,7 +173,20 @@ When creating a project from a template with `hooks` defined:
 3. Hooks are listed and require confirmation before execution
 4. Each hook executes in the project directory with output shown
 
-### Makefile
+## Contributing
+
+Contributions are welcome! Whether you want to fix bugs, add features, or improve documentation, here's how to get started with local development.
+
+### Development Setup
+
+Clone the repository and set up your development environment:
+
+```bash
+git clone https://github.com/Kasui92/lancher.git
+cd lancher
+```
+
+#### Makefile
 
 ```bash
 make build       # Build binary
@@ -185,7 +198,7 @@ make build-all   # Build for Linux/macOS (amd64/arm64)
 make run         # Run without installing (use ARGS='...')
 ```
 
-### Testing
+#### Testing
 
 ```bash
 make test
@@ -197,7 +210,7 @@ Or directly:
 go test ./...
 ```
 
-### Local Development
+#### Local Development
 
 ```bash
 make run ARGS="list"
@@ -207,7 +220,7 @@ make run ARGS="add mytemplate /path/to/source"
 Or:
 
 ```bash
-go run cmd/lancher/main.go list
+go run ./cmd/lancher list
 ```
 
 ## License
