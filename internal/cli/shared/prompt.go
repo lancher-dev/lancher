@@ -96,12 +96,12 @@ func selectWithArrows(prompt string, options []SelectOption) (string, error) {
 	defer fmt.Print("\033[?25h")
 
 	renderOptions := func() {
-		fmt.Printf("\r\033[K%s\n", prompt)
+		fmt.Printf("\r\033[K%s%s%s\n", ColorCyan, prompt, ColorReset)
 		for i, opt := range options {
 			if i == selected {
-				fmt.Printf("\r\033[K  \033[7m▸ %s\033[0m\n", opt.Label)
+				fmt.Printf("\r\033[K > %s\n", opt.Label)
 			} else {
-				fmt.Printf("\r\033[K    %s\n", opt.Label)
+				fmt.Printf("\r\033[K • %s\n", opt.Label)
 			}
 		}
 		fmt.Printf("\033[%dA", len(options)+1)
@@ -217,6 +217,8 @@ func PromptString(prompt string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	// Clear the prompt line (go up one line and clear it)
+	fmt.Print("\033[1A\033[K")
 	return strings.TrimSpace(input), nil
 }
 
