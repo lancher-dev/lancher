@@ -1,6 +1,6 @@
 <h1 align="center" class="b">
   <br>
-  lancher
+  lancher 🚀
   <br>
   <br>
 </h1>
