@@ -11,7 +11,7 @@ A minimal, local project-template manager written in Go.
 
 ## Installation
 
-The easiest way to install launcher is via the dedicated script:
+The easiest way to install `lancher` is via the dedicated script:
 
 ```bash
 curl -sS https:/lancher.dev/install.sh | sh
