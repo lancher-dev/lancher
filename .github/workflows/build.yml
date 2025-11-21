@@ -52,10 +52,10 @@ jobs:
           COMMIT=$(git rev-parse HEAD)
           LDFLAGS="-X github.com/Kasui92/lancher/internal/version.Version=${VERSION} -X github.com/Kasui92/lancher/internal/version.Commit=${COMMIT}"
 
-          GOOS=linux GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o lancher-linux-amd64 cmd/lancher/main.go
-          GOOS=linux GOARCH=arm64 go build -ldflags="${LDFLAGS}" -o lancher-linux-arm64 cmd/lancher/main.go
-          GOOS=darwin GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o lancher-darwin-amd64 cmd/lancher/main.go
-          GOOS=darwin GOARCH=arm64 go build -ldflags="${LDFLAGS}" -o lancher-darwin-arm64 cmd/lancher/main.go
+          GOOS=linux GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o lancher-linux-amd64 ./cmd/lancher
+          GOOS=linux GOARCH=arm64 go build -ldflags="${LDFLAGS}" -o lancher-linux-arm64 ./cmd/lancher
+          GOOS=darwin GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o lancher-darwin-amd64 ./cmd/lancher
+          GOOS=darwin GOARCH=arm64 go build -ldflags="${LDFLAGS}" -o lancher-darwin-arm64 ./cmd/lancher
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
