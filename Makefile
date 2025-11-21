@@ -27,7 +27,7 @@ help:
 # Build the binary
 build:
 	@echo "Building ${BINARY_NAME}..."
-	@go build $(LDFLAGS) -o ${BINARY_NAME} cmd/lancher/main.go
+	@go build $(LDFLAGS) -o ${BINARY_NAME} ./cmd/lancher
 	@echo "Build complete: ${BINARY_NAME}"
 
 # Install the binary system-wide
@@ -57,7 +57,7 @@ test:
 
 # Run the application locally (for testing)
 run:
-	@go run cmd/lancher/main.go $(ARGS)
+	@go run ./cmd/lancher $(ARGS)
 
 # Download dependencies
 deps:
@@ -69,8 +69,8 @@ deps:
 # Build for multiple platforms
 build-all:
 	@echo "Building for multiple platforms..."
-	@GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o ${BINARY_NAME}-linux-amd64 cmd/lancher/main.go
-	@GOOS=linux GOARCH=arm64 go build $(LDFLAGS) -o ${BINARY_NAME}-linux-arm64 cmd/lancher/main.go
-	@GOOS=darwin GOARCH=amd64 go build $(LDFLAGS) -o ${BINARY_NAME}-darwin-amd64 cmd/lancher/main.go
-	@GOOS=darwin GOARCH=arm64 go build $(LDFLAGS) -o ${BINARY_NAME}-darwin-arm64 cmd/lancher/main.go
+	@GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o ${BINARY_NAME}-linux-amd64 ./cmd/lancher
+	@GOOS=linux GOARCH=arm64 go build $(LDFLAGS) -o ${BINARY_NAME}-linux-arm64 ./cmd/lancher
+	@GOOS=darwin GOARCH=amd64 go build $(LDFLAGS) -o ${BINARY_NAME}-darwin-amd64 ./cmd/lancher
+	@GOOS=darwin GOARCH=arm64 go build $(LDFLAGS) -o ${BINARY_NAME}-darwin-arm64 ./cmd/lancher
 	@echo "Multi-platform build complete."
