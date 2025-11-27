@@ -52,7 +52,7 @@ make test
 ### Install Locally
 
 ```bash
-make install      # Install to /usr/local/bin
+make install      # Install to ~/.local/bin
 make uninstall    # Remove
 ```
 
