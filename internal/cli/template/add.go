@@ -20,6 +20,11 @@ func isGitURL(source string) bool {
 		strings.HasSuffix(source, ".git")
 }
 
+// isZipFile checks if source is a ZIP file
+func isZipFile(source string) bool {
+	return strings.HasSuffix(strings.ToLower(source), ".zip")
+}
+
 // runAdd adds a new template from path or git repository
 func RunAdd(args []string) error {
 	var name, source string
@@ -36,7 +41,7 @@ func RunAdd(args []string) error {
 			return shared.FormatError("add", "template name cannot be empty")
 		}
 
-		sourceInput, err := shared.PromptString("Enter source (local path or git URL):")
+		sourceInput, err := shared.PromptString("Enter source (local path, git URL, or ZIP file):")
 		if err != nil {
 			return shared.FormatError("add", "failed to read input")
 		}
@@ -74,7 +79,7 @@ func RunAdd(args []string) error {
 		return shared.FormatError("add", fmt.Sprintf("failed to get template path: %v", err))
 	}
 
-	// Handle git URL or local path
+	// Handle git URL, ZIP file, or local path
 	if isGitURL(source) {
 		fmt.Printf("%sCloning repository...%s\n", shared.ColorYellow, shared.ColorReset)
 		cmd := exec.Command("git", "clone", "--depth", "1", source, destPath)
@@ -85,6 +90,24 @@ func RunAdd(args []string) error {
 		}
 		fmt.Printf("%s✓ Template '%s' added from git repository%s\n", shared.ColorGreen, name, shared.ColorReset)
 		fmt.Printf("  %sSource:%s %s\n", shared.ColorYellow, shared.ColorReset, source)
+	} else if isZipFile(source) {
+		// ZIP file
+		sourceAbs, err := filepath.Abs(source)
+		if err != nil {
+			return shared.FormatError("add", fmt.Sprintf("invalid source path: %v", err))
+		}
+
+		if _, err := os.Stat(sourceAbs); os.IsNotExist(err) {
+			return shared.FormatError("add", fmt.Sprintf("ZIP file does not exist: %s", sourceAbs))
+		}
+
+		fmt.Printf("%sExtracting ZIP file...%s\n", shared.ColorYellow, shared.ColorReset)
+		if err := fileutil.UnzipToDir(sourceAbs, destPath); err != nil {
+			return shared.FormatError("add", fmt.Sprintf("failed to extract ZIP: %v", err))
+		}
+
+		fmt.Printf("%s✓ Template '%s' added from ZIP file%s\n", shared.ColorGreen, name, shared.ColorReset)
+		fmt.Printf("  %sSource:%s %s\n", shared.ColorYellow, shared.ColorReset, sourceAbs)
 	} else {
 		// Local path
 		sourceAbs, err := filepath.Abs(source)

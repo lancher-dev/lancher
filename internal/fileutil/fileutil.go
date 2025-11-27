@@ -1,10 +1,12 @@
 package fileutil
 
 import (
+	"archive/zip"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // CopyDir recursively copies a directory from src to dst
@@ -85,5 +87,74 @@ func RemoveDir(path string) error {
 	if err := os.RemoveAll(path); err != nil {
 		return fmt.Errorf("failed to remove directory: %w", err)
 	}
+	return nil
+}
+
+// UnzipToDir extracts a ZIP file to the specified directory
+func UnzipToDir(zipPath, destDir string) error {
+	// Open ZIP file
+	reader, err := zip.OpenReader(zipPath)
+	if err != nil {
+		return fmt.Errorf("failed to open zip file: %w", err)
+	}
+	defer reader.Close()
+
+	// Create destination directory
+	if err := os.MkdirAll(destDir, 0755); err != nil {
+		return fmt.Errorf("failed to create destination directory: %w", err)
+	}
+
+	// Extract each file
+	for _, file := range reader.File {
+		// Construct destination path
+		destPath := filepath.Join(destDir, file.Name)
+
+		// Security check: prevent zip slip vulnerability
+		if !strings.HasPrefix(destPath, filepath.Clean(destDir)+string(os.PathSeparator)) {
+			return fmt.Errorf("illegal file path in zip: %s", file.Name)
+		}
+
+		if file.FileInfo().IsDir() {
+			// Create directory
+			if err := os.MkdirAll(destPath, file.Mode()); err != nil {
+				return fmt.Errorf("failed to create directory: %w", err)
+			}
+		} else {
+			// Create parent directory if needed
+			if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
+				return fmt.Errorf("failed to create parent directory: %w", err)
+			}
+
+			// Extract file
+			if err := extractZipFile(file, destPath); err != nil {
+				return fmt.Errorf("failed to extract file %s: %w", file.Name, err)
+			}
+		}
+	}
+
+	return nil
+}
+
+// extractZipFile extracts a single file from ZIP
+func extractZipFile(file *zip.File, destPath string) error {
+	// Open file in ZIP
+	srcFile, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer srcFile.Close()
+
+	// Create destination file
+	dstFile, err := os.OpenFile(destPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode())
+	if err != nil {
+		return err
+	}
+	defer dstFile.Close()
+
+	// Copy contents
+	if _, err := io.Copy(dstFile, srcFile); err != nil {
+		return err
+	}
+
 	return nil
 }
