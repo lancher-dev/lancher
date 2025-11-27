@@ -2,7 +2,7 @@
 
 # Binary name
 BINARY_NAME=lancher
-INSTALL_PATH=/usr/local/bin
+INSTALL_PATH=$(HOME)/.local/bin
 
 # Version info
 VERSION?=$(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
@@ -30,17 +30,18 @@ build:
 	@go build $(LDFLAGS) -o ${BINARY_NAME} ./cmd/lancher
 	@echo "Build complete: ${BINARY_NAME}"
 
-# Install the binary system-wide
+# Install the binary to user's local bin
 install: build
 	@echo "Installing ${BINARY_NAME} to ${INSTALL_PATH}..."
-	@sudo cp ${BINARY_NAME} ${INSTALL_PATH}/${BINARY_NAME}
-	@sudo chmod +x ${INSTALL_PATH}/${BINARY_NAME}
+	@mkdir -p ${INSTALL_PATH}
+	@cp ${BINARY_NAME} ${INSTALL_PATH}/${BINARY_NAME}
+	@chmod +x ${INSTALL_PATH}/${BINARY_NAME}
 	@echo "Installation complete. You can now use '${BINARY_NAME}' from anywhere."
 
 # Uninstall the binary
 uninstall:
 	@echo "Uninstalling ${BINARY_NAME}..."
-	@sudo rm -f ${INSTALL_PATH}/${BINARY_NAME}
+	@rm -f ${INSTALL_PATH}/${BINARY_NAME}
 	@echo "Uninstall complete."
 
 # Clean build artifacts

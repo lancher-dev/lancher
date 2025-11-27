@@ -3,7 +3,7 @@ set -e
 
 REPO="Kasui92/lancher"
 BINARY_NAME="lancher"
-INSTALL_DIR="/usr/local/bin"
+INSTALL_DIR="$HOME/.local/bin"
 
 # Colors
 RED='\033[0;31m'
@@ -114,11 +114,12 @@ install_binary() {
 
     # Install binary
     info "Installing to ${INSTALL_DIR}..."
-    if [ -w "${INSTALL_DIR}" ]; then
-        mv "${tmp_dir}/${BINARY_NAME}" "${INSTALL_DIR}/${BINARY_NAME}"
-    else
-        sudo mv "${tmp_dir}/${BINARY_NAME}" "${INSTALL_DIR}/${BINARY_NAME}"
-    fi
+    
+    # Create directory if it doesn't exist
+    mkdir -p "${INSTALL_DIR}"
+    
+    # Move binary to install directory
+    mv "${tmp_dir}/${BINARY_NAME}" "${INSTALL_DIR}/${BINARY_NAME}"
 
     # Clean up
     rm -rf "${tmp_dir}"
@@ -154,6 +155,18 @@ main() {
     info "Check your version:"
     echo "  ${BINARY_NAME} version"
     echo ""
+    
+    # Check if ~/.local/bin is in PATH
+    if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+        warn "~/.local/bin is not in your PATH"
+        echo ""
+        echo "Add the following to your shell profile (~/.bashrc, ~/.zshrc, etc.):"
+        echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
+        echo ""
+        echo "Then reload your shell or run:"
+        echo "  source ~/.bashrc  # or ~/.zshrc"
+        echo ""
+    fi
 }
 
 main "$@"

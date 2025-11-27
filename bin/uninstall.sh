@@ -2,7 +2,7 @@
 set -e
 
 BINARY_NAME="lancher"
-INSTALL_DIR="/usr/local/bin"
+INSTALL_DIR="$HOME/.local/bin"
 
 # Colors
 RED='\033[0;31m'
@@ -43,11 +43,7 @@ main() {
     # Remove binary
     if [ -f "${INSTALL_DIR}/${BINARY_NAME}" ]; then
         info "Removing ${BINARY_NAME} from ${INSTALL_DIR}..."
-        if [ -w "${INSTALL_DIR}" ]; then
-            rm "${INSTALL_DIR}/${BINARY_NAME}"
-        else
-            sudo rm "${INSTALL_DIR}/${BINARY_NAME}"
-        fi
+        rm "${INSTALL_DIR}/${BINARY_NAME}"
         success "Binary removed"
     else
         warn "${BINARY_NAME} not found in ${INSTALL_DIR}"
@@ -70,10 +66,6 @@ main() {
 
     echo ""
     success "Uninstallation complete!"
-    echo ""
-    info "Note: If you installed Go via the lancher installer and want to remove it:"
-    echo "  sudo rm -rf /usr/local/go"
-    echo "  # Then remove the PATH export from your ~/.bashrc or ~/.zshrc"
     echo ""
 }
 
