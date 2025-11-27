@@ -11,19 +11,13 @@ A minimal, local project-template manager written in Go.
 
 ## Installation
 
-The easiest way to install `lancher` is via the dedicated script:
+Download and install the latest release with a single command:
 
 ```bash
 curl -sS https://lancher.dev/install.sh | sh
 ```
 
-The script checks prerequisites, clones the repository, builds the binary, and installs to `/usr/local/bin`.
-
-### Prerequisites
-
-- Go 1.22+
-- git
-- curl
+The installer automatically detects your platform and downloads the appropriate pre-built binary.
 
 ## Documentation
 

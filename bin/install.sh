@@ -4,7 +4,6 @@ set -e
 REPO="Kasui92/lancher"
 BINARY_NAME="lancher"
 INSTALL_DIR="/usr/local/bin"
-MIN_GO_VERSION="1.22"
 
 # Colors
 RED='\033[0;31m'
@@ -33,86 +32,98 @@ has() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# Compare version numbers
-version_ge() {
-    # Returns 0 if $1 >= $2
-    printf '%s\n%s' "$2" "$1" | sort -V -C
+# Detect OS and architecture
+detect_platform() {
+    local os=$(uname -s | tr '[:upper:]' '[:lower:]')
+    local arch=$(uname -m)
+
+    case "$os" in
+        linux)
+            OS="linux"
+            ;;
+        darwin)
+            OS="darwin"
+            ;;
+        *)
+            error "Unsupported operating system: $os"
+            exit 1
+            ;;
+    esac
+
+    case "$arch" in
+        x86_64|amd64)
+            ARCH="amd64"
+            ;;
+        aarch64|arm64)
+            ARCH="arm64"
+            ;;
+        *)
+            error "Unsupported architecture: $arch"
+            exit 1
+            ;;
+    esac
+
+    PLATFORM="${OS}-${ARCH}"
+    info "Detected platform: ${PLATFORM}"
 }
 
-# Check if Go is installed and meets minimum version
-check_go() {
-    if ! has go; then
-        error "Go is not installed"
-        echo ""
-        echo "Please install Go ${MIN_GO_VERSION} or later:"
-        echo "  https://go.dev/doc/install"
-        echo ""
-        return 1
+# Get latest release version from GitHub
+get_latest_version() {
+    info "Fetching latest release version..."
+
+    if ! has curl; then
+        error "curl is required but not installed."
+        exit 1
     fi
 
-    local version=$(go version | awk '{print $3}' | sed 's/go//')
-    info "Found Go ${version}"
+    local api_url="https://api.github.com/repos/${REPO}/releases/latest"
+    LATEST_VERSION=$(curl -sS "${api_url}" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 
-    if ! version_ge "$version" "$MIN_GO_VERSION"; then
-        error "Go ${version} is too old. Minimum required: ${MIN_GO_VERSION}"
-        echo ""
-        echo "Please upgrade Go to version ${MIN_GO_VERSION} or later:"
-        echo "  https://go.dev/doc/install"
-        echo ""
-        return 1
+    if [ -z "$LATEST_VERSION" ]; then
+        error "Failed to fetch latest version"
+        exit 1
     fi
 
-    success "Go version ${version} meets requirements"
-    return 0
+    info "Latest version: ${LATEST_VERSION}"
 }
 
-# Build and install lancher
-install_lancher() {
+# Download and install binary
+install_binary() {
     local tmp_dir=$(mktemp -d)
-    local src_dir="${tmp_dir}/lancher"
+    local binary_name="lancher-${PLATFORM}"
+    local download_url="https://github.com/${REPO}/releases/download/${LATEST_VERSION}/${binary_name}"
 
-    info "Cloning lancher repository..."
-    if ! git clone --depth 1 "https://github.com/${REPO}.git" "${src_dir}" 2>/dev/null; then
-        error "Failed to clone repository. Make sure git is installed."
+    info "Downloading ${binary_name}..."
+
+    if ! curl -sS -L -o "${tmp_dir}/${BINARY_NAME}" "${download_url}"; then
+        error "Failed to download binary"
+        error "URL: ${download_url}"
         rm -rf "${tmp_dir}"
         exit 1
     fi
 
-    cd "${src_dir}"
+    # Make binary executable
+    chmod +x "${tmp_dir}/${BINARY_NAME}"
 
-    info "Building lancher..."
-    VERSION=$(git describe --tags --always --dirty 2>/dev/null || echo "dev")
-    COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
-    LDFLAGS="-X github.com/Kasui92/lancher/internal/version.Version=${VERSION} -X github.com/Kasui92/lancher/internal/version.Commit=${COMMIT}"
-
-    # Check if cmd/lancher directory exists
-    if [ ! -d "cmd/lancher" ]; then
-        error "Project structure not found. The repository may be outdated."
-        error "Please report this issue at: https://github.com/${REPO}/issues"
+    # Verify binary works
+    if ! "${tmp_dir}/${BINARY_NAME}" version >/dev/null 2>&1; then
+        error "Downloaded binary is not working correctly"
         rm -rf "${tmp_dir}"
         exit 1
     fi
 
-    if ! go build -ldflags="${LDFLAGS}" -o "${BINARY_NAME}" ./cmd/lancher; then
-        error "Failed to build lancher"
-        rm -rf "${tmp_dir}"
-        exit 1
-    fi
-
-    info "Installing lancher to ${INSTALL_DIR}..."
+    # Install binary
+    info "Installing to ${INSTALL_DIR}..."
     if [ -w "${INSTALL_DIR}" ]; then
-        cp "${BINARY_NAME}" "${INSTALL_DIR}/"
-        chmod +x "${INSTALL_DIR}/${BINARY_NAME}"
+        mv "${tmp_dir}/${BINARY_NAME}" "${INSTALL_DIR}/${BINARY_NAME}"
     else
-        sudo cp "${BINARY_NAME}" "${INSTALL_DIR}/"
-        sudo chmod +x "${INSTALL_DIR}/${BINARY_NAME}"
+        sudo mv "${tmp_dir}/${BINARY_NAME}" "${INSTALL_DIR}/${BINARY_NAME}"
     fi
 
     # Clean up
-    cd - > /dev/null
     rm -rf "${tmp_dir}"
 
-    success "lancher installed successfully to ${INSTALL_DIR}/${BINARY_NAME}"
+    success "${BINARY_NAME} ${LATEST_VERSION} installed successfully"
 }
 
 # Main installation process
@@ -123,20 +134,14 @@ main() {
     echo "╚══════════════════════════════════════╝"
     echo ""
 
-    # Check for required tools
-    if ! has git; then
-        error "git is required but not installed."
-        echo "Please install git and try again."
-        exit 1
-    fi
+    # Detect platform
+    detect_platform
 
-    # Check Go version
-    if ! check_go; then
-        exit 1
-    fi
+    # Get latest version
+    get_latest_version
 
-    # Install lancher
-    install_lancher
+    # Install binary
+    install_binary
 
     echo ""
     success "Installation complete!"
@@ -144,8 +149,10 @@ main() {
     info "You can now use lancher:"
     echo "  ${BINARY_NAME} help"
     echo "  ${BINARY_NAME} template add mytemplate /path/to/project"
-    echo "  ${BINARY_NAME} template list"
-    echo "  ${BINARY_NAME} create -t mytemplate -d /path/to/new-project"
+    echo "  ${BINARY_NAME} create"
+    echo ""
+    info "Check your version:"
+    echo "  ${BINARY_NAME} version"
     echo ""
 }
 

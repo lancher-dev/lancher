@@ -30,6 +30,7 @@ jobs:
           COMMIT=$(git rev-parse HEAD)
           LDFLAGS="-s -w -X github.com/Kasui92/lancher/internal/version.Version=${VERSION} -X github.com/Kasui92/lancher/internal/version.Commit=${COMMIT}"
 
+          # Build for all platforms
           GOOS=linux GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o lancher-linux-amd64 ./cmd/lancher
           GOOS=linux GOARCH=arm64 go build -ldflags="${LDFLAGS}" -o lancher-linux-arm64 ./cmd/lancher
           GOOS=darwin GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o lancher-darwin-amd64 ./cmd/lancher
@@ -50,5 +51,23 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
+          body: |
+            ## Installation
+
+            Use the install script:
+
+            ```bash
+            curl -sS https://raw.githubusercontent.com/Kasui92/lancher/main/bin/install.sh | sh
+            ```
+
+            ### Manual Installation
+
+            1. Download the appropriate binary for your system
+            2. Make it executable: `chmod +x lancher-*`
+            3. Move it to your PATH: `sudo mv lancher-* /usr/local/bin/lancher`
+
+            ### Checksums
+
+            Verify your download with the checksums in `checksums.txt`
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
