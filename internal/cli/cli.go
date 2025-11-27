@@ -20,6 +20,10 @@ func Run(args []string) error {
 
 	switch command {
 	case "create":
+		// Check for help flag
+		if len(commandArgs) > 0 && (commandArgs[0] == "help" || commandArgs[0] == "-h" || commandArgs[0] == "--help") {
+			return commands.RunHelp()
+		}
 		return commands.Run(commandArgs)
 	case "template":
 		if len(commandArgs) == 0 {
@@ -42,21 +46,15 @@ func Run(args []string) error {
 			return fmt.Errorf("unknown template subcommand: %s\nRun 'lancher template help' for usage", subcommand)
 		}
 	case "info":
+		// Check for help flag
+		if len(commandArgs) > 0 && (commandArgs[0] == "help" || commandArgs[0] == "-h" || commandArgs[0] == "--help") {
+			return commands.RunInfoHelp()
+		}
 		return commands.RunInfo(commandArgs)
 	case "version", "-v", "--version":
 		fmt.Printf("lancher %s\n", version.Get())
 		return nil
 	case "help", "-h", "--help":
-		if len(commandArgs) > 0 {
-			switch commandArgs[0] {
-			case "create":
-				return commands.RunHelp()
-			case "template":
-				return template.RunHelp()
-			case "info":
-				return commands.RunInfoHelp()
-			}
-		}
 		return runHelp()
 	default:
 		return fmt.Errorf("unknown command: %s\nRun 'lancher help' for usage", command)
@@ -70,7 +68,7 @@ func runHelp() error {
 
 	fmt.Printf("%sUSAGE:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
 	fmt.Printf("    lancher <command> [options]\n")
-	fmt.Printf("    lancher help <command>        Get help for a specific command\n\n")
+	fmt.Printf("    lancher <command> help        Get help for a specific command\n\n")
 
 	fmt.Printf("%sCOMMANDS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
 	fmt.Printf("    %screate%s\n", shared.ColorGreen, shared.ColorReset)
@@ -90,13 +88,7 @@ func runHelp() error {
 	fmt.Printf("    -v, --version\n")
 	fmt.Printf("        Print version information\n\n")
 
-	fmt.Printf("%sEXAMPLES:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
-	fmt.Printf("    lancher create                %s# Interactive project creation%s\n", shared.ColorGray, shared.ColorReset)
-	fmt.Printf("    lancher template add myapp .  %s# Add current directory as template%s\n", shared.ColorGray, shared.ColorReset)
-	fmt.Printf("    lancher help create           %s# Get help for create command%s\n", shared.ColorGray, shared.ColorReset)
-	fmt.Printf("    lancher help template         %s# Get help for template command%s\n\n", shared.ColorGray, shared.ColorReset)
-
-	fmt.Printf("Run %slancher help <command>%s for more information on a command.\n", shared.ColorCyan, shared.ColorReset)
+	fmt.Printf("Run %slancher <command> help%s for more information on a command.\n", shared.ColorCyan, shared.ColorReset)
 
 	return nil
 }

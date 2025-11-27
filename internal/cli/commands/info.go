@@ -23,9 +23,6 @@ func RunInfoHelp() error {
 	fmt.Printf("      - Number of templates\n")
 	fmt.Printf("      - List of all templates with their paths\n\n")
 
-	fmt.Printf("%sEXAMPLE:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
-	fmt.Printf("    lancher info\n\n")
-
 	return nil
 }
 

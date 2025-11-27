@@ -33,13 +33,6 @@ func RunHelp() error {
 	fmt.Printf("    -h, --help\n")
 	fmt.Printf("        Show this help message\n\n")
 
-	fmt.Printf("%sEXAMPLES:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
-	fmt.Printf("    %s# Interactive mode (prompts for input)%s\n", shared.ColorGray, shared.ColorReset)
-	fmt.Printf("    lancher create\n\n")
-	fmt.Printf("    %s# Create with flags%s\n", shared.ColorGray, shared.ColorReset)
-	fmt.Printf("    lancher create -t myapp -d ./new-project\n")
-	fmt.Printf("    lancher create --template nextjs --destination ~/projects/my-site\n\n")
-
 	return nil
 }
 
