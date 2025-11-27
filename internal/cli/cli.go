@@ -67,8 +67,7 @@ func runHelp() error {
 	fmt.Printf("A minimal local project template manager\n\n")
 
 	fmt.Printf("%sUSAGE:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
-	fmt.Printf("    lancher <command> [options]\n")
-	fmt.Printf("    lancher <command> help        Get help for a specific command\n\n")
+	fmt.Printf("    lancher <command> [options]\n\n")
 
 	fmt.Printf("%sCOMMANDS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
 	fmt.Printf("    %screate%s\n", shared.ColorGreen, shared.ColorReset)
