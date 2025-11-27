@@ -157,16 +157,21 @@ main() {
     echo ""
     
     # Check if ~/.local/bin is in PATH
-    if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-        warn "~/.local/bin is not in your PATH"
-        echo ""
-        echo "Add the following to your shell profile (~/.bashrc, ~/.zshrc, etc.):"
-        echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
-        echo ""
-        echo "Then reload your shell or run:"
-        echo "  source ~/.bashrc  # or ~/.zshrc"
-        echo ""
-    fi
+    case ":$PATH:" in
+        *":$HOME/.local/bin:"*)
+            # Already in PATH
+            ;;
+        *)
+            warn "~/.local/bin is not in your PATH"
+            echo ""
+            echo "Add the following to your shell profile (~/.bashrc, ~/.zshrc, etc.):"
+            echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
+            echo ""
+            echo "Then reload your shell or run:"
+            echo "  source ~/.bashrc  # or ~/.zshrc"
+            echo ""
+            ;;
+    esac
 }
 
 main "$@"
