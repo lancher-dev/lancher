@@ -222,6 +222,138 @@ func PromptString(prompt string) (string, error) {
 	return strings.TrimSpace(input), nil
 }
 
+// PromptStringWithDefault prompts for text input with a default value shown as gray placeholder
+func PromptStringWithDefault(prompt, defaultValue string) (string, error) {
+	fmt.Printf("%s%s%s ", ColorCyan, prompt, ColorReset)
+
+	// Check if terminal supports raw mode for interactive placeholder
+	fd := int(os.Stdin.Fd())
+	if !isTerminal(fd) {
+		// Fallback: simple prompt without placeholder
+		fmt.Printf("(default: %s%s%s) ", ColorGray, defaultValue, ColorReset)
+		reader := bufio.NewReader(os.Stdin)
+		input, err := reader.ReadString('\n')
+		if err != nil {
+			return "", err
+		}
+		input = strings.TrimSpace(input)
+		if input == "" {
+			return defaultValue, nil
+		}
+		return input, nil
+	}
+
+	// Set terminal to raw mode for character-by-character reading
+	state, err := term.MakeRaw(fd)
+	if err != nil {
+		// Fallback on error
+		fmt.Printf("(default: %s%s%s) ", ColorGray, defaultValue, ColorReset)
+		reader := bufio.NewReader(os.Stdin)
+		input, err := reader.ReadString('\n')
+		if err != nil {
+			return "", err
+		}
+		input = strings.TrimSpace(input)
+		if input == "" {
+			return defaultValue, nil
+		}
+		return input, nil
+	}
+	defer term.Restore(fd, state)
+
+	// Print placeholder in gray at cursor position
+	fmt.Printf("%s%s%s", ColorGray, defaultValue, ColorReset)
+	// Move cursor back to start of placeholder
+	for i := 0; i < len(defaultValue); i++ {
+		fmt.Print("\033[D")
+	}
+
+	var inputBuffer []rune
+	placeholderVisible := true
+
+	buf := make([]byte, 1)
+	for {
+		// Read single byte
+		n, err := os.Stdin.Read(buf)
+		if err != nil {
+			term.Restore(fd, state)
+			return "", err
+		}
+		if n == 0 {
+			continue
+		}
+
+		b := buf[0]
+
+		// Handle Enter key
+		if b == 13 || b == 10 {
+			fmt.Println() // Move to next line
+			break
+		}
+
+		// Handle Backspace/Delete
+		if b == 127 || b == 8 {
+			if len(inputBuffer) > 0 {
+				// Remove last character from buffer
+				inputBuffer = inputBuffer[:len(inputBuffer)-1]
+
+				if len(inputBuffer) == 0 {
+					// Input is now empty - show placeholder again
+					// Move back one position, then clear to end of line and show placeholder
+					fmt.Print("\033[D")  // Move cursor back
+					fmt.Print("\033[K")  // Clear to end of line
+					fmt.Printf("%s%s%s", ColorGray, defaultValue, ColorReset)
+					// Move cursor back to start of placeholder
+					for i := 0; i < len(defaultValue); i++ {
+						fmt.Print("\033[D")
+					}
+					placeholderVisible = true
+				} else {
+					// Move back and clear character
+					fmt.Print("\033[D \033[D")
+				}
+			}
+			continue
+		}
+
+		// Handle Ctrl+C
+		if b == 3 {
+			fmt.Println()
+			term.Restore(fd, state)
+			return "", fmt.Errorf("cancelled by user")
+		}
+
+		// Ignore other control characters
+		if b < 32 {
+			continue
+		}
+
+		// Regular character input
+		if placeholderVisible {
+			// Clear placeholder on first character
+			fmt.Print("\033[K") // Clear to end of line
+			placeholderVisible = false
+		}
+
+		// Add to buffer and display
+		r := rune(b)
+		inputBuffer = append(inputBuffer, r)
+		fmt.Printf("%c", r)
+	}
+
+	input := string(inputBuffer)
+
+	// Clear the prompt line
+	fmt.Print("\033[1A\033[K")
+
+	// If empty, use default
+	if input == "" {
+		return defaultValue, nil
+	}
+
+	return input, nil
+}
+
 // PromptConfirm prompts for yes/no confirmation
 func PromptConfirm(prompt string) (bool, error) {
 	fmt.Printf("%s%s (y/n):%s ", ColorYellow, prompt, ColorReset)
@@ -232,5 +364,39 @@ func PromptConfirm(prompt string) (bool, error) {
 	}
 
 	input = strings.ToLower(strings.TrimSpace(input))
+	return input == "y" || input == "yes", nil
+}
+
+// PromptConfirmWithDefault prompts for yes/no confirmation with default value and placeholder
+func PromptConfirmWithDefault(prompt string, defaultValue bool) (bool, error) {
+	var placeholder, defaultChar string
+	if defaultValue {
+		placeholder = "Y/n"
+		defaultChar = "y"
+	} else {
+		placeholder = "y/N"
+		defaultChar = "n"
+	}
+
+	fmt.Printf("%s%s (%s):%s ", ColorYellow, prompt, placeholder, ColorReset)
+
+	// Print placeholder in gray
+	fmt.Printf("%s%s%s", ColorGray, defaultChar, ColorReset)
+	// Move cursor back
+	fmt.Printf("\033[1D")
+
+	reader := bufio.NewReader(os.Stdin)
+	input, err := reader.ReadString('\n')
+	if err != nil {
+		return false, err
+	}
+
+	input = strings.ToLower(strings.TrimSpace(input))
+
+	// If empty, use default
+	if input == "" {
+		return defaultValue, nil
+	}
+
 	return input == "y" || input == "yes", nil
 }
