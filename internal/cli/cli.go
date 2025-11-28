@@ -89,7 +89,7 @@ func runHelp() error {
 	fmt.Printf("    %s%-20s%s %s\n", shared.ColorGreen, "create", shared.ColorReset, "Create a new project from template")
 	fmt.Printf("    %s%-20s%s %s\n", shared.ColorGreen, "template", shared.ColorReset, "Manage templates (add, list, update, remove)")
 	fmt.Printf("    %s%-20s%s %s\n", shared.ColorGreen, "info", shared.ColorReset, "Show storage information")
-	fmt.Printf("    %shelp%s, %s-h%s             %s\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "Print this help message")
+	fmt.Printf("    %shelp%s, %s-h%s             %s\n\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "Print this help message")
 
 	fmt.Printf("%sOPTIONS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
 	fmt.Printf("    %s-v%s, %s--version%s        %s\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "Print version information")
