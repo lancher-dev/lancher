@@ -35,9 +35,12 @@ get_templates_dir() {
 
 main() {
     echo ""
-    echo "╔══════════════════════════════════════╗"
-    echo "║   lancher Uninstaller                ║"
-    echo "╚══════════════════════════════════════╝"
+    # Try to use rocket emoji with fallback
+    if printf "🚀" 2>/dev/null | grep -q "🚀"; then
+        echo "🚀  lancher uninstaller"
+    else
+        echo ">>  lancher uninstaller"
+    fi
     echo ""
 
     # Remove binary
