@@ -61,7 +61,7 @@ func RunAdd(args []string) error {
 
 	// Interactive mode if no arguments provided
 	if len(args) == 0 {
-		nameInput, err := shared.PromptString("Enter template name:")
+		nameInput, err := shared.PromptStringWithDefault("Enter template name:", "my-template")
 		if err != nil {
 			return shared.FormatError("add", "failed to read input")
 		}
@@ -71,7 +71,7 @@ func RunAdd(args []string) error {
 			return shared.FormatError("add", "template name cannot be empty")
 		}
 
-		sourceInput, err := shared.PromptString("Enter source (local path, git URL, or ZIP file):")
+		sourceInput, err := shared.PromptStringWithDefault("Enter source (local path, git URL, or ZIP file):", "./my-template")
 		if err != nil {
 			return shared.FormatError("add", "failed to read input")
 		}
