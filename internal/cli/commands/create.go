@@ -13,27 +13,19 @@ import (
 	"github.com/Kasui92/lancher/internal/storage"
 )
 
-// RunHelp displays help for create command
-func RunHelp() error {
+// RunCreateHelp displays help for create command
+func RunCreateHelp() error {
 	fmt.Printf("%slancher create%s\n", shared.ColorGreen+shared.ColorBold, shared.ColorReset)
 	fmt.Printf("Create a new project from template\n\n")
 
 	fmt.Printf("%sUSAGE:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
 	fmt.Printf("    lancher create [options]\n\n")
 
-	fmt.Printf("%sDESCRIPTION:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
-	fmt.Printf("    Creates a new project from an existing template. Can be used interactively\n")
-	fmt.Printf("    (prompts for template and destination) or with command-line flags.\n\n")
-
 	fmt.Printf("%sOPTIONS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
-	fmt.Printf("    -t, --template <name>\n")
-	fmt.Printf("        Template name to use\n\n")
-	fmt.Printf("    -d, --destination <path>\n")
-	fmt.Printf("        Destination directory for the new project\n\n")
-	fmt.Printf("    -p, --print\n")
-	fmt.Printf("        Show detailed output (no spinner)\n\n")
-	fmt.Printf("    -h, --help\n")
-	fmt.Printf("        Show this help message\n\n")
+	fmt.Printf("    %s-t%s, %s--template%s %s<name>%s     %sTemplate name to use%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, shared.ColorCyan, shared.ColorReset, "", "")
+	fmt.Printf("    %s-d%s, %s--destination%s %s<path>%s  %sDestination directory for the project%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, shared.ColorCyan, shared.ColorReset, "", "")
+	fmt.Printf("    %s-p%s, %s--print%s               %sShow detailed output (no spinner)%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "", "")
+	fmt.Printf("    %s-h%s, %s--help%s                %sShow this help message%s\n\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "", "")
 
 	return nil
 }

@@ -25,6 +25,25 @@ func isZipFile(source string) bool {
 	return strings.HasSuffix(strings.ToLower(source), ".zip")
 }
 
+// RunAddHelp displays help for template add command
+func RunAddHelp() error {
+	fmt.Printf("%slancher template add%s\n", shared.ColorGreen+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("Add a new template\n\n")
+
+	fmt.Printf("%sUSAGE:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("    lancher template add [name] [source] [options]\n\n")
+
+	fmt.Printf("%sARGS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("    %s%-15s%s %s\n", shared.ColorGreen, "name", shared.ColorReset, "Template name (interactive if omitted)")
+	fmt.Printf("    %s%-15s%s %s\n\n", shared.ColorGreen, "source", shared.ColorReset, "Local path, ZIP file, or git URL")
+
+	fmt.Printf("%sOPTIONS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("    %s-p%s, %s--print%s  %sShow detailed output (no spinner)%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "", "")
+	fmt.Printf("    %s-h%s, %s--help%s   %sShow this help message%s\n\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "", "")
+
+	return nil
+}
+
 // runAdd adds a new template from path or git repository
 func RunAdd(args []string) error {
 	var name, source string

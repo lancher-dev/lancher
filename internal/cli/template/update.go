@@ -11,6 +11,25 @@ import (
 	"github.com/Kasui92/lancher/internal/storage"
 )
 
+// RunUpdateHelp displays help for template update command
+func RunUpdateHelp() error {
+	fmt.Printf("%slancher template update%s\n", shared.ColorGreen+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("Update an existing template\n\n")
+
+	fmt.Printf("%sUSAGE:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("    lancher template update <name> [options]\n\n")
+
+	fmt.Printf("%sARGS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("    %s%-15s%s %s\n\n", shared.ColorGreen, "name", shared.ColorReset, "Template name to update")
+
+	fmt.Printf("%sOPTIONS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("    %s-d%s %s<path>%s     %sOverwrite with files from this path%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "", "")
+	fmt.Printf("    %s-p%s, %s--print%s  %sShow detailed output (no spinner)%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "", "")
+	fmt.Printf("    %s-h%s, %s--help%s   %sShow this help message%s\n\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "", "")
+
+	return nil
+}
+
 // runUpdate updates a template
 func RunUpdate(args []string) error {
 	var overwritePath string
