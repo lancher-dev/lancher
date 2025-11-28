@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 REPO="Kasui92/lancher"
@@ -114,10 +114,10 @@ install_binary() {
 
     # Install binary
     info "Installing to ${INSTALL_DIR}..."
-    
+
     # Create directory if it doesn't exist
     mkdir -p "${INSTALL_DIR}"
-    
+
     # Move binary to install directory
     mv "${tmp_dir}/${BINARY_NAME}" "${INSTALL_DIR}/${BINARY_NAME}"
 
@@ -155,7 +155,7 @@ main() {
     info "Check your version:"
     echo "  ${BINARY_NAME} version"
     echo ""
-    
+
     # Check if ~/.local/bin is in PATH
     case ":$PATH:" in
         *":$HOME/.local/bin:"*)
