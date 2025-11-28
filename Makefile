@@ -16,13 +16,13 @@ help:
 	@echo "  make build       Build the binary"
 	@echo "  make install     Build and install to ${INSTALL_PATH}"
 	@echo "  make uninstall   Remove binary from ${INSTALL_PATH}"
-	@echo "  make test        Run tests"
+	@echo "  make test        Run all tests"
 	@echo "  make run         Run locally (use ARGS='...' for arguments)"
 	@echo "  make clean       Clean build artifacts"
 	@echo "  make build-all   Build for multiple platforms"
 	@echo ""
 	@echo "For end users:"
-	@echo "  curl -sS https://raw.githubusercontent.com/Kasui92/lancher/main/install.sh | sh"
+	@echo "  curl -sS https://lancher.dev/install.sh | sh"
 
 # Build the binary
 build:
