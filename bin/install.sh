@@ -106,7 +106,7 @@ install_binary() {
     chmod +x "${tmp_dir}/${BINARY_NAME}"
 
     # Verify binary works
-    if ! "${tmp_dir}/${BINARY_NAME}" version >/dev/null 2>&1; then
+    if ! "${tmp_dir}/${BINARY_NAME}" --version >/dev/null 2>&1; then
         error "Downloaded binary is not working correctly"
         rm -rf "${tmp_dir}"
         exit 1
@@ -153,7 +153,7 @@ main() {
     echo "  ${BINARY_NAME} create"
     echo ""
     info "Check your version:"
-    echo "  ${BINARY_NAME} version"
+    echo "  ${BINARY_NAME} --version"
     echo ""
 
     # Check if ~/.local/bin is in PATH
