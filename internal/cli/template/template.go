@@ -38,9 +38,9 @@ func RunHelp() error {
 	fmt.Printf("    lancher template update <name> [options]\n\n")
 	fmt.Printf("    Update a template. For git-based templates, pulls latest changes.\n")
 	fmt.Printf("    For path-based templates, use -d flag to overwrite.\n\n")
-	fmt.Printf("    Options:\n")
-	fmt.Printf("      -d <path>\n")
-	fmt.Printf("          Overwrite template with files from this path\n\n")
+	fmt.Printf("%sOPTIONS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("    -d <path>\n")
+	fmt.Printf("        Overwrite template with files from this path\n\n")
 
 	fmt.Printf("%sREMOVE TEMPLATE:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
 	fmt.Printf("    lancher template remove [name]\n\n")

@@ -76,16 +76,13 @@ func runHelp() error {
 	fmt.Printf("        Manage templates (add, list, update, remove)\n\n")
 	fmt.Printf("    %sinfo%s\n", shared.ColorGreen, shared.ColorReset)
 	fmt.Printf("        Show storage information\n\n")
-	fmt.Printf("    %sversion%s\n", shared.ColorGreen, shared.ColorReset)
+	fmt.Printf("    %sversion, -v, --version%s\n", shared.ColorGreen, shared.ColorReset)
 	fmt.Printf("        Print version information\n\n")
-	fmt.Printf("    %shelp%s\n", shared.ColorGreen, shared.ColorReset)
-	fmt.Printf("        Print this message\n\n")
+	fmt.Printf("    %shelp, -h, --help%s\n", shared.ColorGreen, shared.ColorReset)
+	fmt.Printf("        Print this help message\n\n")
 
 	fmt.Printf("%sOPTIONS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
-	fmt.Printf("    -h, --help\n")
-	fmt.Printf("        Print this message\n\n")
-	fmt.Printf("    -v, --version\n")
-	fmt.Printf("        Print version information\n\n")
+	fmt.Printf("    Each command accepts -h or --help to display its usage information.\n\n")
 
 	fmt.Printf("Run %slancher <command> help%s for more information on a command.\n", shared.ColorCyan, shared.ColorReset)
 
