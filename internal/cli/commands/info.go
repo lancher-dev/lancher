@@ -16,12 +16,8 @@ func RunInfoHelp() error {
 	fmt.Printf("%sUSAGE:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
 	fmt.Printf("    lancher info\n\n")
 
-	fmt.Printf("%sDESCRIPTION:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
-	fmt.Printf("    Displays information about template storage, including:\n")
-	fmt.Printf("      - Current platform (Linux/macOS)\n")
-	fmt.Printf("      - Storage directory path\n")
-	fmt.Printf("      - Number of templates\n")
-	fmt.Printf("      - List of all templates with their paths\n\n")
+	fmt.Printf("%sOPTIONS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("    %s-h%s, %s--help%s  %sShow this help message%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "", "")
 
 	return nil
 }

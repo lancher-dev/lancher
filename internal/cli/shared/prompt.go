@@ -99,9 +99,9 @@ func selectWithArrows(prompt string, options []SelectOption) (string, error) {
 		fmt.Printf("\r\033[K%s%s%s\n", ColorCyan, prompt, ColorReset)
 		for i, opt := range options {
 			if i == selected {
-				fmt.Printf("\r\033[K > %s\n", opt.Label)
+				fmt.Printf("\r\033[K%s>%s %s\n", ColorGreen, ColorReset, opt.Label)
 			} else {
-				fmt.Printf("\r\033[K • %s\n", opt.Label)
+				fmt.Printf("\r\033[K%s•%s %s\n", ColorGray, ColorReset, opt.Label)
 			}
 		}
 		fmt.Printf("\033[%dA", len(options)+1)

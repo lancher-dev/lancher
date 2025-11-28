@@ -25,9 +25,39 @@ func isZipFile(source string) bool {
 	return strings.HasSuffix(strings.ToLower(source), ".zip")
 }
 
+// RunAddHelp displays help for template add command
+func RunAddHelp() error {
+	fmt.Printf("%slancher template add%s\n", shared.ColorGreen+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("Add a new template\n\n")
+
+	fmt.Printf("%sUSAGE:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("    lancher template add [name] [source] [options]\n\n")
+
+	fmt.Printf("%sARGS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("    %s%-15s%s %s\n", shared.ColorGreen, "name", shared.ColorReset, "Template name (interactive if omitted)")
+	fmt.Printf("    %s%-15s%s %s\n\n", shared.ColorGreen, "source", shared.ColorReset, "Local path, ZIP file, or git URL")
+
+	fmt.Printf("%sOPTIONS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("    %s-p%s, %s--print%s  %sShow detailed output (no spinner)%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "", "")
+	fmt.Printf("    %s-h%s, %s--help%s   %sShow this help message%s\n\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "", "")
+
+	return nil
+}
+
 // runAdd adds a new template from path or git repository
 func RunAdd(args []string) error {
 	var name, source string
+	var verbose bool
+
+	// Parse flags first
+	for i := 0; i < len(args); i++ {
+		if args[i] == "-p" || args[i] == "--print" {
+			verbose = true
+			// Remove flag from args
+			args = append(args[:i], args[i+1:]...)
+			i--
+		}
+	}
 
 	// Interactive mode if no arguments provided
 	if len(args) == 0 {
@@ -81,14 +111,32 @@ func RunAdd(args []string) error {
 
 	// Handle git URL, ZIP file, or local path
 	if isGitURL(source) {
-		fmt.Printf("%sCloning repository...%s\n", shared.ColorYellow, shared.ColorReset)
+		var spinner *shared.Spinner
+		writer := shared.NewSpinnerWriter(verbose)
+
+		if !verbose {
+			spinner = shared.NewSpinner("Cloning repository...")
+			spinner.Start()
+			defer spinner.Stop()
+		} else {
+			fmt.Printf("%sCloning repository...%s\n", shared.ColorYellow, shared.ColorReset)
+		}
+
 		cmd := exec.Command("git", "clone", "--depth", "1", source, destPath)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
+		cmd.Stdout = writer.MultiWriter()
+		cmd.Stderr = writer.MultiWriter()
 		if err := cmd.Run(); err != nil {
+			if spinner != nil {
+				spinner.Fail(fmt.Sprintf("Failed to clone repository: %v", err))
+			}
 			return shared.FormatError("add", fmt.Sprintf("failed to clone repository: %v", err))
 		}
-		fmt.Printf("%s✓ Template '%s' added from git repository%s\n", shared.ColorGreen, name, shared.ColorReset)
+
+		if spinner != nil {
+			spinner.Success(fmt.Sprintf("Template '%s' added from git repository", name))
+		} else {
+			fmt.Printf("%s✓ Template '%s' added from git repository%s\n", shared.ColorGreen, name, shared.ColorReset)
+		}
 		fmt.Printf("  %sSource:%s %s\n", shared.ColorYellow, shared.ColorReset, source)
 	} else if isZipFile(source) {
 		// ZIP file
@@ -101,12 +149,27 @@ func RunAdd(args []string) error {
 			return shared.FormatError("add", fmt.Sprintf("ZIP file does not exist: %s", sourceAbs))
 		}
 
-		fmt.Printf("%sExtracting ZIP file...%s\n", shared.ColorYellow, shared.ColorReset)
+		var spinner *shared.Spinner
+		if !verbose {
+			spinner = shared.NewSpinner("Extracting ZIP file...")
+			spinner.Start()
+			defer spinner.Stop()
+		} else {
+			fmt.Printf("%sExtracting ZIP file...%s\n", shared.ColorYellow, shared.ColorReset)
+		}
+
 		if err := fileutil.UnzipToDir(sourceAbs, destPath); err != nil {
+			if spinner != nil {
+				spinner.Fail(fmt.Sprintf("Failed to extract ZIP: %v", err))
+			}
 			return shared.FormatError("add", fmt.Sprintf("failed to extract ZIP: %v", err))
 		}
 
-		fmt.Printf("%s✓ Template '%s' added from ZIP file%s\n", shared.ColorGreen, name, shared.ColorReset)
+		if spinner != nil {
+			spinner.Success(fmt.Sprintf("Template '%s' added from ZIP file", name))
+		} else {
+			fmt.Printf("%s✓ Template '%s' added from ZIP file%s\n", shared.ColorGreen, name, shared.ColorReset)
+		}
 		fmt.Printf("  %sSource:%s %s\n", shared.ColorYellow, shared.ColorReset, sourceAbs)
 	} else {
 		// Local path

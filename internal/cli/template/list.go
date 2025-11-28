@@ -7,6 +7,21 @@ import (
 	"github.com/Kasui92/lancher/internal/storage"
 )
 
+// RunListHelp displays help for template list command
+func RunListHelp() error {
+	fmt.Printf("%slancher template list%s\n", shared.ColorGreen+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("List all available templates\n\n")
+
+	fmt.Printf("%sUSAGE:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("    lancher template list\n")
+	fmt.Printf("    lancher template ls\n\n")
+
+	fmt.Printf("%sOPTIONS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("    %s-h%s, %s--help%s  %sShow this help message%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "", "")
+
+	return nil
+}
+
 // runList lists all available templates
 func RunList(args []string) error {
 	templates, err := storage.ListTemplates()

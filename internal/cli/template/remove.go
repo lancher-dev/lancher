@@ -8,6 +8,24 @@ import (
 	"github.com/Kasui92/lancher/internal/storage"
 )
 
+// RunRemoveHelp displays help for template remove command
+func RunRemoveHelp() error {
+	fmt.Printf("%slancher template remove%s\n", shared.ColorGreen+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("Remove a template\n\n")
+
+	fmt.Printf("%sUSAGE:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("    lancher template remove [name]\n")
+	fmt.Printf("    lancher template rm [name]\n\n")
+
+	fmt.Printf("%sARGS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("    %s%-15s%s %s\n\n", shared.ColorGreen, "name", shared.ColorReset, "Template name (interactive if omitted)")
+
+	fmt.Printf("%sOPTIONS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("    %s-h%s, %s--help%s  %sShow this help message%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "", "")
+
+	return nil
+}
+
 // runRemove removes a template
 func RunRemove(args []string) error {
 	var name string

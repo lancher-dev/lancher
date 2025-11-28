@@ -13,25 +13,19 @@ import (
 	"github.com/Kasui92/lancher/internal/storage"
 )
 
-// RunHelp displays help for create command
-func RunHelp() error {
+// RunCreateHelp displays help for create command
+func RunCreateHelp() error {
 	fmt.Printf("%slancher create%s\n", shared.ColorGreen+shared.ColorBold, shared.ColorReset)
 	fmt.Printf("Create a new project from template\n\n")
 
 	fmt.Printf("%sUSAGE:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
 	fmt.Printf("    lancher create [options]\n\n")
 
-	fmt.Printf("%sDESCRIPTION:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
-	fmt.Printf("    Creates a new project from an existing template. Can be used interactively\n")
-	fmt.Printf("    (prompts for template and destination) or with command-line flags.\n\n")
-
 	fmt.Printf("%sOPTIONS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
-	fmt.Printf("    -t, --template <name>\n")
-	fmt.Printf("        Template name to use\n\n")
-	fmt.Printf("    -d, --destination <path>\n")
-	fmt.Printf("        Destination directory for the new project\n\n")
-	fmt.Printf("    -h, --help\n")
-	fmt.Printf("        Show this help message\n\n")
+	fmt.Printf("    %s-t%s, %s--template%s %s<name>%s     %sTemplate name to use%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, shared.ColorCyan, shared.ColorReset, "", "")
+	fmt.Printf("    %s-d%s, %s--destination%s %s<path>%s  %sDestination directory for the project%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, shared.ColorCyan, shared.ColorReset, "", "")
+	fmt.Printf("    %s-p%s, %s--print%s               %sShow detailed output (no spinner)%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "", "")
+	fmt.Printf("    %s-h%s, %s--help%s                %sShow this help message%s\n\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "", "")
 
 	return nil
 }
@@ -39,6 +33,7 @@ func RunHelp() error {
 // runCreate creates a new project from a template
 func Run(args []string) error {
 	var templateName, destination string
+	var verbose bool
 
 	// Parse flags
 	for i := 0; i < len(args); i++ {
@@ -53,6 +48,8 @@ func Run(args []string) error {
 				destination = args[i+1]
 				i++
 			}
+		case "-p", "--print":
+			verbose = true
 		}
 	}
 
@@ -188,11 +185,27 @@ func Run(args []string) error {
 	}
 
 	// Copy template to destination
+	var spinner *shared.Spinner
+	if !verbose {
+		spinner = shared.NewSpinner("Creating project...")
+		spinner.Start()
+		defer spinner.Stop()
+	} else {
+		fmt.Printf("%sCreating project...%s\n", shared.ColorYellow, shared.ColorReset)
+	}
+
 	if err := copyTemplate(templatePath, destAbs, cfg); err != nil {
+		if spinner != nil {
+			spinner.Fail(fmt.Sprintf("Failed to create project: %v", err))
+		}
 		return shared.FormatError("create", fmt.Sprintf("failed to create project: %v", err))
 	}
 
-	fmt.Printf("%s✓ Project created successfully from template '%s'%s\n", shared.ColorGreen, templateName, shared.ColorReset)
+	if spinner != nil {
+		spinner.Success(fmt.Sprintf("Project created successfully from template '%s'", templateName))
+	} else {
+		fmt.Printf("%s✓ Project created successfully from template '%s'%s\n", shared.ColorGreen, templateName, shared.ColorReset)
+	}
 	fmt.Printf("  %sLocation:%s %s\n", shared.ColorYellow, shared.ColorReset, destAbs)
 
 	// Execute hooks if defined
@@ -219,6 +232,28 @@ func Run(args []string) error {
 		}
 	}
 
+	// Ask to initialize git repository
+	fmt.Println()
+	gitInit, err := shared.PromptConfirm("Initialize git repository?")
+	if err != nil {
+		return shared.FormatError("create", "failed to read confirmation")
+	}
+
+	if gitInit {
+		cmd := exec.Command("git", "init")
+		cmd.Dir = destAbs
+		if output, err := cmd.CombinedOutput(); err != nil {
+			fmt.Printf("%s⚠ Failed to initialize git: %v%s\n", shared.ColorYellow, err, shared.ColorReset)
+			if len(output) > 0 {
+				fmt.Printf("%s%s%s\n", shared.ColorGray, string(output), shared.ColorReset)
+			}
+		} else {
+			fmt.Printf("%s✓ Git repository initialized%s\n", shared.ColorGreen, shared.ColorReset)
+		}
+	} else {
+		fmt.Printf("%sSkipped git initialization%s\n", shared.ColorYellow, shared.ColorReset)
+	}
+
 	return nil
 }
 
@@ -237,6 +272,14 @@ func copyTemplate(srcPath, dstPath string, cfg *config.Config) error {
 
 		// Skip .lancher.yaml config file
 		if relPath == config.ConfigFileName {
+			return nil
+		}
+
+		// Skip .git directory (always excluded from templates)
+		if relPath == ".git" || strings.HasPrefix(relPath, ".git"+string(filepath.Separator)) {
+			if info.IsDir() {
+				return filepath.SkipDir
+			}
 			return nil
 		}
 

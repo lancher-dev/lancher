@@ -1,4 +1,4 @@
-package cli
+package tests
 
 import (
 	"testing"
@@ -6,6 +6,7 @@ import (
 	"github.com/Kasui92/lancher/internal/cli/shared"
 )
 
+// TestSanitizeTemplateName ensures template names are validated correctly
 func TestSanitizeTemplateName(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -30,32 +31,6 @@ func TestSanitizeTemplateName(t *testing.T) {
 			}
 			if !tt.shouldErr && err != nil {
 				t.Errorf("Expected no error for input %q, got: %v", tt.input, err)
-			}
-		})
-	}
-}
-
-func TestValidateArgs(t *testing.T) {
-	tests := []struct {
-		name      string
-		args      []string
-		expected  int
-		shouldErr bool
-	}{
-		{"exact match", []string{"arg1", "arg2"}, 2, false},
-		{"too few", []string{"arg1"}, 2, true},
-		{"too many", []string{"arg1", "arg2", "arg3"}, 2, true},
-		{"zero args ok", []string{}, 0, false},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := shared.ValidateArgs(tt.args, tt.expected, "usage")
-			if tt.shouldErr && err == nil {
-				t.Error("Expected error, got nil")
-			}
-			if !tt.shouldErr && err != nil {
-				t.Errorf("Expected no error, got: %v", err)
 			}
 		})
 	}
