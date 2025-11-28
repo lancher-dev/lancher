@@ -25,7 +25,7 @@ func RunHelp() error {
 	fmt.Printf("        Remove a template\n\n")
 
 	fmt.Printf("%sADD TEMPLATE:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
-	fmt.Printf("    lancher template add [name] [source]\n\n")
+	fmt.Printf("    lancher template add [name] [source] [options]\n\n")
 	fmt.Printf("    Add a template from a local directory, git repository, or ZIP file.\n")
 	fmt.Printf("    Can be used interactively (prompts for name and source) or with arguments.\n\n")
 	fmt.Printf("    Source can be:\n")
@@ -33,6 +33,9 @@ func RunHelp() error {
 	fmt.Printf("      - ZIP file:   /path/to/template.zip\n")
 	fmt.Printf("      - HTTPS URL:  https://github.com/user/repo\n")
 	fmt.Printf("      - SSH URL:    git@github.com:user/repo.git\n\n")
+	fmt.Printf("    %sOPTIONS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("      -p, --print\n")
+	fmt.Printf("          Show detailed output (no spinner)\n\n")
 
 	fmt.Printf("%sUPDATE TEMPLATE:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
 	fmt.Printf("    lancher template update <name> [options]\n\n")
@@ -41,6 +44,8 @@ func RunHelp() error {
 	fmt.Printf("%sOPTIONS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
 	fmt.Printf("    -d <path>\n")
 	fmt.Printf("        Overwrite template with files from this path\n\n")
+	fmt.Printf("    -p, --print\n")
+	fmt.Printf("        Show detailed output (no spinner)\n\n")
 
 	fmt.Printf("%sREMOVE TEMPLATE:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
 	fmt.Printf("    lancher template remove [name]\n\n")

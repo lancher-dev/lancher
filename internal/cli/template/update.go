@@ -15,12 +15,15 @@ import (
 func RunUpdate(args []string) error {
 	var overwritePath string
 	var templateName string
+	var verbose bool
 
 	// Parse args and flags
 	for i := 0; i < len(args); i++ {
 		if args[i] == "-d" && i+1 < len(args) {
 			overwritePath = args[i+1]
 			i++
+		} else if args[i] == "-p" || args[i] == "--print" {
+			verbose = true
 		} else if templateName == "" {
 			templateName = args[i]
 		}
@@ -84,15 +87,32 @@ func RunUpdate(args []string) error {
 		return shared.FormatError("update", fmt.Sprintf("template '%s' is not a git repository\nUse -d <path> to overwrite with new files", templateName))
 	}
 
-	fmt.Printf("%sPulling latest changes...%s\n", shared.ColorYellow, shared.ColorReset)
+	var spinner *shared.Spinner
+	writer := shared.NewSpinnerWriter(verbose)
+
+	if !verbose {
+		spinner = shared.NewSpinner("Pulling latest changes...")
+		spinner.Start()
+		defer spinner.Stop()
+	} else {
+		fmt.Printf("%sPulling latest changes...%s\n", shared.ColorYellow, shared.ColorReset)
+	}
+
 	cmd := exec.Command("git", "-C", templatePath, "pull")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = writer.MultiWriter()
+	cmd.Stderr = writer.MultiWriter()
 	if err := cmd.Run(); err != nil {
+		if spinner != nil {
+			spinner.Fail(fmt.Sprintf("Git pull failed: %v", err))
+		}
 		return shared.FormatError("update", fmt.Sprintf("git pull failed: %v", err))
 	}
 
-	fmt.Printf("%s✓ Template '%s' updated successfully%s\n", shared.ColorGreen, templateName, shared.ColorReset)
+	if spinner != nil {
+		spinner.Success(fmt.Sprintf("Template '%s' updated successfully", templateName))
+	} else {
+		fmt.Printf("%s✓ Template '%s' updated successfully%s\n", shared.ColorGreen, templateName, shared.ColorReset)
+	}
 	fmt.Printf("  %sLocation:%s %s\n", shared.ColorYellow, shared.ColorReset, templatePath)
 
 	return nil

@@ -30,6 +30,8 @@ func RunHelp() error {
 	fmt.Printf("        Template name to use\n\n")
 	fmt.Printf("    -d, --destination <path>\n")
 	fmt.Printf("        Destination directory for the new project\n\n")
+	fmt.Printf("    -p, --print\n")
+	fmt.Printf("        Show detailed output (no spinner)\n\n")
 	fmt.Printf("    -h, --help\n")
 	fmt.Printf("        Show this help message\n\n")
 
@@ -39,6 +41,7 @@ func RunHelp() error {
 // runCreate creates a new project from a template
 func Run(args []string) error {
 	var templateName, destination string
+	var verbose bool
 
 	// Parse flags
 	for i := 0; i < len(args); i++ {
@@ -53,6 +56,8 @@ func Run(args []string) error {
 				destination = args[i+1]
 				i++
 			}
+		case "-p", "--print":
+			verbose = true
 		}
 	}
 
@@ -188,11 +193,27 @@ func Run(args []string) error {
 	}
 
 	// Copy template to destination
+	var spinner *shared.Spinner
+	if !verbose {
+		spinner = shared.NewSpinner("Creating project...")
+		spinner.Start()
+		defer spinner.Stop()
+	} else {
+		fmt.Printf("%sCreating project...%s\n", shared.ColorYellow, shared.ColorReset)
+	}
+
 	if err := copyTemplate(templatePath, destAbs, cfg); err != nil {
+		if spinner != nil {
+			spinner.Fail(fmt.Sprintf("Failed to create project: %v", err))
+		}
 		return shared.FormatError("create", fmt.Sprintf("failed to create project: %v", err))
 	}
 
-	fmt.Printf("%s✓ Project created successfully from template '%s'%s\n", shared.ColorGreen, templateName, shared.ColorReset)
+	if spinner != nil {
+		spinner.Success(fmt.Sprintf("Project created successfully from template '%s'", templateName))
+	} else {
+		fmt.Printf("%s✓ Project created successfully from template '%s'%s\n", shared.ColorGreen, templateName, shared.ColorReset)
+	}
 	fmt.Printf("  %sLocation:%s %s\n", shared.ColorYellow, shared.ColorReset, destAbs)
 
 	// Execute hooks if defined
