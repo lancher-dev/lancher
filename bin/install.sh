@@ -105,8 +105,10 @@ install_binary() {
     # Make binary executable
     chmod +x "${tmp_dir}/${BINARY_NAME}"
 
-    # Verify binary works
-    if ! "${tmp_dir}/${BINARY_NAME}" --version >/dev/null 2>&1; then
+    # Verify binary works (try both --version and help)
+    if ! "${tmp_dir}/${BINARY_NAME}" --version >/dev/null 2>&1 && \
+       ! "${tmp_dir}/${BINARY_NAME}" -v >/dev/null 2>&1 && \
+       ! "${tmp_dir}/${BINARY_NAME}" help >/dev/null 2>&1; then
         error "Downloaded binary is not working correctly"
         rm -rf "${tmp_dir}"
         exit 1
