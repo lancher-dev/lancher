@@ -240,6 +240,28 @@ func Run(args []string) error {
 		}
 	}
 
+	// Ask to initialize git repository
+	fmt.Println()
+	gitInit, err := shared.PromptConfirm("Initialize git repository?")
+	if err != nil {
+		return shared.FormatError("create", "failed to read confirmation")
+	}
+
+	if gitInit {
+		cmd := exec.Command("git", "init")
+		cmd.Dir = destAbs
+		if output, err := cmd.CombinedOutput(); err != nil {
+			fmt.Printf("%s⚠ Failed to initialize git: %v%s\n", shared.ColorYellow, err, shared.ColorReset)
+			if len(output) > 0 {
+				fmt.Printf("%s%s%s\n", shared.ColorGray, string(output), shared.ColorReset)
+			}
+		} else {
+			fmt.Printf("%s✓ Git repository initialized%s\n", shared.ColorGreen, shared.ColorReset)
+		}
+	} else {
+		fmt.Printf("%sSkipped git initialization%s\n", shared.ColorYellow, shared.ColorReset)
+	}
+
 	return nil
 }
 
@@ -258,6 +280,14 @@ func copyTemplate(srcPath, dstPath string, cfg *config.Config) error {
 
 		// Skip .lancher.yaml config file
 		if relPath == config.ConfigFileName {
+			return nil
+		}
+
+		// Skip .git directory (always excluded from templates)
+		if relPath == ".git" || strings.HasPrefix(relPath, ".git"+string(filepath.Separator)) {
+			if info.IsDir() {
+				return filepath.SkipDir
+			}
 			return nil
 		}
 
