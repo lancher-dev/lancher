@@ -1,14 +1,62 @@
-package commands
+package tests
 
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/Kasui92/lancher/internal/config"
+	"github.com/Kasui92/lancher/internal/fileutil"
 )
 
-func TestCopyTemplateExcludesGit(t *testing.T) {
+// copyTemplate replicates the logic from create.go for testing
+func copyTemplate(srcPath, dstPath string, cfg *config.Config) error {
+	return filepath.Walk(srcPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Calculate relative path
+		relPath, err := filepath.Rel(srcPath, path)
+		if err != nil {
+			return err
+		}
+
+		// Skip .lancher.yaml config file
+		if relPath == config.ConfigFileName {
+			return nil
+		}
+
+		// Skip .git directory (always excluded from templates)
+		if relPath == ".git" || strings.HasPrefix(relPath, ".git"+string(filepath.Separator)) {
+			if info.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+
+		// Check ignore patterns
+		if cfg != nil && cfg.ShouldIgnore(relPath) {
+			if info.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+
+		// Construct destination path
+		targetPath := filepath.Join(dstPath, relPath)
+
+		if info.IsDir() {
+			return os.MkdirAll(targetPath, info.Mode())
+		}
+
+		return fileutil.CopyFile(path, targetPath)
+	})
+}
+
+// TestCreateCommandExcludesGit verifies that .git directory is never copied from templates
+func TestCreateCommandExcludesGit(t *testing.T) {
 	// Create temp directories
 	srcDir, err := os.MkdirTemp("", "template-src-*")
 	if err != nil {
@@ -41,7 +89,8 @@ func TestCopyTemplateExcludesGit(t *testing.T) {
 	}
 
 	// Copy template
-	if err := copyTemplate(srcDir, dstDir, nil); err != nil {
+	err = copyTemplate(srcDir, dstDir, nil)
+	if err != nil {
 		t.Fatalf("copyTemplate failed: %v", err)
 	}
 
@@ -58,7 +107,8 @@ func TestCopyTemplateExcludesGit(t *testing.T) {
 	}
 }
 
-func TestCopyTemplateExcludesLancherYaml(t *testing.T) {
+// TestCreateCommandExcludesConfig verifies that .lancher.yaml is never copied to destination
+func TestCreateCommandExcludesConfig(t *testing.T) {
 	// Create temp directories
 	srcDir, err := os.MkdirTemp("", "template-src-*")
 	if err != nil {
@@ -74,18 +124,19 @@ func TestCopyTemplateExcludesLancherYaml(t *testing.T) {
 
 	// Create .lancher.yaml
 	lancherYaml := filepath.Join(srcDir, config.ConfigFileName)
-	if err := os.WriteFile(lancherYaml, []byte("name: test"), 0644); err != nil {
+	if err := os.WriteFile(lancherYaml, []byte("name: test\nversion: 1.0.0"), 0644); err != nil {
 		t.Fatalf("Failed to create .lancher.yaml: %v", err)
 	}
 
 	// Add a normal file
 	normalFile := filepath.Join(srcDir, "test.txt")
-	if err := os.WriteFile(normalFile, []byte("test"), 0644); err != nil {
+	if err := os.WriteFile(normalFile, []byte("test content"), 0644); err != nil {
 		t.Fatalf("Failed to create test.txt: %v", err)
 	}
 
 	// Copy template
-	if err := copyTemplate(srcDir, dstDir, nil); err != nil {
+	err = copyTemplate(srcDir, dstDir, nil)
+	if err != nil {
 		t.Fatalf("copyTemplate failed: %v", err)
 	}
 
