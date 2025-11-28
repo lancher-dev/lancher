@@ -27,9 +27,10 @@ func GetFull() string {
 
 // Compare compares two version strings in format v0.0.1
 // Returns:
-//   1 if v1 > v2
-//   0 if v1 == v2
-//  -1 if v1 < v2
+//
+//	 1 if v1 > v2
+//	 0 if v1 == v2
+//	-1 if v1 < v2
 func Compare(v1, v2 string) int {
 	// Remove 'v' prefix if present
 	v1 = strings.TrimPrefix(v1, "v")
