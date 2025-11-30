@@ -59,7 +59,8 @@ func Run(args []string) error {
 		case "help", "-h", "--help":
 			return template.RunHelp()
 		default:
-			return fmt.Errorf("unknown template subcommand: %s\nRun 'lancher template help' for usage", subcommand)
+			usage := "USAGE:\n    lancher template <SUBCOMMAND> [ARGS...] [OPTIONS]"
+			return shared.FormatUnknownSubcommandError(subcommand, "lancher template", usage)
 		}
 	case "info":
 		// Check for help flag
@@ -73,7 +74,8 @@ func Run(args []string) error {
 	case "help", "-h", "--help":
 		return runHelp()
 	default:
-		return fmt.Errorf("unknown command: %s\nRun 'lancher help' for usage", command)
+		usage := "USAGE:\n    lancher <COMMAND> [ARGS...] [OPTIONS]"
+		return shared.FormatUnknownCommandError(command, usage, "lancher ")
 	}
 }
 

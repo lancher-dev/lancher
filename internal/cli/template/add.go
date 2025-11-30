@@ -63,6 +63,10 @@ func RunAdd(args []string) error {
 	if len(args) == 0 {
 		nameInput, err := shared.PromptStringWithDefault("Enter template name:", "my-template")
 		if err != nil {
+			if strings.Contains(err.Error(), "cancelled") {
+				fmt.Printf("%sCancelled.%s\n", shared.ColorYellow, shared.ColorReset)
+				return nil
+			}
 			return shared.FormatError("add", "failed to read input")
 		}
 		name = nameInput
@@ -73,6 +77,10 @@ func RunAdd(args []string) error {
 
 		sourceInput, err := shared.PromptStringWithDefault("Enter source (local path, git URL, or ZIP file):", "./my-template")
 		if err != nil {
+			if strings.Contains(err.Error(), "cancelled") {
+				fmt.Printf("%sCancelled.%s\n", shared.ColorYellow, shared.ColorReset)
+				return nil
+			}
 			return shared.FormatError("add", "failed to read input")
 		}
 		source = sourceInput
@@ -82,8 +90,15 @@ func RunAdd(args []string) error {
 		}
 	} else {
 		// Command-line arguments mode
-		if err := shared.ValidateArgs(args, 2, "lancher template add <name> <source>"); err != nil {
-			return err
+		if len(args) < 2 {
+			var missing []string
+			if len(args) == 0 {
+				missing = []string{"name", "source"}
+			} else {
+				missing = []string{"source"}
+			}
+			usage := "USAGE:\n    lancher template add <name> <source>"
+			return shared.FormatMissingArgsError(missing, usage)
 		}
 		name = args[0]
 		source = args[1]
