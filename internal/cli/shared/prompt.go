@@ -134,9 +134,12 @@ func selectWithArrows(prompt string, options []SelectOption) (string, error) {
 			fmt.Printf("\033[%dA", len(options)+1)
 			return options[selected].Value, nil
 		case "ctrl+c", "q":
-			fmt.Print("\033[?25h")
-			fmt.Println("\r\033[K\nCancelled")
-			return "", fmt.Errorf("cancelled by user")
+			// Clear the display
+			for i := 0; i <= len(options); i++ {
+				fmt.Print("\r\033[K\n")
+			}
+			fmt.Printf("\033[%dA", len(options)+1)
+			return "", fmt.Errorf("cancelled")
 		}
 	}
 }
@@ -217,8 +220,6 @@ func PromptString(prompt string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	// Clear the prompt line (go up one line and clear it)
-	fmt.Print("\033[1A\033[K")
 	return strings.TrimSpace(input), nil
 }
 
@@ -318,7 +319,8 @@ func PromptStringWithDefault(prompt, defaultValue string) (string, error) {
 
 		// Handle Ctrl+C
 		if b == 3 {
-			fmt.Println()
+			// Clear current line content and move cursor to beginning
+			fmt.Print("\r\033[K")
 			term.Restore(fd, state)
 			return "", fmt.Errorf("cancelled by user")
 		}
@@ -343,14 +345,15 @@ func PromptStringWithDefault(prompt, defaultValue string) (string, error) {
 
 	input := string(inputBuffer)
 
-	// Clear the prompt line
-	fmt.Print("\033[1A\033[K")
-
 	// If empty, use default
 	if input == "" {
+		// Clear the prompt line only on success
+		fmt.Print("\033[1A\033[K")
 		return defaultValue, nil
 	}
 
+	// Clear the prompt line only on success
+	fmt.Print("\033[1A\033[K")
 	return input, nil
 }
 
