@@ -36,6 +36,14 @@ jobs:
           GOOS=darwin GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o lancher-darwin-amd64 ./cmd/lancher
           GOOS=darwin GOARCH=arm64 go build -ldflags="${LDFLAGS}" -o lancher-darwin-arm64 ./cmd/lancher
 
+      - name: Generate checksums
+        id: checksums
+        run: |
+          CHECKSUMS=$(sha256sum lancher-linux-amd64 lancher-linux-arm64 lancher-darwin-amd64 lancher-darwin-arm64)
+          echo "checksums<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHECKSUMS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
@@ -54,7 +62,7 @@ jobs:
             <summary>Checksums (SHA256)</summary>
 
             ```
-            $(sha256sum lancher-linux-amd64 lancher-linux-arm64 lancher-darwin-amd64 lancher-darwin-arm64)
+            ${{ steps.checksums.outputs.checksums }}
             ```
 
             </details>
