@@ -10,6 +10,24 @@ func FormatError(cmd string, message string) error {
 	return fmt.Errorf("%s: %s", cmd, message)
 }
 
+// FormatUnknownCommandError creates a formatted error for unknown commands
+func FormatUnknownCommandError(arg string, usage string, helpCmd string) error {
+	return fmt.Errorf("%sError:%s Unknown command '%s%s%s'\n\n%s\n\nRun %s--help%s for more information",
+		ColorRed+ColorBold, ColorReset,
+		ColorYellow, arg, ColorReset,
+		usage,
+		ColorGreen, ColorReset)
+}
+
+// FormatUnknownSubcommandError creates a formatted error for unknown subcommands
+func FormatUnknownSubcommandError(arg string, parentCmd string, usage string) error {
+	return fmt.Errorf("%sError:%s Unknown subcommand '%s%s%s'\n\n%s\n\nRun %s%s --help%s for more information",
+		ColorRed+ColorBold, ColorReset,
+		ColorYellow, arg, ColorReset,
+		usage,
+		ColorGreen, parentCmd, ColorReset)
+}
+
 // ValidateArgs checks if the correct number of arguments is provided
 func ValidateArgs(args []string, expected int, usage string) error {
 	if len(args) != expected {
@@ -24,6 +42,25 @@ func ValidateArgsMin(args []string, min int, usage string) error {
 		return fmt.Errorf("insufficient arguments\nUsage: %s", usage)
 	}
 	return nil
+}
+
+// FormatMissingArgsError creates a formatted error for missing required arguments
+func FormatMissingArgsError(missingArgs []string, usage string) error {
+	var argsText string
+	if len(missingArgs) == 1 {
+		argsText = fmt.Sprintf("    %s<%s>%s", ColorCyan, missingArgs[0], ColorReset)
+	} else {
+		for _, arg := range missingArgs {
+			argsText += fmt.Sprintf("    %s<%s>%s\n", ColorCyan, arg, ColorReset)
+		}
+		argsText = strings.TrimSuffix(argsText, "\n")
+	}
+
+	return fmt.Errorf("%sError:%s The following required arguments were not provided:\n%s\n\n%s\n\nRun %s--help%s for more information",
+		ColorRed+ColorBold, ColorReset,
+		argsText,
+		usage,
+		ColorGreen, ColorReset)
 }
 
 // SanitizeTemplateName ensures template name is safe
