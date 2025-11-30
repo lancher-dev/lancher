@@ -49,7 +49,8 @@ func RunUpdate(args []string) error {
 	}
 
 	if templateName == "" {
-		return fmt.Errorf("template name required\nUsage: lancher template update <name> [-d <path>]")
+		usage := "USAGE:\n    lancher template update <name> [OPTIONS]"
+		return shared.FormatMissingArgsError([]string{"name"}, usage)
 	}
 
 	// Validate template name

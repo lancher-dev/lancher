@@ -24,6 +24,7 @@ func RunCreateHelp() error {
 	fmt.Printf("%sOPTIONS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
 	fmt.Printf("    %s-t%s, %s--template%s %s<name>%s     %sTemplate name to use%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, shared.ColorCyan, shared.ColorReset, "", "")
 	fmt.Printf("    %s-d%s, %s--destination%s %s<path>%s  %sDestination directory for the project%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, shared.ColorCyan, shared.ColorReset, "", "")
+	fmt.Printf("    %s-g%s, %s--git%s                 %sInitialize git repository automatically%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "", "")
 	fmt.Printf("    %s-p%s, %s--print%s               %sShow detailed output (no spinner)%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "", "")
 	fmt.Printf("    %s-h%s, %s--help%s                %sShow this help message%s\n\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "", "")
 
@@ -33,7 +34,7 @@ func RunCreateHelp() error {
 // runCreate creates a new project from a template
 func Run(args []string) error {
 	var templateName, destination string
-	var verbose bool
+	var verbose, gitInit bool
 
 	// Parse flags
 	for i := 0; i < len(args); i++ {
@@ -42,14 +43,26 @@ func Run(args []string) error {
 			if i+1 < len(args) {
 				templateName = args[i+1]
 				i++
+			} else {
+				return shared.FormatError("create", "flag -t/--template requires a value")
 			}
 		case "-d", "--destination":
 			if i+1 < len(args) {
 				destination = args[i+1]
 				i++
+			} else {
+				return shared.FormatError("create", "flag -d/--destination requires a value")
 			}
+		case "-g", "--git":
+			gitInit = true
 		case "-p", "--print":
 			verbose = true
+		default:
+			if strings.HasPrefix(args[i], "-") {
+				usage := "USAGE:\n    lancher create [OPTIONS]"
+				return shared.FormatUnknownCommandError(args[i], usage, "lancher create ")
+			}
+			// Treat as positional argument (ignore for now, could be enhanced later)
 		}
 	}
 
@@ -70,6 +83,10 @@ func Run(args []string) error {
 		// Use interactive select
 		selectedTemplate, err := shared.Select("Choose a template:", templates)
 		if err != nil {
+			if strings.Contains(err.Error(), "cancelled") {
+				fmt.Printf("%sCancelled.%s\n", shared.ColorYellow, shared.ColorReset)
+				return nil
+			}
 			return shared.FormatError("create", fmt.Sprintf("selection failed: %v", err))
 		}
 		templateName = selectedTemplate
@@ -79,8 +96,12 @@ func Run(args []string) error {
 	}
 
 	if destination == "" {
-		dest, err := shared.PromptString("Enter destination directory:")
+		dest, err := shared.PromptStringWithDefault("Enter destination directory:", "my-app")
 		if err != nil {
+			if strings.Contains(err.Error(), "cancelled") {
+				fmt.Printf("%sCancelled.%s\n", shared.ColorYellow, shared.ColorReset)
+				return nil
+			}
 			return shared.FormatError("create", "failed to read input")
 		}
 		destination = dest
@@ -232,11 +253,14 @@ func Run(args []string) error {
 		}
 	}
 
-	// Ask to initialize git repository
+	// Ask to initialize git repository (if not set via flag)
 	fmt.Println()
-	gitInit, err := shared.PromptConfirm("Initialize git repository?")
-	if err != nil {
-		return shared.FormatError("create", "failed to read confirmation")
+	if !gitInit {
+		var err error
+		gitInit, err = shared.PromptConfirmWithDefault("Initialize git repository?", false)
+		if err != nil {
+			return shared.FormatError("create", "failed to read confirmation")
+		}
 	}
 
 	if gitInit {

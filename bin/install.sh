@@ -132,9 +132,12 @@ install_binary() {
 # Main installation process
 main() {
     echo ""
-    echo "╔══════════════════════════════════════╗"
-    echo "║   lancher Installer                  ║"
-    echo "╚══════════════════════════════════════╝"
+    # Try to use rocket emoji with fallback
+    if printf "🚀" 2>/dev/null | grep -q "🚀"; then
+        echo "🚀  lancher installer"
+    else
+        echo ">>  lancher installer"
+    fi
     echo ""
 
     # Detect platform

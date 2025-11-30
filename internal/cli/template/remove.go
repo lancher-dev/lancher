@@ -2,6 +2,7 @@ package template
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/Kasui92/lancher/internal/cli/shared"
 	"github.com/Kasui92/lancher/internal/fileutil"
@@ -42,26 +43,20 @@ func RunRemove(args []string) error {
 			return nil
 		}
 
-		// Use interactive select with cancel option
-		options := append([]shared.SelectOption{{Value: "", Label: "Cancel"}}, make([]shared.SelectOption, len(templates))...)
-		for i, tmpl := range templates {
-			options[i+1] = shared.SelectOption{Value: tmpl, Label: tmpl}
-		}
-
-		selected, err := shared.SelectWithOptions("Select template to remove:", options)
+		selected, err := shared.Select("Select template to remove:", templates)
 		if err != nil {
+			if strings.Contains(err.Error(), "cancelled") {
+				fmt.Printf("%sCancelled.%s\n", shared.ColorYellow, shared.ColorReset)
+				return nil
+			}
 			return shared.FormatError("remove", fmt.Sprintf("selection failed: %v", err))
-		}
-
-		if selected == "" {
-			fmt.Printf("%sCancelled.%s\n", shared.ColorYellow, shared.ColorReset)
-			return nil
 		}
 
 		name = selected
 	} else {
-		if err := shared.ValidateArgs(args, 1, "lancher template remove [name]"); err != nil {
-			return err
+		if len(args) == 0 {
+			usage := "USAGE:\n    lancher template remove <name>"
+			return shared.FormatMissingArgsError([]string{"name"}, usage)
 		}
 		name = args[0]
 	}
