@@ -36,31 +36,6 @@ jobs:
           GOOS=darwin GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o lancher-darwin-amd64 ./cmd/lancher
           GOOS=darwin GOARCH=arm64 go build -ldflags="${LDFLAGS}" -o lancher-darwin-arm64 ./cmd/lancher
 
-          # Create checksums
-          sha256sum lancher-* > checksums.txt
-
-      - name: Generate checksums accordion
-        id: checksums_accordion
-        run: |
-          # Create checksums accordion
-          cat > checksums_accordion.md << 'EOF'
-
-          <details>
-          <summary>SHA256</summary>
-
-          ```
-          EOF
-
-          # Append checksums
-          cat checksums.txt >> checksums_accordion.md
-
-          # Close code block and details
-          cat >> checksums_accordion.md << 'EOF'
-          ```
-
-          </details>
-          EOF
-
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
@@ -69,10 +44,19 @@ jobs:
             lancher-linux-arm64
             lancher-darwin-amd64
             lancher-darwin-arm64
-            checksums.txt
-          body_path: checksums_accordion.md
           draft: false
           prerelease: false
           generate_release_notes: true
+          append_body: true
+          body: |
+
+            <details>
+            <summary>Checksums (SHA256)</summary>
+
+            ```
+            $(sha256sum lancher-linux-amd64 lancher-linux-arm64 lancher-darwin-amd64 lancher-darwin-arm64)
+            ```
+
+            </details>
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
