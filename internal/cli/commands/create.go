@@ -331,13 +331,10 @@ func executeHooks(hooks []string, projectDir string) error {
 	for i, hook := range hooks {
 		fmt.Printf("\n%sExecuting hook %d/%d:%s %s\n", shared.ColorCyan, i+1, len(hooks), shared.ColorReset, hook)
 
-		// Parse command and arguments
-		parts := strings.Fields(hook)
-		if len(parts) == 0 {
-			continue
-		}
+		// Execute hook via shell to properly handle quotes and redirects
+		var cmd *exec.Cmd
+		cmd = exec.Command("sh", "-c", hook)
 
-		cmd := exec.Command(parts[0], parts[1:]...)
 		cmd.Dir = projectDir
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
