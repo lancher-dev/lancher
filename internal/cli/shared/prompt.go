@@ -288,6 +288,10 @@ func PromptStringWithDefault(prompt, defaultValue string) (string, error) {
 
 		// Handle Enter key
 		if b == 13 || b == 10 {
+			// Clear placeholder if still visible
+			if placeholderVisible {
+				fmt.Print("\033[K")
+			}
 			fmt.Println() // Move to next line
 			break
 		}
@@ -345,15 +349,14 @@ func PromptStringWithDefault(prompt, defaultValue string) (string, error) {
 
 	input := string(inputBuffer)
 
+	// Go back to start of line and clear it, then go up one line and clear that too
+	fmt.Print("\r\033[K\033[1A\033[K")
+
 	// If empty, use default
 	if input == "" {
-		// Clear the prompt line only on success
-		fmt.Print("\033[1A\033[K")
 		return defaultValue, nil
 	}
 
-	// Clear the prompt line only on success
-	fmt.Print("\033[1A\033[K")
 	return input, nil
 }
 
