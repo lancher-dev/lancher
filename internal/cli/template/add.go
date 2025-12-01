@@ -70,6 +70,7 @@ func RunAdd(args []string) error {
 			return shared.FormatError("add", "failed to read input")
 		}
 		name = nameInput
+		fmt.Printf("%s✓ Template name:%s %s\n", shared.ColorGreen, shared.ColorReset, name)
 
 		if name == "" {
 			return shared.FormatError("add", "template name cannot be empty")
@@ -84,6 +85,7 @@ func RunAdd(args []string) error {
 			return shared.FormatError("add", "failed to read input")
 		}
 		source = sourceInput
+		fmt.Printf("%s✓ Source:%s %s\n", shared.ColorGreen, shared.ColorReset, source)
 
 		if source == "" {
 			return shared.FormatError("add", "source cannot be empty")
