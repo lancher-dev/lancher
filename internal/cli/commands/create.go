@@ -165,7 +165,7 @@ func Run(args []string) error {
 			fmt.Printf("%s⚠ Warning:%s Destination directory is not empty (%d items)\n", shared.ColorYellow, shared.ColorReset, len(entries))
 			fmt.Printf("  %sLocation:%s %s\n", shared.ColorYellow, shared.ColorReset, destAbs)
 
-			confirmed, err := shared.PromptConfirm("Do you want to remove and recreate the directory?")
+			confirmed, err := shared.PromptConfirmWithDefault("Do you want to remove and recreate the directory?", false)
 			if err != nil {
 				return shared.FormatError("create", "failed to read confirmation")
 			}
@@ -237,7 +237,7 @@ func Run(args []string) error {
 		}
 		fmt.Println()
 
-		confirmed, err := shared.PromptConfirm("Execute hooks?")
+		confirmed, err := shared.PromptConfirmWithDefault("Execute hooks?", true)
 		if err != nil {
 			return shared.FormatError("create", "failed to read confirmation")
 		}
