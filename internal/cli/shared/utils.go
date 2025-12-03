@@ -2,12 +2,19 @@ package shared
 
 import (
 	"fmt"
+	"os/exec"
 	"strings"
 )
 
 // FormatError creates a user-friendly error message
 func FormatError(cmd string, message string) error {
 	return fmt.Errorf("%s: %s", cmd, message)
+}
+
+// CommandExists checks if a command is available in PATH
+func CommandExists(cmd string) bool {
+	_, err := exec.LookPath(cmd)
+	return err == nil
 }
 
 // FormatUnknownCommandError creates a formatted error for unknown commands
