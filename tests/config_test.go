@@ -1,9 +1,11 @@
-package config
+package tests
 
 import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/Kasui92/lancher/internal/config"
 )
 
 func TestLoadConfig(t *testing.T) {
@@ -54,7 +56,7 @@ description: Minimal template`,
 		t.Run(tt.name, func(t *testing.T) {
 			// Create temp directory
 			tmpDir := t.TempDir()
-			configPath := filepath.Join(tmpDir, ConfigFileName)
+			configPath := filepath.Join(tmpDir, config.ConfigFileName)
 
 			// Write config file
 			if err := os.WriteFile(configPath, []byte(tt.yamlContent), 0644); err != nil {
@@ -62,7 +64,7 @@ description: Minimal template`,
 			}
 
 			// Load config
-			cfg, err := LoadConfig(tmpDir)
+			cfg, err := config.LoadConfig(tmpDir)
 
 			if tt.wantErr {
 				if err == nil {
@@ -103,7 +105,7 @@ description: Minimal template`,
 
 func TestLoadConfigNotFound(t *testing.T) {
 	tmpDir := t.TempDir()
-	cfg, err := LoadConfig(tmpDir)
+	cfg, err := config.LoadConfig(tmpDir)
 
 	if err != nil {
 		t.Errorf("expected no error when config not found, got: %v", err)
@@ -114,7 +116,7 @@ func TestLoadConfigNotFound(t *testing.T) {
 }
 
 func TestShouldIgnore(t *testing.T) {
-	cfg := &Config{
+	cfg := &config.Config{
 		Ignore: []string{
 			"node_modules",
 			"*.log",
@@ -149,7 +151,7 @@ func TestShouldIgnore(t *testing.T) {
 }
 
 func TestShouldIgnoreNilConfig(t *testing.T) {
-	var cfg *Config
+	var cfg *config.Config
 	if cfg.ShouldIgnore("anything") {
 		t.Error("nil config should not ignore any files")
 	}
@@ -158,26 +160,26 @@ func TestShouldIgnoreNilConfig(t *testing.T) {
 func TestHasHooks(t *testing.T) {
 	tests := []struct {
 		name string
-		cfg  *Config
+		cfg  *config.Config
 		want bool
 	}{
 		{
 			name: "config with hooks",
-			cfg: &Config{
+			cfg: &config.Config{
 				Hooks: []string{"npm install", "git init"},
 			},
 			want: true,
 		},
 		{
 			name: "config without hooks",
-			cfg: &Config{
+			cfg: &config.Config{
 				Hooks: []string{},
 			},
 			want: false,
 		},
 		{
 			name: "nil hooks",
-			cfg:  &Config{},
+			cfg:  &config.Config{},
 			want: false,
 		},
 		{
@@ -200,12 +202,12 @@ func TestHasHooks(t *testing.T) {
 func TestGetMetadata(t *testing.T) {
 	tests := []struct {
 		name     string
-		cfg      *Config
+		cfg      *config.Config
 		wantText []string
 	}{
 		{
 			name: "full metadata",
-			cfg: &Config{
+			cfg: &config.Config{
 				Name:        "My Template",
 				Description: "A great template",
 				Author:      "John Doe",
@@ -215,7 +217,7 @@ func TestGetMetadata(t *testing.T) {
 		},
 		{
 			name: "partial metadata",
-			cfg: &Config{
+			cfg: &config.Config{
 				Name:    "Minimal",
 				Version: "0.1.0",
 			},
@@ -223,7 +225,7 @@ func TestGetMetadata(t *testing.T) {
 		},
 		{
 			name:     "empty config",
-			cfg:      &Config{},
+			cfg:      &config.Config{},
 			wantText: []string{},
 		},
 		{
