@@ -20,6 +20,24 @@ func isGitURL(source string) bool {
 		strings.HasSuffix(source, ".git")
 }
 
+// isGitHubAlias checks if source uses gh: alias
+func isGitHubAlias(source string) bool {
+	return strings.HasPrefix(source, "gh:")
+}
+
+// isGitLabAlias checks if source uses gl: alias
+func isGitLabAlias(source string) bool {
+	return strings.HasPrefix(source, "gl:")
+}
+
+// ensureGitSuffix adds .git suffix if not present
+func ensureGitSuffix(url string) string {
+	if !strings.HasSuffix(url, ".git") {
+		return url + ".git"
+	}
+	return url
+}
+
 // isZipFile checks if source is a ZIP file
 func isZipFile(source string) bool {
 	return strings.HasSuffix(strings.ToLower(source), ".zip")
@@ -35,7 +53,11 @@ func RunAddHelp() error {
 
 	fmt.Printf("%sARGS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
 	fmt.Printf("    %s%-15s%s %s\n", shared.ColorGreen, "name", shared.ColorReset, "Template name (interactive if omitted)")
-	fmt.Printf("    %s%-15s%s %s\n\n", shared.ColorGreen, "source", shared.ColorReset, "Local path, ZIP file, or git URL")
+	fmt.Printf("    %s%-15s%s %s\n\n", shared.ColorGreen, "source", shared.ColorReset, "Local path, ZIP file, git URL, or alias (gh:, gl:)")
+
+	fmt.Printf("%sALIASES:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("    %sgh:%s<repo>     %sGitHub repository (uses GitHub CLI if available)%s\n", shared.ColorGreen, shared.ColorReset, "", "")
+	fmt.Printf("    %sgl:%s<repo>     %sGitLab repository (uses GitLab CLI if available)%s\n\n", shared.ColorGreen, shared.ColorReset, "", "")
 
 	fmt.Printf("%sOPTIONS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
 	fmt.Printf("    %s-p%s, %s--print%s  %sShow detailed output (no spinner)%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "", "")
@@ -126,6 +148,18 @@ func RunAdd(args []string) error {
 		return shared.FormatError("add", fmt.Sprintf("failed to get template path: %v", err))
 	}
 
+	// Handle GitHub alias (gh:)
+	if isGitHubAlias(source) {
+		repoPath := strings.TrimPrefix(source, "gh:")
+		return cloneWithAlias(name, repoPath, destPath, "gh", "https://github.com/", verbose)
+	}
+
+	// Handle GitLab alias (gl:)
+	if isGitLabAlias(source) {
+		repoPath := strings.TrimPrefix(source, "gl:")
+		return cloneWithAlias(name, repoPath, destPath, "glab", "https://gitlab.com/", verbose)
+	}
+
 	// Handle git URL, ZIP file, or local path
 	if isGitURL(source) {
 		var spinner *shared.Spinner
@@ -208,6 +242,66 @@ func RunAdd(args []string) error {
 		fmt.Printf("  %sSource:%s %s\n", shared.ColorYellow, shared.ColorReset, sourceAbs)
 	}
 
+	fmt.Printf("  %sStored:%s %s\n", shared.ColorYellow, shared.ColorReset, destPath)
+
+	return nil
+}
+
+// cloneWithAlias handles cloning with gh: or gl: alias
+// cliCmd is "gh" for GitHub or "glab" for GitLab
+// baseURL is the base HTTPS URL for the platform
+func cloneWithAlias(name, repoPath, destPath, cliCmd, baseURL string, verbose bool) error {
+	var spinner *shared.Spinner
+	writer := shared.NewSpinnerWriter(verbose)
+
+	var cmd *exec.Cmd
+	var sourceDisplay string
+
+	if shared.CommandExists(cliCmd) {
+		// Use CLI tool (gh repo clone or glab repo clone)
+		if !verbose {
+			spinner = shared.NewSpinner(fmt.Sprintf("Cloning with CLI..."))
+			spinner.Start()
+			defer spinner.Stop()
+		} else {
+			fmt.Printf("%sCloning with CLI...%s\n", shared.ColorYellow, shared.ColorReset)
+		}
+
+		cmd = exec.Command(cliCmd, "repo", "clone", repoPath, destPath, "--", "--depth", "1")
+		sourceDisplay = fmt.Sprintf("%s:%s", cliCmd, repoPath)
+	} else {
+		// Fallback to git clone with HTTPS URL
+		gitURL := baseURL + repoPath
+		gitURL = ensureGitSuffix(gitURL)
+
+		if !verbose {
+			spinner = shared.NewSpinner("Cloning repository...")
+			spinner.Start()
+			defer spinner.Stop()
+		} else {
+			fmt.Printf("%sCloning repository...%s\n", shared.ColorYellow, shared.ColorReset)
+		}
+
+		cmd = exec.Command("git", "clone", "--depth", "1", gitURL, destPath)
+		sourceDisplay = gitURL
+	}
+
+	cmd.Stdout = writer.MultiWriter()
+	cmd.Stderr = writer.MultiWriter()
+
+	if err := cmd.Run(); err != nil {
+		if spinner != nil {
+			spinner.Fail(fmt.Sprintf("Failed to clone repository: %v", err))
+		}
+		return shared.FormatError("add", fmt.Sprintf("failed to clone repository: %v", err))
+	}
+
+	if spinner != nil {
+		spinner.Success(fmt.Sprintf("Template '%s' added from repository", name))
+	} else {
+		fmt.Printf("%s✓ Template '%s' added from repository%s\n", shared.ColorGreen, name, shared.ColorReset)
+	}
+	fmt.Printf("  %sSource:%s %s\n", shared.ColorYellow, shared.ColorReset, sourceDisplay)
 	fmt.Printf("  %sStored:%s %s\n", shared.ColorYellow, shared.ColorReset, destPath)
 
 	return nil

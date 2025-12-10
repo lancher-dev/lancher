@@ -1,10 +1,12 @@
-package fileutil
+package tests
 
 import (
 	"archive/zip"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/Kasui92/lancher/internal/fileutil"
 )
 
 func TestCopyFile(t *testing.T) {
@@ -19,7 +21,7 @@ func TestCopyFile(t *testing.T) {
 
 	// Copy file
 	dstPath := filepath.Join(tmpDir, "dest.txt")
-	if err := CopyFile(srcPath, dstPath); err != nil {
+	if err := fileutil.CopyFile(srcPath, dstPath); err != nil {
 		t.Fatalf("CopyFile() failed: %v", err)
 	}
 
@@ -50,7 +52,7 @@ func TestCopyDir(t *testing.T) {
 
 	// Copy directory
 	dstDir := filepath.Join(tmpDir, "dest")
-	if err := CopyDir(srcDir, dstDir); err != nil {
+	if err := fileutil.CopyDir(srcDir, dstDir); err != nil {
 		t.Fatalf("CopyDir() failed: %v", err)
 	}
 
@@ -78,7 +80,7 @@ func TestRemoveDir(t *testing.T) {
 	os.WriteFile(filepath.Join(dirToRemove, "file.txt"), []byte("content"), 0644)
 
 	// Remove directory
-	if err := RemoveDir(dirToRemove); err != nil {
+	if err := fileutil.RemoveDir(dirToRemove); err != nil {
 		t.Fatalf("RemoveDir() failed: %v", err)
 	}
 
@@ -99,7 +101,7 @@ func TestUnzipToDir(t *testing.T) {
 
 	// Extract ZIP
 	extractDir := filepath.Join(tmpDir, "extracted")
-	if err := UnzipToDir(zipPath, extractDir); err != nil {
+	if err := fileutil.UnzipToDir(zipPath, extractDir); err != nil {
 		t.Fatalf("UnzipToDir() failed: %v", err)
 	}
 

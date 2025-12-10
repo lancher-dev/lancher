@@ -1,13 +1,15 @@
-package storage
+package tests
 
 import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/Kasui92/lancher/internal/storage"
 )
 
 func TestGetTemplatesDir(t *testing.T) {
-	dir, err := GetTemplatesDir()
+	dir, err := storage.GetTemplatesDir()
 	if err != nil {
 		t.Fatalf("GetTemplatesDir() failed: %v", err)
 	}
@@ -28,7 +30,7 @@ func TestGetTemplatesDir(t *testing.T) {
 }
 
 func TestGetTemplatePath(t *testing.T) {
-	path, err := GetTemplatePath("test-template")
+	path, err := storage.GetTemplatePath("test-template")
 	if err != nil {
 		t.Fatalf("GetTemplatePath() failed: %v", err)
 	}
@@ -44,7 +46,7 @@ func TestGetTemplatePath(t *testing.T) {
 
 func TestTemplateExists(t *testing.T) {
 	// Test non-existent template
-	exists, err := TemplateExists("non-existent-template-12345")
+	exists, err := storage.TemplateExists("non-existent-template-12345")
 	if err != nil {
 		t.Fatalf("TemplateExists() failed: %v", err)
 	}
@@ -55,7 +57,7 @@ func TestTemplateExists(t *testing.T) {
 }
 
 func TestListTemplates(t *testing.T) {
-	templates, err := ListTemplates()
+	templates, err := storage.ListTemplates()
 	if err != nil {
 		t.Fatalf("ListTemplates() failed: %v", err)
 	}
