@@ -131,11 +131,6 @@ jobs:
           }
           EOF
 
-      - name: Generate .SRCINFO
-        uses: actionshub/makepkg@main
-        with:
-          command: printsrcinfo > .SRCINFO
-
       - name: Publish to AUR
         uses: KSXGitHub/github-actions-deploy-aur@v2.7.0
         with:
