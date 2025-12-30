@@ -19,6 +19,19 @@ curl -sS https://lancher.dev/install.sh | sh
 
 The installer automatically detects your platform and downloads the appropriate pre-built binary.
 
+<details>
+<summary style="font-weight: bold">
+Arch Linux
+</summary>
+<br />
+
+```sh
+yay -Sy lancher
+```
+</details>
+
+
+
 ## Documentation
 
 For detailed usage instructions, command reference, and advanced features, visit the official documentation at [lancher.dev/docs](https://lancher.dev/docs).
