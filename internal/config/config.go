@@ -8,9 +8,15 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const ConfigFileName = ".lancher.yaml"
+// ConfigFileNames lists all supported configuration file names in order of priority
+var ConfigFileNames = []string{
+	".lancher.yaml",
+	".lancher.yml",
+	"lancher.yaml",
+	"lancher.yml",
+}
 
-// Config represents the .lancher.yaml configuration file
+// Config represents the lancher configuration file
 type Config struct {
 	Name        string   `yaml:"name"`
 	Description string   `yaml:"description"`
@@ -20,26 +26,55 @@ type Config struct {
 	Ignore      []string `yaml:"ignore"`
 }
 
-// LoadConfig loads .lancher.yaml from the template directory
+// LoadResult contains the loaded config and metadata about the loading process
+type LoadResult struct {
+	Config      *Config
+	FoundFiles  []string // List of all config files found
+	UsedFile    string   // The config file that was actually used
+}
+
+// LoadConfig loads configuration from the template directory
+// Searches for config files in order of priority and returns the first one found
 func LoadConfig(templatePath string) (*Config, error) {
-	configPath := filepath.Join(templatePath, ConfigFileName)
+	result := LoadConfigWithDetails(templatePath)
+	return result.Config, nil
+}
 
-	// Check if config file exists
-	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		return nil, nil // No config file, return nil without error
+// LoadConfigWithDetails loads configuration and returns detailed information
+func LoadConfigWithDetails(templatePath string) *LoadResult {
+	result := &LoadResult{
+		FoundFiles: []string{},
 	}
 
-	data, err := os.ReadFile(configPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read config file: %w", err)
+	// Check all possible config file names
+	for _, fileName := range ConfigFileNames {
+		configPath := filepath.Join(templatePath, fileName)
+
+		// Check if config file exists
+		if _, err := os.Stat(configPath); err == nil {
+			result.FoundFiles = append(result.FoundFiles, fileName)
+
+			// Load the first config found (highest priority)
+			if result.Config == nil {
+				data, err := os.ReadFile(configPath)
+				if err != nil {
+					// Could return error here, but for now just skip this file
+					continue
+				}
+
+				var cfg Config
+				if err := yaml.Unmarshal(data, &cfg); err != nil {
+					// Could return error here, but for now just skip this file
+					continue
+				}
+
+				result.Config = &cfg
+				result.UsedFile = fileName
+			}
+		}
 	}
 
-	var cfg Config
-	if err := yaml.Unmarshal(data, &cfg); err != nil {
-		return nil, fmt.Errorf("failed to parse config file: %w", err)
-	}
-
-	return &cfg, nil
+	return result
 }
 
 // ShouldIgnore checks if a file should be ignored during template creation

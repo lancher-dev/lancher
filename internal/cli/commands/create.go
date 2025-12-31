@@ -325,9 +325,12 @@ func copyTemplate(srcPath, dstPath string, cfg *config.Config) error {
 			return err
 		}
 
-		// Skip .lancher.yaml config file
-		if relPath == config.ConfigFileName {
-			return nil
+		// Skip any lancher config files
+		fileName := filepath.Base(relPath)
+		for _, configFile := range config.ConfigFileNames {
+			if fileName == configFile {
+				return nil
+			}
 		}
 
 		// Skip .git directory (always excluded from templates)

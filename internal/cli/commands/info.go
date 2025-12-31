@@ -43,8 +43,9 @@ func RunInfo(args []string) error {
 		for i, name := range templates {
 			templatePath, _ := storage.GetTemplatePath(name)
 
-			// Load .lancher.yaml config if exists
-			cfg, err := config.LoadConfig(templatePath)
+			// Load .lancher.yaml config with details
+			loadResult := config.LoadConfigWithDetails(templatePath)
+			cfg := loadResult.Config
 
 			fmt.Printf("  %s•%s %s%s%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorBold, name, shared.ColorReset)
 			fmt.Printf("    %sPath:%s %s\n", shared.ColorGray, shared.ColorReset, templatePath)
@@ -63,9 +64,12 @@ func RunInfo(args []string) error {
 				if cfg.Version != "" {
 					fmt.Printf("    %sVersion:%s %s\n", shared.ColorGray, shared.ColorReset, cfg.Version)
 				}
-			} else if err != nil {
-				// Only show error if it's not just a missing config file
-				fmt.Printf("    %s(config error: %v)%s\n", shared.ColorYellow, err, shared.ColorReset)
+			}
+
+			// Show warning if multiple config files found
+			if len(loadResult.FoundFiles) > 1 {
+				fmt.Printf("    %s⚠ Warning: Multiple config files found (%v). Using %s%s\n",
+					shared.ColorYellow, loadResult.FoundFiles, loadResult.UsedFile, shared.ColorReset)
 			}
 
 			// Add extra spacing between templates
