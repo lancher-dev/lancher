@@ -2,9 +2,9 @@ package commands
 
 import (
 	"fmt"
-	"runtime"
 
 	"github.com/Kasui92/lancher/internal/cli/shared"
+	"github.com/Kasui92/lancher/internal/config"
 	"github.com/Kasui92/lancher/internal/storage"
 )
 
@@ -35,16 +35,43 @@ func RunInfo(args []string) error {
 	}
 
 	fmt.Printf("%sStorage Information%s\n\n", shared.ColorBold+shared.ColorCyan, shared.ColorReset)
-	fmt.Printf("  %sPlatform:%s       %s\n", shared.ColorYellow, shared.ColorReset, runtime.GOOS)
 	fmt.Printf("  %sStorage Path:%s  %s\n", shared.ColorYellow, shared.ColorReset, templatesDir)
 	fmt.Printf("  %sTemplates:%s     %d\n\n", shared.ColorYellow, shared.ColorReset, len(templates))
 
 	if len(templates) > 0 {
-		fmt.Printf("%sAvailable Templates:%s\n", shared.ColorBold, shared.ColorReset)
-		for _, name := range templates {
+		fmt.Printf("%sAvailable Templates:%s\n\n", shared.ColorBold, shared.ColorReset)
+		for i, name := range templates {
 			templatePath, _ := storage.GetTemplatePath(name)
+
+			// Load .lancher.yaml config if exists
+			cfg, err := config.LoadConfig(templatePath)
+
 			fmt.Printf("  %s•%s %s%s%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorBold, name, shared.ColorReset)
-			fmt.Printf("    %s%s%s\n", shared.ColorGray, templatePath, shared.ColorReset)
+			fmt.Printf("    %sPath:%s %s\n", shared.ColorGray, shared.ColorReset, templatePath)
+
+			// Display metadata from .lancher.yaml if available
+			if cfg != nil {
+				if cfg.Name != "" && cfg.Name != name {
+					fmt.Printf("    %sName:%s %s\n", shared.ColorGray, shared.ColorReset, cfg.Name)
+				}
+				if cfg.Description != "" {
+					fmt.Printf("    %sDescription:%s %s\n", shared.ColorGray, shared.ColorReset, cfg.Description)
+				}
+				if cfg.Author != "" {
+					fmt.Printf("    %sAuthor:%s %s\n", shared.ColorGray, shared.ColorReset, cfg.Author)
+				}
+				if cfg.Version != "" {
+					fmt.Printf("    %sVersion:%s %s\n", shared.ColorGray, shared.ColorReset, cfg.Version)
+				}
+			} else if err != nil {
+				// Only show error if it's not just a missing config file
+				fmt.Printf("    %s(config error: %v)%s\n", shared.ColorYellow, err, shared.ColorReset)
+			}
+
+			// Add extra spacing between templates
+			if i < len(templates)-1 {
+				fmt.Println()
+			}
 		}
 	}
 
