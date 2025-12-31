@@ -98,7 +98,7 @@ func RunAdd(args []string) error {
 			return shared.FormatError("add", "template name cannot be empty")
 		}
 
-		sourceInput, err := shared.PromptStringWithDefault("Enter source (local path, git URL, or ZIP file):", "./my-template")
+		sourceInput, err := shared.PromptStringWithDefault("Enter source (local path, git URL, or ZIP file):", ".")
 		if err != nil {
 			if strings.Contains(err.Error(), "cancelled") {
 				fmt.Printf("%sCancelled.%s\n", shared.ColorYellow, shared.ColorReset)

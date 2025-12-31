@@ -1,0 +1,75 @@
+name: Publish
+
+on:
+  workflow_run:
+    workflows: ["Release"]
+    types:
+      - completed
+
+jobs:
+  publish-aur:
+    name: Publish to AUR
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Download release binaries
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          wget https://github.com/Kasui92/lancher/releases/download/v${VERSION}/lancher-linux-amd64
+          wget https://github.com/Kasui92/lancher/releases/download/v${VERSION}/lancher-linux-arm64
+
+      - name: Calculate checksums
+        id: checksums
+        run: |
+          SHA256_X86_64=$(sha256sum lancher-linux-amd64 | awk '{print $1}')
+          SHA256_AARCH64=$(sha256sum lancher-linux-arm64 | awk '{print $1}')
+          echo "sha256_x86_64=${SHA256_X86_64}" >> $GITHUB_OUTPUT
+          echo "sha256_aarch64=${SHA256_AARCH64}" >> $GITHUB_OUTPUT
+
+      - name: Update PKGBUILD
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          SHA256_X86_64=${{ steps.checksums.outputs.sha256_x86_64 }}
+          SHA256_AARCH64=${{ steps.checksums.outputs.sha256_aarch64 }}
+
+          cat > PKGBUILD << EOF
+          # Maintainer: Kasui92 <me@lucapattocchio.dev>
+          pkgname=lancher
+          pkgver=${VERSION}
+          pkgrel=1
+          pkgdesc="A minimal, local project-template manager written in Go"
+          arch=('x86_64' 'aarch64')
+          url="https://github.com/Kasui92/lancher"
+          license=('MIT')
+          depends=('glibc')
+          source_x86_64=("\$pkgname-\$pkgver-x86_64::\$url/releases/download/v\$pkgver/\$pkgname-linux-amd64")
+          source_aarch64=("\$pkgname-\$pkgver-aarch64::\$url/releases/download/v\$pkgver/\$pkgname-linux-arm64")
+          sha256sums_x86_64=('${SHA256_X86_64}')
+          sha256sums_aarch64=('${SHA256_AARCH64}')
+
+          package() {
+            # install the binary
+            install -Dm755 "\$srcdir/\$pkgname-\$pkgver-\$CARCH" "\$pkgdir/usr/bin/\$pkgname"
+          }
+          EOF
+
+      - name: Publish to AUR
+        uses: KSXGitHub/github-actions-deploy-aur@v2.7.0
+        with:
+          pkgname: lancher
+          pkgbuild: ./PKGBUILD
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: "Update to version ${{ steps.version.outputs.version }}"
+          ssh_keyscan_types: rsa,ecdsa,ed25519
