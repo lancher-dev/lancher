@@ -73,6 +73,8 @@ func readKey() (string, error) {
 			return "ctrl+c", nil
 		case 113: // q
 			return "q", nil
+		case 32: // Space
+			return "space", nil
 		}
 	}
 
@@ -405,4 +407,130 @@ func PromptConfirmWithDefault(prompt string, defaultValue bool) (bool, error) {
 	}
 
 	return input == "y" || input == "yes", nil
+}
+
+// MultiSelect prompts user to select multiple options with arrow key navigation and space bar to toggle
+// Returns a slice of selected values or error if cancelled
+func MultiSelect(prompt string, choices []string) ([]string, error) {
+	if len(choices) == 0 {
+		return nil, fmt.Errorf("no choices provided")
+	}
+
+	fd := int(os.Stdin.Fd())
+	if !isTerminal(fd) {
+		// Fallback to numbered multi-selection if not a terminal
+		return multiSelectWithNumbers(prompt, choices)
+	}
+
+	// Set terminal to raw mode
+	if err := setRawMode(fd); err != nil {
+		return multiSelectWithNumbers(prompt, choices)
+	}
+	defer restoreTerminal(fd)
+
+	// Hide cursor and show initial selection
+	fmt.Print("\033[?25l")
+	defer fmt.Print("\033[?25h")
+
+	selected := 0
+	marked := make(map[int]bool)
+
+	renderOptions := func() {
+		fmt.Printf("\r\033[K%s%s%s\n", ColorCyan, prompt, ColorReset)
+		fmt.Printf("\r\033[K%s(Use arrows to move, space to toggle, enter to confirm)%s\n", ColorGray, ColorReset)
+		for i, choice := range choices {
+			marker := " "
+			if marked[i] {
+				marker = "✓"
+			}
+			if i == selected {
+				fmt.Printf("\r\033[K%s>%s [%s%s%s] %s\n", ColorGreen, ColorReset, ColorGreen, marker, ColorReset, choice)
+			} else {
+				fmt.Printf("\r\033[K%s•%s [%s] %s\n", ColorGray, ColorReset, marker, choice)
+			}
+		}
+		fmt.Printf("\033[%dA", len(choices)+2)
+	}
+
+	renderOptions()
+
+	for {
+		key, err := readKey()
+		if err != nil {
+			return nil, err
+		}
+
+		switch key {
+		case "up":
+			if selected > 0 {
+				selected--
+				renderOptions()
+			}
+		case "down":
+			if selected < len(choices)-1 {
+				selected++
+				renderOptions()
+			}
+		case "space":
+			marked[selected] = !marked[selected]
+			renderOptions()
+		case "enter":
+			// Clear the display
+			for i := 0; i <= len(choices)+1; i++ {
+				fmt.Print("\r\033[K\n")
+			}
+			fmt.Printf("\033[%dA", len(choices)+2)
+
+			// Collect marked items
+			var result []string
+			for i := range choices {
+				if marked[i] {
+					result = append(result, choices[i])
+				}
+			}
+			return result, nil
+		case "ctrl+c", "q":
+			// Clear the display
+			for i := 0; i <= len(choices)+1; i++ {
+				fmt.Print("\r\033[K\n")
+			}
+			fmt.Printf("\033[%dA", len(choices)+2)
+			return nil, fmt.Errorf("cancelled")
+		}
+	}
+}
+
+// multiSelectWithNumbers provides numbered multi-selection as fallback
+func multiSelectWithNumbers(prompt string, choices []string) ([]string, error) {
+	fmt.Println(prompt)
+	fmt.Println("(Enter numbers separated by commas, e.g., 1,3,5)")
+	for i, choice := range choices {
+		fmt.Printf("  %d) %s\n", i+1, choice)
+	}
+	fmt.Print("Enter numbers: ")
+
+	reader := bufio.NewReader(os.Stdin)
+	input, err := reader.ReadString('\n')
+	if err != nil {
+		return nil, err
+	}
+
+	input = strings.TrimSpace(input)
+	if input == "" {
+		return []string{}, nil
+	}
+
+	// Parse comma-separated numbers
+	parts := strings.Split(input, ",")
+	var result []string
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		choice, err := strconv.Atoi(part)
+		if err != nil || choice < 1 || choice > len(choices) {
+			return nil, fmt.Errorf("invalid selection: %s", part)
+		}
+		result = append(result, choices[choice-1])
+	}
+
+	return result, nil
 }
