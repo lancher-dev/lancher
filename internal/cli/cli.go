@@ -62,12 +62,13 @@ func Run(args []string) error {
 			usage := "USAGE:\n    lancher template <SUBCOMMAND> [ARGS...] [OPTIONS]"
 			return shared.FormatUnknownSubcommandError(subcommand, "lancher template", usage)
 		}
-	case "info":
+	case "templates":
+		// Alias for template ls
 		// Check for help flag
 		if len(commandArgs) > 0 && (commandArgs[0] == "help" || commandArgs[0] == "-h" || commandArgs[0] == "--help") {
-			return commands.RunInfoHelp()
+			return template.RunListHelp()
 		}
-		return commands.RunInfo(commandArgs)
+		return template.RunList(commandArgs)
 	case "upgrade":
 		// Check for help flag
 		if len(commandArgs) > 0 && (commandArgs[0] == "help" || commandArgs[0] == "-h" || commandArgs[0] == "--help") {
@@ -96,7 +97,7 @@ func runHelp() error {
 	fmt.Printf("%sCOMMANDS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
 	fmt.Printf("    %s%-20s%s %s\n", shared.ColorGreen, "create", shared.ColorReset, "Create a new project from template")
 	fmt.Printf("    %s%-20s%s %s\n", shared.ColorGreen, "template", shared.ColorReset, "Manage templates (add, list, update, remove)")
-	fmt.Printf("    %s%-20s%s %s\n", shared.ColorGreen, "info", shared.ColorReset, "Show storage information")
+	fmt.Printf("    %s%-20s%s %s\n", shared.ColorGreen, "templates", shared.ColorReset, "List all available templates")
 	fmt.Printf("    %s%-20s%s %s\n", shared.ColorGreen, "upgrade", shared.ColorReset, "Check for updates and upgrade to latest version")
 	fmt.Printf("    %shelp%s, %s-h%s             %s\n\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "Print this help message")
 

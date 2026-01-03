@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Kasui92/lancher/internal/cli/shared"
+	"github.com/Kasui92/lancher/internal/config"
 	"github.com/Kasui92/lancher/internal/storage"
 )
 
@@ -14,7 +15,8 @@ func RunListHelp() error {
 
 	fmt.Printf("%sUSAGE:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
 	fmt.Printf("    lancher template list\n")
-	fmt.Printf("    lancher template ls\n\n")
+	fmt.Printf("    lancher template ls\n")
+	fmt.Printf("    lancher templates\n\n")
 
 	fmt.Printf("%sOPTIONS:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
 	fmt.Printf("    %s-h%s, %s--help%s  %sShow this help message%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorGreen, shared.ColorReset, "", "")
@@ -35,13 +37,44 @@ func RunList(args []string) error {
 		return nil
 	}
 
-	fmt.Printf("%sAvailable templates (%d):%s\n\n", shared.ColorBold, len(templates), shared.ColorReset)
-	for _, name := range templates {
-		fmt.Printf("  %s•%s %s\n", shared.ColorGreen, shared.ColorReset, name)
-	}
+	fmt.Printf("%sAvailable Templates:%s\n\n", shared.ColorBold, shared.ColorReset)
+	for i, name := range templates {
+		templatePath, _ := storage.GetTemplatePath(name)
 
-	templatesDir, _ := storage.GetTemplatesDir()
-	fmt.Printf("\n%sStored in:%s %s\n", shared.ColorYellow, shared.ColorReset, templatesDir)
+		// Load .lancher.yaml config with details
+		loadResult := config.LoadConfigWithDetails(templatePath)
+		cfg := loadResult.Config
+
+		fmt.Printf("  %s•%s %s%s%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorBold, name, shared.ColorReset)
+		fmt.Printf("    %sPath:%s %s\n", shared.ColorGray, shared.ColorReset, templatePath)
+
+		// Display metadata from .lancher.yaml if available
+		if cfg != nil {
+			if cfg.Name != "" && cfg.Name != name {
+				fmt.Printf("    %sName:%s %s\n", shared.ColorGray, shared.ColorReset, cfg.Name)
+			}
+			if cfg.Description != "" {
+				fmt.Printf("    %sDescription:%s %s\n", shared.ColorGray, shared.ColorReset, cfg.Description)
+			}
+			if cfg.Author != "" {
+				fmt.Printf("    %sAuthor:%s %s\n", shared.ColorGray, shared.ColorReset, cfg.Author)
+			}
+			if cfg.Version != "" {
+				fmt.Printf("    %sVersion:%s %s\n", shared.ColorGray, shared.ColorReset, cfg.Version)
+			}
+		}
+
+		// Show warning if multiple config files found
+		if len(loadResult.FoundFiles) > 1 {
+			fmt.Printf("    %s⚠ Warning: Multiple config files found (%v). Using %s%s\n",
+				shared.ColorYellow, loadResult.FoundFiles, loadResult.UsedFile, shared.ColorReset)
+		}
+
+		// Add extra spacing between templates
+		if i < len(templates)-1 {
+			fmt.Println()
+		}
+	}
 
 	return nil
 }
