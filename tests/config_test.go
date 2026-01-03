@@ -56,7 +56,7 @@ description: Minimal template`,
 		t.Run(tt.name, func(t *testing.T) {
 			// Create temp directory
 			tmpDir := t.TempDir()
-			configPath := filepath.Join(tmpDir, config.ConfigFileName)
+			configPath := filepath.Join(tmpDir, config.ConfigFileNames[0])
 
 			// Write config file
 			if err := os.WriteFile(configPath, []byte(tt.yamlContent), 0644); err != nil {
