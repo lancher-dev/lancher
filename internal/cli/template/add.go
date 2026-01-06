@@ -89,13 +89,13 @@ func RunAdd(args []string) error {
 				fmt.Printf("%sCancelled.%s\n", shared.ColorYellow, shared.ColorReset)
 				return nil
 			}
-			return shared.FormatError("add", "failed to read input")
+			return shared.FormatError("failed to read input")
 		}
 		name = nameInput
 		fmt.Printf("%s✓ Template name:%s %s\n", shared.ColorGreen, shared.ColorReset, name)
 
 		if name == "" {
-			return shared.FormatError("add", "template name cannot be empty")
+			return shared.FormatError("Template name cannot be empty")
 		}
 
 		sourceInput, err := shared.PromptStringWithDefault("Enter source (local path, git URL, or ZIP file):", ".")
@@ -104,14 +104,30 @@ func RunAdd(args []string) error {
 				fmt.Printf("%sCancelled.%s\n", shared.ColorYellow, shared.ColorReset)
 				return nil
 			}
-			return shared.FormatError("add", "failed to read input")
+			return shared.FormatError("failed to read input")
 		}
 		source = sourceInput
-		fmt.Printf("%s✓ Source:%s %s\n", shared.ColorGreen, shared.ColorReset, source)
 
 		if source == "" {
-			return shared.FormatError("add", "source cannot be empty")
+			return shared.FormatError("Source cannot be empty")
 		}
+
+		// Validate source before printing confirmation
+		if !isGitURL(source) && !isGitHubAlias(source) && !isGitLabAlias(source) {
+			// For local paths and ZIP files, verify they exist
+			sourceAbs, err := filepath.Abs(source)
+			if err != nil {
+				return shared.FormatError(fmt.Sprintf("Invalid source path '%s'", source))
+			}
+			if _, err := os.Stat(sourceAbs); os.IsNotExist(err) {
+				if isZipFile(source) {
+					return shared.FormatError(fmt.Sprintf("ZIP file not found: '%s'", source))
+				}
+				return shared.FormatError(fmt.Sprintf("Directory not found: '%s'", source))
+			}
+		}
+
+		fmt.Printf("%s✓ Source:%s %s\n", shared.ColorGreen, shared.ColorReset, source)
 	} else {
 		// Command-line arguments mode
 		if len(args) < 2 {
@@ -130,22 +146,22 @@ func RunAdd(args []string) error {
 
 	// Validate template name
 	if err := shared.SanitizeTemplateName(name); err != nil {
-		return shared.FormatError("add", err.Error())
+		return shared.FormatError(err.Error())
 	}
 
 	// Check if template already exists
 	exists, err := storage.TemplateExists(name)
 	if err != nil {
-		return shared.FormatError("add", fmt.Sprintf("failed to check template: %v", err))
+		return shared.FormatError(fmt.Sprintf("Failed to check template: %v", err))
 	}
 	if exists {
-		return shared.FormatError("add", fmt.Sprintf("template '%s' already exists", name))
+		return shared.FormatError(fmt.Sprintf("Template '%s' already exists", name))
 	}
 
 	// Get destination path
 	destPath, err := storage.GetTemplatePath(name)
 	if err != nil {
-		return shared.FormatError("add", fmt.Sprintf("failed to get template path: %v", err))
+		return shared.FormatError(fmt.Sprintf("Failed to get template path: %v", err))
 	}
 
 	// Handle GitHub alias (gh:)
@@ -180,7 +196,7 @@ func RunAdd(args []string) error {
 			if spinner != nil {
 				spinner.Fail(fmt.Sprintf("Failed to clone repository: %v", err))
 			}
-			return shared.FormatError("add", fmt.Sprintf("failed to clone repository: %v", err))
+			return shared.FormatError(fmt.Sprintf("Failed to clone repository: %v", err))
 		}
 
 		if spinner != nil {
@@ -193,11 +209,11 @@ func RunAdd(args []string) error {
 		// ZIP file
 		sourceAbs, err := filepath.Abs(source)
 		if err != nil {
-			return shared.FormatError("add", fmt.Sprintf("invalid source path: %v", err))
+			return shared.FormatError(fmt.Sprintf("Invalid source path: %v", err))
 		}
 
 		if _, err := os.Stat(sourceAbs); os.IsNotExist(err) {
-			return shared.FormatError("add", fmt.Sprintf("ZIP file does not exist: %s", sourceAbs))
+			return shared.FormatError(fmt.Sprintf("ZIP file not found: '%s'", sourceAbs))
 		}
 
 		var spinner *shared.Spinner
@@ -213,7 +229,7 @@ func RunAdd(args []string) error {
 			if spinner != nil {
 				spinner.Fail(fmt.Sprintf("Failed to extract ZIP: %v", err))
 			}
-			return shared.FormatError("add", fmt.Sprintf("failed to extract ZIP: %v", err))
+			return shared.FormatError(fmt.Sprintf("Failed to extract ZIP: %v", err))
 		}
 
 		if spinner != nil {
@@ -226,16 +242,16 @@ func RunAdd(args []string) error {
 		// Local path
 		sourceAbs, err := filepath.Abs(source)
 		if err != nil {
-			return shared.FormatError("add", fmt.Sprintf("invalid source path: %v", err))
+			return shared.FormatError(fmt.Sprintf("Invalid source path: %v", err))
 		}
 
 		if _, err := os.Stat(sourceAbs); os.IsNotExist(err) {
-			return shared.FormatError("add", fmt.Sprintf("source directory does not exist: %s", sourceAbs))
+			return shared.FormatError(fmt.Sprintf("Directory not found: '%s'", sourceAbs))
 		}
 
 		// Copy directory
 		if err := fileutil.CopyDir(sourceAbs, destPath); err != nil {
-			return shared.FormatError("add", fmt.Sprintf("failed to copy template: %v", err))
+			return shared.FormatError(fmt.Sprintf("Failed to copy template: %v", err))
 		}
 
 		fmt.Printf("%s✓ Template '%s' added successfully%s\n", shared.ColorGreen, name, shared.ColorReset)
@@ -293,7 +309,7 @@ func cloneWithAlias(name, repoPath, destPath, cliCmd, baseURL string, verbose bo
 		if spinner != nil {
 			spinner.Fail(fmt.Sprintf("Failed to clone repository: %v", err))
 		}
-		return shared.FormatError("add", fmt.Sprintf("failed to clone repository: %v", err))
+		return shared.FormatError(fmt.Sprintf("Failed to clone repository: %v", err))
 	}
 
 	if spinner != nil {
