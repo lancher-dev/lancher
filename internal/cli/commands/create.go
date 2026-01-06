@@ -47,14 +47,14 @@ func Run(args []string) error {
 				templateName = args[i+1]
 				i++
 			} else {
-				return shared.FormatError("create", "flag -t/--template requires a value")
+				return shared.FormatError("flag -t/--template requires a value")
 			}
 		case "-d", "--destination":
 			if i+1 < len(args) {
 				destination = args[i+1]
 				i++
 			} else {
-				return shared.FormatError("create", "flag -d/--destination requires a value")
+				return shared.FormatError("flag -d/--destination requires a value")
 			}
 		case "--git":
 			gitInit = true
@@ -77,10 +77,10 @@ func Run(args []string) error {
 
 	// Validate mutually exclusive flags
 	if gitInit && noGit {
-		return shared.FormatError("create", "cannot use both --git and --no-git flags")
+		return shared.FormatError("cannot use both --git and --no-git flags")
 	}
 	if executeHooks && noHooks {
-		return shared.FormatError("create", "cannot use both --hooks and --no-hooks flags")
+		return shared.FormatError("cannot use both --hooks and --no-hooks flags")
 	}
 
 	// Interactive mode if flags not provided
@@ -88,7 +88,7 @@ func Run(args []string) error {
 		// List available templates
 		templates, err := storage.ListTemplates()
 		if err != nil {
-			return shared.FormatError("create", fmt.Sprintf("failed to list templates: %v", err))
+			return shared.FormatError(fmt.Sprintf("failed to list templates: %v", err))
 		}
 
 		if len(templates) == 0 {
@@ -104,7 +104,7 @@ func Run(args []string) error {
 				fmt.Printf("%sCancelled.%s\n", shared.ColorYellow, shared.ColorReset)
 				return nil
 			}
-			return shared.FormatError("create", fmt.Sprintf("selection failed: %v", err))
+			return shared.FormatError(fmt.Sprintf("selection failed: %v", err))
 		}
 		templateName = selectedTemplate
 
@@ -119,7 +119,7 @@ func Run(args []string) error {
 				fmt.Printf("%sCancelled.%s\n", shared.ColorYellow, shared.ColorReset)
 				return nil
 			}
-			return shared.FormatError("create", "failed to read input")
+			return shared.FormatError("failed to read input")
 		}
 		destination = dest
 		fmt.Printf("%s✓ Destination set:%s %s\n", shared.ColorGreen, shared.ColorReset, destination)
@@ -127,16 +127,16 @@ func Run(args []string) error {
 
 	// Validate template name
 	if err := shared.SanitizeTemplateName(templateName); err != nil {
-		return shared.FormatError("create", err.Error())
+		return shared.FormatError(err.Error())
 	}
 
 	// Check if template exists
 	exists, err := storage.TemplateExists(templateName)
 	if err != nil {
-		return shared.FormatError("create", fmt.Sprintf("failed to check template: %v", err))
+		return shared.FormatError(fmt.Sprintf("failed to check template: %v", err))
 	}
 	if !exists {
-		return shared.FormatError("create", fmt.Sprintf("template '%s' not found", templateName))
+		return shared.FormatError(fmt.Sprintf("template '%s' not found", templateName))
 	}
 
 	// Handle destination path resolution
@@ -146,13 +146,13 @@ func Run(args []string) error {
 	if destination == "." {
 		destAbs, err = os.Getwd()
 		if err != nil {
-			return shared.FormatError("create", fmt.Sprintf("failed to get current directory: %v", err))
+			return shared.FormatError(fmt.Sprintf("failed to get current directory: %v", err))
 		}
 	} else {
 		// Get absolute path
 		destAbs, err = filepath.Abs(destination)
 		if err != nil {
-			return shared.FormatError("create", fmt.Sprintf("invalid destination path: %v", err))
+			return shared.FormatError(fmt.Sprintf("invalid destination path: %v", err))
 		}
 	}
 
@@ -160,7 +160,7 @@ func Run(args []string) error {
 	parentDir := filepath.Dir(destAbs)
 	if parentDir != "." && parentDir != "/" {
 		if _, err := os.Stat(parentDir); os.IsNotExist(err) {
-			return shared.FormatError("create", fmt.Sprintf("parent directory does not exist: %s", parentDir))
+			return shared.FormatError(fmt.Sprintf("parent directory does not exist: %s", parentDir))
 		}
 	}
 
@@ -168,13 +168,13 @@ func Run(args []string) error {
 	if stat, err := os.Stat(destAbs); err == nil {
 		// Destination exists - check if it's a directory
 		if !stat.IsDir() {
-			return shared.FormatError("create", fmt.Sprintf("destination exists and is not a directory: %s", destAbs))
+			return shared.FormatError(fmt.Sprintf("destination exists and is not a directory: %s", destAbs))
 		}
 
 		// Check if directory is empty
 		entries, err := os.ReadDir(destAbs)
 		if err != nil {
-			return shared.FormatError("create", fmt.Sprintf("failed to read destination directory: %v", err))
+			return shared.FormatError(fmt.Sprintf("failed to read destination directory: %v", err))
 		}
 
 		if len(entries) > 0 {
@@ -184,7 +184,7 @@ func Run(args []string) error {
 
 			confirmed, err := shared.PromptConfirmWithDefault("Do you want to remove and recreate the directory?", false)
 			if err != nil {
-				return shared.FormatError("create", "failed to read confirmation")
+				return shared.FormatError("failed to read confirmation")
 			}
 
 			if !confirmed {
@@ -194,7 +194,7 @@ func Run(args []string) error {
 
 			// Remove existing directory
 			if err := os.RemoveAll(destAbs); err != nil {
-				return shared.FormatError("create", fmt.Sprintf("failed to remove existing directory: %v", err))
+				return shared.FormatError(fmt.Sprintf("failed to remove existing directory: %v", err))
 			}
 			fmt.Printf("%s✓ Removed existing directory%s\n", shared.ColorGreen, shared.ColorReset)
 		}
@@ -203,13 +203,13 @@ func Run(args []string) error {
 	// Get template path
 	templatePath, err := storage.GetTemplatePath(templateName)
 	if err != nil {
-		return shared.FormatError("create", fmt.Sprintf("failed to get template path: %v", err))
+		return shared.FormatError(fmt.Sprintf("failed to get template path: %v", err))
 	}
 
 	// Load template configuration if exists
 	cfg, err := config.LoadConfig(templatePath)
 	if err != nil {
-		return shared.FormatError("create", fmt.Sprintf("failed to load template config: %v", err))
+		return shared.FormatError(fmt.Sprintf("failed to load template config: %v", err))
 	}
 
 	// Display template metadata if available
@@ -236,7 +236,7 @@ func Run(args []string) error {
 		if spinner != nil {
 			spinner.Fail(fmt.Sprintf("Failed to create project: %v", err))
 		}
-		return shared.FormatError("create", fmt.Sprintf("failed to create project: %v", err))
+		return shared.FormatError(fmt.Sprintf("failed to create project: %v", err))
 	}
 
 	if spinner != nil {
@@ -266,7 +266,7 @@ func Run(args []string) error {
 				var err error
 				confirmed, err = shared.PromptConfirmWithDefault("Execute hooks?", true)
 				if err != nil {
-					return shared.FormatError("create", "failed to read confirmation")
+					return shared.FormatError("failed to read confirmation")
 				}
 			}
 
@@ -289,7 +289,7 @@ func Run(args []string) error {
 			var err error
 			gitInit, err = shared.PromptConfirmWithDefault("Initialize git repository?", false)
 			if err != nil {
-				return shared.FormatError("create", "failed to read confirmation")
+				return shared.FormatError("failed to read confirmation")
 			}
 		}
 

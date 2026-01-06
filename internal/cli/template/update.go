@@ -55,43 +55,43 @@ func RunUpdate(args []string) error {
 
 	// Validate template name
 	if err := shared.SanitizeTemplateName(templateName); err != nil {
-		return shared.FormatError("update", err.Error())
+		return shared.FormatError(err.Error())
 	}
 
 	// Check if template exists
 	exists, err := storage.TemplateExists(templateName)
 	if err != nil {
-		return shared.FormatError("update", fmt.Sprintf("failed to check template: %v", err))
+		return shared.FormatError(fmt.Sprintf("failed to check template: %v", err))
 	}
 	if !exists {
-		return shared.FormatError("update", fmt.Sprintf("template '%s' not found", templateName))
+		return shared.FormatError(fmt.Sprintf("template '%s' not found", templateName))
 	}
 
 	// Get template path
 	templatePath, err := storage.GetTemplatePath(templateName)
 	if err != nil {
-		return shared.FormatError("update", fmt.Sprintf("failed to get template path: %v", err))
+		return shared.FormatError(fmt.Sprintf("failed to get template path: %v", err))
 	}
 
 	// If -d flag is provided, overwrite with new path
 	if overwritePath != "" {
 		sourceAbs, err := filepath.Abs(overwritePath)
 		if err != nil {
-			return shared.FormatError("update", fmt.Sprintf("invalid source path: %v", err))
+			return shared.FormatError(fmt.Sprintf("invalid source path: %v", err))
 		}
 
 		if _, err := os.Stat(sourceAbs); os.IsNotExist(err) {
-			return shared.FormatError("update", fmt.Sprintf("source directory does not exist: %s", sourceAbs))
+			return shared.FormatError(fmt.Sprintf("source directory does not exist: %s", sourceAbs))
 		}
 
 		fmt.Printf("%sRemoving old template...%s\n", shared.ColorYellow, shared.ColorReset)
 		if err := fileutil.RemoveDir(templatePath); err != nil {
-			return shared.FormatError("update", fmt.Sprintf("failed to remove old template: %v", err))
+			return shared.FormatError(fmt.Sprintf("failed to remove old template: %v", err))
 		}
 
 		fmt.Printf("%sCopying new template...%s\n", shared.ColorYellow, shared.ColorReset)
 		if err := fileutil.CopyDir(sourceAbs, templatePath); err != nil {
-			return shared.FormatError("update", fmt.Sprintf("failed to copy new template: %v", err))
+			return shared.FormatError(fmt.Sprintf("failed to copy new template: %v", err))
 		}
 
 		fmt.Printf("%s✓ Template '%s' updated from path%s\n", shared.ColorGreen, templateName, shared.ColorReset)
@@ -104,7 +104,7 @@ func RunUpdate(args []string) error {
 	// Otherwise, try git pull
 	gitDir := filepath.Join(templatePath, ".git")
 	if _, err := os.Stat(gitDir); os.IsNotExist(err) {
-		return shared.FormatError("update", fmt.Sprintf("template '%s' is not a git repository\nUse -d <path> to overwrite with new files", templateName))
+		return shared.FormatError(fmt.Sprintf("template '%s' is not a git repository\nUse -d <path> to overwrite with new files", templateName))
 	}
 
 	var spinner *shared.Spinner
@@ -125,7 +125,7 @@ func RunUpdate(args []string) error {
 		if spinner != nil {
 			spinner.Fail(fmt.Sprintf("Git pull failed: %v", err))
 		}
-		return shared.FormatError("update", fmt.Sprintf("git pull failed: %v", err))
+		return shared.FormatError(fmt.Sprintf("git pull failed: %v", err))
 	}
 
 	if spinner != nil {

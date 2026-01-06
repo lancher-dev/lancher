@@ -35,7 +35,7 @@ func RunRemove(args []string) error {
 	if len(args) == 0 {
 		templates, err := storage.ListTemplates()
 		if err != nil {
-			return shared.FormatError("remove", fmt.Sprintf("failed to list templates: %v", err))
+			return shared.FormatError(fmt.Sprintf("failed to list templates: %v", err))
 		}
 
 		if len(templates) == 0 {
@@ -49,7 +49,7 @@ func RunRemove(args []string) error {
 				fmt.Printf("%sCancelled.%s\n", shared.ColorYellow, shared.ColorReset)
 				return nil
 			}
-			return shared.FormatError("remove", fmt.Sprintf("selection failed: %v", err))
+			return shared.FormatError(fmt.Sprintf("selection failed: %v", err))
 		}
 
 		if len(selected) == 0 {
@@ -66,16 +66,16 @@ func RunRemove(args []string) error {
 	// Validate all template names first
 	for _, name := range templatesToRemove {
 		if err := shared.SanitizeTemplateName(name); err != nil {
-			return shared.FormatError("remove", fmt.Sprintf("invalid template name '%s': %s", name, err.Error()))
+			return shared.FormatError(fmt.Sprintf("invalid template name '%s': %s", name, err.Error()))
 		}
 
 		// Check if template exists
 		exists, err := storage.TemplateExists(name)
 		if err != nil {
-			return shared.FormatError("remove", fmt.Sprintf("failed to check template '%s': %v", name, err))
+			return shared.FormatError(fmt.Sprintf("failed to check template '%s': %v", name, err))
 		}
 		if !exists {
-			return shared.FormatError("remove", fmt.Sprintf("template '%s' not found", name))
+			return shared.FormatError(fmt.Sprintf("template '%s' not found", name))
 		}
 	}
 
@@ -106,7 +106,7 @@ func RunRemove(args []string) error {
 	}
 
 	if firstError != nil {
-		return shared.FormatError("remove", firstError.Error())
+		return shared.FormatError(firstError.Error())
 	}
 
 	if removedCount > 1 {

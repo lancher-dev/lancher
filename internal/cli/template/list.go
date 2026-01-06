@@ -28,7 +28,7 @@ func RunListHelp() error {
 func RunList(args []string) error {
 	templates, err := storage.ListTemplates()
 	if err != nil {
-		return shared.FormatError("list", fmt.Sprintf("failed to list templates: %v", err))
+		return shared.FormatError(fmt.Sprintf("failed to list templates: %v", err))
 	}
 
 	if len(templates) == 0 {
