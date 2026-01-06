@@ -24,7 +24,7 @@ func copyTemplate(srcPath, dstPath string, cfg *config.Config) error {
 		}
 
 		// Skip .lancher.yaml config file
-		if relPath == config.ConfigFileName {
+		if relPath == config.ConfigFileNames[0] {
 			return nil
 		}
 
@@ -123,7 +123,7 @@ func TestCreateCommandExcludesConfig(t *testing.T) {
 	defer os.RemoveAll(dstDir)
 
 	// Create .lancher.yaml
-	lancherYaml := filepath.Join(srcDir, config.ConfigFileName)
+	lancherYaml := filepath.Join(srcDir, config.ConfigFileNames[0])
 	if err := os.WriteFile(lancherYaml, []byte("name: test\nversion: 1.0.0"), 0644); err != nil {
 		t.Fatalf("Failed to create .lancher.yaml: %v", err)
 	}
@@ -141,7 +141,7 @@ func TestCreateCommandExcludesConfig(t *testing.T) {
 	}
 
 	// Verify .lancher.yaml was not copied
-	dstLancherYaml := filepath.Join(dstDir, config.ConfigFileName)
+	dstLancherYaml := filepath.Join(dstDir, config.ConfigFileNames[0])
 	if _, err := os.Stat(dstLancherYaml); !os.IsNotExist(err) {
 		t.Errorf(".lancher.yaml should not be copied, but it exists")
 	}

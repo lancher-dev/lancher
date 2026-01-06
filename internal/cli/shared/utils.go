@@ -6,9 +6,9 @@ import (
 	"strings"
 )
 
-// FormatError creates a user-friendly error message
-func FormatError(cmd string, message string) error {
-	return fmt.Errorf("%s: %s", cmd, message)
+// FormatError creates a user-friendly error message with visual styling
+func FormatError(message string) error {
+	return fmt.Errorf("%s✗%s %s", ColorRed, ColorReset, message)
 }
 
 // CommandExists checks if a command is available in PATH
@@ -19,18 +19,20 @@ func CommandExists(cmd string) bool {
 
 // FormatUnknownCommandError creates a formatted error for unknown commands
 func FormatUnknownCommandError(arg string, usage string, helpCmd string) error {
-	return fmt.Errorf("%sError:%s Unknown command '%s%s%s'\n\n%s\n\nRun %s--help%s for more information",
-		ColorRed+ColorBold, ColorReset,
+	return fmt.Errorf("%sUnknown command '%s%s%s'%s\n\n%s\n\nRun %s--help%s for more information",
+		ColorRed+ColorBold,
 		ColorYellow, arg, ColorReset,
+		ColorReset,
 		usage,
 		ColorGreen, ColorReset)
 }
 
 // FormatUnknownSubcommandError creates a formatted error for unknown subcommands
 func FormatUnknownSubcommandError(arg string, parentCmd string, usage string) error {
-	return fmt.Errorf("%sError:%s Unknown subcommand '%s%s%s'\n\n%s\n\nRun %s%s --help%s for more information",
-		ColorRed+ColorBold, ColorReset,
+	return fmt.Errorf("%sUnknown subcommand '%s%s%s'%s\n\n%s\n\nRun %s%s --help%s for more information",
+		ColorRed+ColorBold,
 		ColorYellow, arg, ColorReset,
+		ColorReset,
 		usage,
 		ColorGreen, parentCmd, ColorReset)
 }
@@ -63,7 +65,7 @@ func FormatMissingArgsError(missingArgs []string, usage string) error {
 		argsText = strings.TrimSuffix(argsText, "\n")
 	}
 
-	return fmt.Errorf("%sError:%s The following required arguments were not provided:\n%s\n\n%s\n\nRun %s--help%s for more information",
+	return fmt.Errorf("%sThe following required arguments were not provided:%s\n%s\n\n%s\n\nRun %s--help%s for more information",
 		ColorRed+ColorBold, ColorReset,
 		argsText,
 		usage,

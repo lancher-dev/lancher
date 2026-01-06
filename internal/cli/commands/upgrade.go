@@ -60,7 +60,7 @@ func RunUpgrade(args []string) error {
 
 	// Check if we're on a supported platform
 	if runtime.GOOS != "linux" && runtime.GOOS != "darwin" {
-		return shared.FormatError("upgrade", "upgrade is only supported on Linux and macOS")
+		return shared.FormatError("upgrade is only supported on Linux and macOS")
 	}
 
 	currentVersion := version.Get()
@@ -77,7 +77,7 @@ func RunUpgrade(args []string) error {
 	latestRelease, err := getLatestRelease()
 	if err != nil {
 		spinner.Fail("Failed to check for updates")
-		return shared.FormatError("upgrade", fmt.Sprintf("failed to check for updates: %v", err))
+		return shared.FormatError(fmt.Sprintf("failed to check for updates: %v", err))
 	}
 
 	latestVersion := strings.TrimPrefix(latestRelease.TagName, "v")
@@ -104,13 +104,13 @@ func RunUpgrade(args []string) error {
 	if force {
 		conf, err := shared.PromptConfirmWithDefault(fmt.Sprintf("Reinstall version %s?", latestVersion), false)
 		if err != nil {
-			return shared.FormatError("upgrade", "failed to read confirmation")
+			return shared.FormatError("failed to read confirmation")
 		}
 		confirmed = conf
 	} else {
 		conf, err := shared.PromptConfirmWithDefault(fmt.Sprintf("Upgrade to version %s?", latestVersion), false)
 		if err != nil {
-			return shared.FormatError("upgrade", "failed to read confirmation")
+			return shared.FormatError("failed to read confirmation")
 		}
 		confirmed = conf
 	}
@@ -127,7 +127,7 @@ func RunUpgrade(args []string) error {
 	script, err := downloadInstallScript()
 	if err != nil {
 		upgradeSpinner.Fail("Failed to download installer")
-		return shared.FormatError("upgrade", fmt.Sprintf("failed to download installer: %v", err))
+		return shared.FormatError(fmt.Sprintf("failed to download installer: %v", err))
 	}
 
 	upgradeSpinner.Stop()
@@ -141,7 +141,7 @@ func RunUpgrade(args []string) error {
 	cmd.Stdin = os.Stdin
 
 	if err := cmd.Run(); err != nil {
-		return shared.FormatError("upgrade", fmt.Sprintf("installation failed: %v", err))
+		return shared.FormatError(fmt.Sprintf("installation failed: %v", err))
 	}
 
 	fmt.Printf("\n%s✓ Upgrade completed successfully%s\n", shared.ColorGreen, shared.ColorReset)
