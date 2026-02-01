@@ -7,7 +7,7 @@ INSTALL_PATH=$(HOME)/.local/bin
 # Version info
 VERSION?=$(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 COMMIT?=$(shell git rev-parse HEAD 2>/dev/null || echo "unknown")
-LDFLAGS=-ldflags "-X github.com/Kasui92/lancher/internal/version.Version=$(VERSION) -X github.com/Kasui92/lancher/internal/version.Commit=$(COMMIT)"
+LDFLAGS=-ldflags "-X github.com/lancher-dev/lancher/internal/version.Version=$(VERSION) -X github.com/lancher-dev/lancher/internal/version.Commit=$(COMMIT)"
 
 help:
 	@echo "lancher - Development Makefile"

@@ -65,7 +65,7 @@ make uninstall    # Remove
 
 ## Questions?
 
-- Check [Issues](https://github.com/Kasui92/lancher/issues)
+- Check [Issues](https://github.com/lancher-dev/lancher/issues)
 - Visit [lancher.dev](https://lancher.dev)
 
 Thank you for contributing!

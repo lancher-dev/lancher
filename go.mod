@@ -1,4 +1,4 @@
-module github.com/Kasui92/lancher
+module github.com/lancher-dev/lancher
 
 go 1.24.0
 

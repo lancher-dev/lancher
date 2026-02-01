@@ -3,7 +3,7 @@ package template
 import (
 	"fmt"
 
-	"github.com/Kasui92/lancher/internal/cli/shared"
+	"github.com/lancher-dev/lancher/internal/cli/shared"
 )
 
 // RunHelp displays help for template command

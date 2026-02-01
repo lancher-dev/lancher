@@ -6,9 +6,9 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/Kasui92/lancher/internal/cli/shared"
-	"github.com/Kasui92/lancher/internal/fileutil"
-	"github.com/Kasui92/lancher/internal/storage"
+	"github.com/lancher-dev/lancher/internal/cli/shared"
+	"github.com/lancher-dev/lancher/internal/fileutil"
+	"github.com/lancher-dev/lancher/internal/storage"
 )
 
 // RunUpdateHelp displays help for template update command

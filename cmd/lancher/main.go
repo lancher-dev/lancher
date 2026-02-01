@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Kasui92/lancher/internal/cli"
+	"github.com/lancher-dev/lancher/internal/cli"
 )
 
 func main() {

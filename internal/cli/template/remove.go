@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Kasui92/lancher/internal/cli/shared"
-	"github.com/Kasui92/lancher/internal/fileutil"
-	"github.com/Kasui92/lancher/internal/storage"
+	"github.com/lancher-dev/lancher/internal/cli/shared"
+	"github.com/lancher-dev/lancher/internal/fileutil"
+	"github.com/lancher-dev/lancher/internal/storage"
 )
 
 // RunRemoveHelp displays help for template remove command

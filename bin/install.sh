@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-REPO="Kasui92/lancher"
+REPO="lancher-dev/lancher"
 BINARY_NAME="lancher"
 INSTALL_DIR="$HOME/.local/bin"
 

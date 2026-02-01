@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/Kasui92/lancher/internal/storage"
+	"github.com/lancher-dev/lancher/internal/storage"
 )
 
 func TestGetTemplatesDir(t *testing.T) {

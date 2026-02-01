@@ -11,13 +11,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Kasui92/lancher/internal/cli/shared"
-	"github.com/Kasui92/lancher/internal/version"
+	"github.com/lancher-dev/lancher/internal/cli/shared"
+	"github.com/lancher-dev/lancher/internal/version"
 )
 
 const (
-	githubAPIURL    = "https://api.github.com/repos/Kasui92/lancher/releases/latest"
-	installScriptURL = "https://raw.githubusercontent.com/Kasui92/lancher/main/bin/install.sh"
+	githubAPIURL    = "https://api.github.com/repos/lancher-dev/lancher/releases/latest"
+	installScriptURL = "https://raw.githubusercontent.com/lancher-dev/lancher/main/bin/install.sh"
 )
 
 type GitHubRelease struct {

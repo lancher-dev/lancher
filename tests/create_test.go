@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Kasui92/lancher/internal/config"
-	"github.com/Kasui92/lancher/internal/fileutil"
+	"github.com/lancher-dev/lancher/internal/config"
+	"github.com/lancher-dev/lancher/internal/fileutil"
 )
 
 // copyTemplate replicates the logic from create.go for testing

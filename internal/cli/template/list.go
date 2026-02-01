@@ -3,9 +3,9 @@ package template
 import (
 	"fmt"
 
-	"github.com/Kasui92/lancher/internal/cli/shared"
-	"github.com/Kasui92/lancher/internal/config"
-	"github.com/Kasui92/lancher/internal/storage"
+	"github.com/lancher-dev/lancher/internal/cli/shared"
+	"github.com/lancher-dev/lancher/internal/config"
+	"github.com/lancher-dev/lancher/internal/storage"
 )
 
 // RunListHelp displays help for template list command

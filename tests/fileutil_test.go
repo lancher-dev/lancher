@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/Kasui92/lancher/internal/fileutil"
+	"github.com/lancher-dev/lancher/internal/fileutil"
 )
 
 func TestCopyFile(t *testing.T) {

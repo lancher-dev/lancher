@@ -3,7 +3,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/Kasui92/lancher/internal/cli/shared"
+	"github.com/lancher-dev/lancher/internal/cli/shared"
 )
 
 // TestSanitizeTemplateName ensures template names are validated correctly

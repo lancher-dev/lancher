@@ -22,8 +22,8 @@ jobs:
       - name: Download release binaries
         run: |
           VERSION=${{ steps.version.outputs.version }}
-          wget https://github.com/Kasui92/lancher/releases/download/v${VERSION}/lancher-linux-amd64
-          wget https://github.com/Kasui92/lancher/releases/download/v${VERSION}/lancher-linux-arm64
+          wget https://github.com/lancher-dev/lancher/releases/download/v${VERSION}/lancher-linux-amd64
+          wget https://github.com/lancher-dev/lancher/releases/download/v${VERSION}/lancher-linux-arm64
 
       - name: Calculate checksums
         id: checksums
@@ -46,7 +46,7 @@ jobs:
           pkgrel=1
           pkgdesc="A minimal, local project-template manager written in Go"
           arch=('x86_64' 'aarch64')
-          url="https://github.com/Kasui92/lancher"
+          url="https://github.com/lancher-dev/lancher"
           license=('MIT')
           depends=('glibc')
           source_x86_64=("\$pkgname-\$pkgver-x86_64::\$url/releases/download/v\$pkgver/\$pkgname-linux-amd64")

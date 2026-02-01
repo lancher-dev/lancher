@@ -3,10 +3,10 @@ package cli
 import (
 	"fmt"
 
-	"github.com/Kasui92/lancher/internal/cli/commands"
-	"github.com/Kasui92/lancher/internal/cli/shared"
-	"github.com/Kasui92/lancher/internal/cli/template"
-	"github.com/Kasui92/lancher/internal/version"
+	"github.com/lancher-dev/lancher/internal/cli/commands"
+	"github.com/lancher-dev/lancher/internal/cli/shared"
+	"github.com/lancher-dev/lancher/internal/cli/template"
+	"github.com/lancher-dev/lancher/internal/version"
 )
 
 // Run executes the CLI command based on arguments

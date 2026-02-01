@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/Kasui92/lancher/internal/config"
+	"github.com/lancher-dev/lancher/internal/config"
 )
 
 func TestLoadConfig(t *testing.T) {

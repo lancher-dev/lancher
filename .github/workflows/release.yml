@@ -28,7 +28,7 @@ jobs:
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
           COMMIT=$(git rev-parse HEAD)
-          LDFLAGS="-s -w -X github.com/Kasui92/lancher/internal/version.Version=${VERSION} -X github.com/Kasui92/lancher/internal/version.Commit=${COMMIT}"
+          LDFLAGS="-s -w -X github.com/lancher-dev/lancher/internal/version.Version=${VERSION} -X github.com/lancher-dev/lancher/internal/version.Commit=${COMMIT}"
 
           # Build for all platforms
           GOOS=linux GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o lancher-linux-amd64 ./cmd/lancher
