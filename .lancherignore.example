@@ -1,0 +1,72 @@
+# .lancherignore example file
+#
+# This file specifies patterns of files and directories that should be
+# excluded when adding a template with 'lancher template add'.
+#
+# Usage: Place a file named '.lancherignore' in the root of your project
+# before running 'lancher template add'
+#
+# Syntax:
+# - One pattern per line
+# - Lines starting with # are comments
+# - Supports wildcards (e.g., *.log, *.tmp)
+# - Exact directory or file names (e.g., node_modules, .env)
+#
+# NOTE: By default, NO files or directories are ignored.
+# You must explicitly list what you want to exclude.
+
+# Common patterns you might want to ignore:
+
+# Dependencies
+node_modules
+vendor
+
+# Version control
+.git
+.svn
+.hg
+
+# Build outputs
+dist
+build
+target
+.next
+.nuxt
+
+# Python
+__pycache__
+*.pyc
+.venv
+venv
+env
+.pytest_cache
+.tox
+
+# Cache directories
+.cache
+.parcel-cache
+.turbo
+
+# IDE and editor files
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+secrets.json
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
