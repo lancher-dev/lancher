@@ -2,12 +2,55 @@ package fileutil
 
 import (
 	"archive/zip"
+	"bufio"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
 )
+
+// shouldIgnore checks if a file or directory should be ignored based on patterns
+func shouldIgnore(name string, patterns []string) bool {
+	for _, pattern := range patterns {
+		// Exact match
+		if name == pattern {
+			return true
+		}
+
+		// Wildcard pattern (simple glob)
+		if strings.Contains(pattern, "*") {
+			matched, _ := filepath.Match(pattern, name)
+			if matched {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// loadIgnoreFile loads ignore patterns from a .lancherignore file if it exists
+func loadIgnoreFile(srcDir string) []string {
+	ignoreFile := filepath.Join(srcDir, ".lancherignore")
+	file, err := os.Open(ignoreFile)
+	if err != nil {
+		// File doesn't exist or can't be read, return empty slice
+		return []string{}
+	}
+	defer file.Close()
+
+	var patterns []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		// Skip empty lines and comments
+		if line != "" && !strings.HasPrefix(line, "#") {
+			patterns = append(patterns, line)
+		}
+	}
+
+	return patterns
+}
 
 // CopyDir recursively copies a directory from src to dst
 func CopyDir(src, dst string) error {
@@ -19,6 +62,20 @@ func CopyDir(src, dst string) error {
 
 	if !srcInfo.IsDir() {
 		return fmt.Errorf("source is not a directory: %s", src)
+	}
+
+	// Load ignore patterns from .lancherignore file if it exists
+	ignorePatterns := loadIgnoreFile(src)
+
+	return copyDirWithIgnore(src, dst, src, ignorePatterns)
+}
+
+// copyDirWithIgnore is the internal function that handles recursive copying with ignore patterns
+func copyDirWithIgnore(src, dst, rootSrc string, ignorePatterns []string) error {
+	// Get source directory info
+	srcInfo, err := os.Stat(src)
+	if err != nil {
+		return fmt.Errorf("failed to stat source: %w", err)
 	}
 
 	// Create destination directory
@@ -34,12 +91,19 @@ func CopyDir(src, dst string) error {
 
 	// Copy each entry
 	for _, entry := range entries {
-		srcPath := filepath.Join(src, entry.Name())
-		dstPath := filepath.Join(dst, entry.Name())
+		name := entry.Name()
+
+		// Skip if should be ignored
+		if shouldIgnore(name, ignorePatterns) {
+			continue
+		}
+
+		srcPath := filepath.Join(src, name)
+		dstPath := filepath.Join(dst, name)
 
 		if entry.IsDir() {
 			// Recursively copy subdirectory
-			if err := CopyDir(srcPath, dstPath); err != nil {
+			if err := copyDirWithIgnore(srcPath, dstPath, rootSrc, ignorePatterns); err != nil {
 				return err
 			}
 		} else {
