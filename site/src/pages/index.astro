@@ -1,0 +1,65 @@
+---
+import Layout from "@lancher-dev/jaad/layouts/Page.astro";
+import { Image } from "astro:assets";
+import Hero from "../components/Hero.astro";
+
+import DemoGif from "../assets/demo.gif";
+
+const install = "curl -fsSL https://lancher.dev/install.sh | sh";
+---
+
+<Layout>
+  <Hero />
+
+  <section class="mx-auto mb-12 max-w-200" aria-labelledby="intro-heading">
+    <h2 class="sr-only" id="intro-heading">
+      Introduction
+    </h2>
+
+    <Image
+      src={DemoGif}
+      alt="A demo of lancher in action, showing how it can be used to quickly launch a development server for a project."
+      class="mx-auto h-auto max-w-full rounded-lg object-cover shadow-lg"
+    />
+
+    <p class="text-foreground-muted mt-6 text-[1.1rem] leading-[1.8]">
+      To install <strong>lancher</strong>, run the following command in your
+      terminal:
+    </p>
+
+    <div
+      class="border-border bg-background-secondary relative mx-0 my-6 flex items-center gap-4 rounded-sm border p-4"
+      role="group"
+      aria-label="Installation command for lancher"
+    >
+      <code
+        class="scrollbar-hide text-primary/90 flex flex-1 items-center overflow-x-auto bg-none text-[0.9rem] whitespace-nowrap lg:overflow-visible"
+        aria-label="Installation command"
+        style="scrollbar-width: none; -ms-overflow-style: none;"
+      >
+        {install}
+      </code>
+      <button
+        class="border-border-light bg-border-dark text-foreground-muted hover:bg-border hover:text-foreground-bright flex shrink-0 cursor-pointer items-center justify-center rounded border px-4 py-2 text-[0.75rem] transition-colors"
+        onclick={`navigator.clipboard.writeText('${install}')`}
+        title="Copy to clipboard"
+        aria-label="Copy installation command to clipboard"
+      >
+        <i class="nf nf-md-content_copy"></i>
+      </button>
+    </div>
+
+    <p class="text-foreground-secondary mt-2 mb-16 text-[0.85rem] italic">
+      Currently available for <i>macOS</i> and <i>Linux</i>. You can also
+      download pre-compiled binaries from the{" "}
+      <a
+        href="https://github.com/lancher-dev/lancher/releases/latest"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        latest release
+      </a>
+      .
+    </p>
+  </section>
+</Layout>
