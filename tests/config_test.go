@@ -50,6 +50,11 @@ description: Minimal template`,
 			wantIgnore: 0,
 			wantErr:    false,
 		},
+		{
+			name:        "invalid yaml",
+			yamlContent: "name: [unclosed\nhooks:\n  - npm install",
+			wantErr:     true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -236,4 +241,29 @@ func containsMiddle(s, substr string) bool {
 		}
 	}
 	return false
+}
+
+func TestLoadConfigWithDetailsInvalidYAML(t *testing.T) {
+	tmpDir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(tmpDir, ".lancher.yaml"), []byte("name: [unclosed"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(tmpDir, "lancher.yml"), []byte("name: fallback"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	result := config.LoadConfigWithDetails(tmpDir)
+
+	if result.Err == nil {
+		t.Fatal("expected an error for invalid YAML")
+	}
+	if result.Config != nil {
+		t.Errorf("expected no config, got %+v (lower-priority files must not be used as fallback)", result.Config)
+	}
+	if result.UsedFile != ".lancher.yaml" {
+		t.Errorf("UsedFile = %q, want .lancher.yaml", result.UsedFile)
+	}
+	if len(result.FoundFiles) != 2 {
+		t.Errorf("FoundFiles = %v, want 2 entries", result.FoundFiles)
+	}
 }

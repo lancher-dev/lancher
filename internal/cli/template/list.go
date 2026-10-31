@@ -64,6 +64,10 @@ func RunList(args []string) error {
 			}
 		}
 
+		if loadResult.Err != nil {
+			fmt.Printf("    %s⚠ Warning: %v%s\n", shared.ColorYellow, loadResult.Err, shared.ColorReset)
+		}
+
 		// Show warning if multiple config files found
 		if len(loadResult.FoundFiles) > 1 {
 			fmt.Printf("    %s⚠ Warning: Multiple config files found (%v). Using %s%s\n",

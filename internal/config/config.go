@@ -29,49 +29,49 @@ type Config struct {
 // LoadResult contains the loaded config and metadata about the loading process
 type LoadResult struct {
 	Config     *Config
-	FoundFiles []string // List of all config files found
-	UsedFile   string   // The config file that was actually used
+	FoundFiles []string // All config files found
+	UsedFile   string   // The config file that was loaded
+	Err        error    // Read or parse error of UsedFile
 }
 
-// LoadConfig loads configuration from the template directory
-// Searches for config files in order of priority and returns the first one found
+// LoadConfig loads the highest-priority config file from the template directory.
+// It returns nil and no error when no config file exists.
 func LoadConfig(templatePath string) (*Config, error) {
 	result := LoadConfigWithDetails(templatePath)
-	return result.Config, nil
+	return result.Config, result.Err
 }
 
-// LoadConfigWithDetails loads configuration and returns detailed information
+// LoadConfigWithDetails loads the highest-priority config file and lists all
+// config files found. A file that cannot be read or parsed sets Err.
 func LoadConfigWithDetails(templatePath string) *LoadResult {
 	result := &LoadResult{
 		FoundFiles: []string{},
 	}
 
-	// Check all possible config file names
 	for _, fileName := range ConfigFileNames {
 		configPath := filepath.Join(templatePath, fileName)
-
-		// Check if config file exists
-		if _, err := os.Stat(configPath); err == nil {
-			result.FoundFiles = append(result.FoundFiles, fileName)
-
-			// Load the first config found (highest priority)
-			if result.Config == nil {
-				data, err := os.ReadFile(configPath)
-				if err != nil {
-					// Could return error here, but for now just skip this file
-					continue
-				}
-
-				var cfg Config
-				if err := yaml.Unmarshal(data, &cfg); err != nil {
-					// Could return error here, but for now just skip this file
-					continue
-				}
-
-				result.Config = &cfg
-				result.UsedFile = fileName
-			}
+		if _, err := os.Stat(configPath); err != nil {
+			continue
 		}
+		result.FoundFiles = append(result.FoundFiles, fileName)
+
+		if result.UsedFile != "" {
+			continue
+		}
+		result.UsedFile = fileName
+
+		data, err := os.ReadFile(configPath)
+		if err != nil {
+			result.Err = fmt.Errorf("failed to read %s: %w", fileName, err)
+			continue
+		}
+
+		var cfg Config
+		if err := yaml.Unmarshal(data, &cfg); err != nil {
+			result.Err = fmt.Errorf("invalid YAML in %s: %w", fileName, err)
+			continue
+		}
+		result.Config = &cfg
 	}
 
 	return result
