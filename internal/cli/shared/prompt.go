@@ -167,8 +167,8 @@ func PromptStringWithDefault(prompt, defaultValue string) (string, error) {
 				if len(inputBuffer) == 0 {
 					// Input is now empty - show placeholder again
 					// Move back one position, then clear to end of line and show placeholder
-					fmt.Print("\033[D")  // Move cursor back
-					fmt.Print("\033[K")  // Clear to end of line
+					fmt.Print("\033[D") // Move cursor back
+					fmt.Print("\033[K") // Clear to end of line
 					fmt.Printf("%s%s%s", ColorGray, defaultValue, ColorReset)
 					// Move cursor back to start of placeholder
 					for i := 0; i < len(defaultValue); i++ {

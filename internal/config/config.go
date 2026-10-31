@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v3"
 )
 
 // ConfigFileNames lists all supported configuration file names in order of priority
@@ -28,9 +28,9 @@ type Config struct {
 
 // LoadResult contains the loaded config and metadata about the loading process
 type LoadResult struct {
-	Config      *Config
-	FoundFiles  []string // List of all config files found
-	UsedFile    string   // The config file that was actually used
+	Config     *Config
+	FoundFiles []string // List of all config files found
+	UsedFile   string   // The config file that was actually used
 }
 
 // LoadConfig loads configuration from the template directory

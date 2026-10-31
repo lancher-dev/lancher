@@ -15,11 +15,11 @@ const IgnoreFileName = ".lancherignore"
 
 // ignorePattern represents a normalized ignore pattern with pre-computed properties
 type ignorePattern struct {
-	raw        string // Original pattern
-	normalized string // Normalized pattern (no leading/trailing slashes)
-	isRoot     bool   // Pattern starts with /
-	isRecursive bool  // Pattern contains **
-	hasWildcard bool  // Pattern contains * or ?
+	raw         string // Original pattern
+	normalized  string // Normalized pattern (no leading/trailing slashes)
+	isRoot      bool   // Pattern starts with /
+	isRecursive bool   // Pattern contains **
+	hasWildcard bool   // Pattern contains * or ?
 }
 
 // parsePattern parses and normalizes a pattern string

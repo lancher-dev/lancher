@@ -4,7 +4,7 @@ Thank you for your interest in contributing to lancher! We welcome contributions
 
 ## Prerequisites
 
-- Go 1.22 or higher
+- Go, at the version set in `go.mod`
 - git
 
 ## Development Setup

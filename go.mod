@@ -1,12 +1,12 @@
 module github.com/lancher-dev/lancher
 
-go 1.24.0
+go 1.27.0
 
-toolchain go1.24.10
+toolchain go1.27.3
 
 require (
-	golang.org/x/term v0.37.0
-	gopkg.in/yaml.v3 v3.0.1
+	go.yaml.in/yaml/v3 v3.0.5
+	golang.org/x/term v0.47.0
 )
 
-require golang.org/x/sys v0.38.0 // indirect
+require golang.org/x/sys v0.49.0 // indirect
