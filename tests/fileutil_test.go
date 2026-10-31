@@ -246,3 +246,48 @@ func TestCopyDirRespectsLancherIgnore(t *testing.T) {
 		t.Error("src/handler.go should be copied")
 	}
 }
+
+func TestApplyIgnorePatternsKeepsRootGit(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, ".lancherignore"), ".git\n*.log\n")
+	writeFile(t, filepath.Join(dir, ".git", "HEAD"), "ref: refs/heads/main")
+	writeFile(t, filepath.Join(dir, "app.log"), "log")
+	writeFile(t, filepath.Join(dir, "main.go"), "package main")
+
+	if err := fileutil.ApplyIgnorePatterns(dir); err != nil {
+		t.Fatalf("ApplyIgnorePatterns failed: %v", err)
+	}
+
+	assertExists(t, filepath.Join(dir, ".git", "HEAD"))
+	assertMissing(t, filepath.Join(dir, "app.log"))
+	assertExists(t, filepath.Join(dir, "main.go"))
+}
+
+func TestApplyIgnorePatternsRootPattern(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, ".lancherignore"), "/build\n")
+	writeFile(t, filepath.Join(dir, "build", "out.js"), "out")
+	writeFile(t, filepath.Join(dir, "src", "build", "keep.js"), "keep")
+
+	if err := fileutil.ApplyIgnorePatterns(dir); err != nil {
+		t.Fatalf("ApplyIgnorePatterns failed: %v", err)
+	}
+
+	assertMissing(t, filepath.Join(dir, "build"))
+	assertExists(t, filepath.Join(dir, "src", "build", "keep.js"))
+}
+
+func TestCopyDirRootPattern(t *testing.T) {
+	src := t.TempDir()
+	dst := filepath.Join(t.TempDir(), "dest")
+	writeFile(t, filepath.Join(src, ".lancherignore"), "/build\n")
+	writeFile(t, filepath.Join(src, "build", "out.js"), "out")
+	writeFile(t, filepath.Join(src, "src", "build", "keep.js"), "keep")
+
+	if err := fileutil.CopyDir(src, dst); err != nil {
+		t.Fatalf("CopyDir failed: %v", err)
+	}
+
+	assertMissing(t, filepath.Join(dst, "build"))
+	assertExists(t, filepath.Join(dst, "src", "build", "keep.js"))
+}

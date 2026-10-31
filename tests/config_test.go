@@ -115,48 +115,6 @@ func TestLoadConfigNotFound(t *testing.T) {
 	}
 }
 
-func TestShouldIgnore(t *testing.T) {
-	cfg := &config.Config{
-		Ignore: []string{
-			"node_modules",
-			"*.log",
-			".git",
-			"*.tmp",
-		},
-	}
-
-	tests := []struct {
-		name     string
-		path     string
-		wantSkip bool
-	}{
-		{"node_modules directory", "node_modules", true},
-		{"file in node_modules", "node_modules/package.json", false}, // glob only matches basename
-		{"log file", "app.log", true},
-		{"nested log file", "logs/app.log", true},
-		{"tmp file", "test.tmp", true},
-		{"git directory", ".git", true},
-		{"normal file", "README.md", false},
-		{"normal directory", "src", false},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := cfg.ShouldIgnore(tt.path)
-			if got != tt.wantSkip {
-				t.Errorf("ShouldIgnore(%q) = %v, want %v", tt.path, got, tt.wantSkip)
-			}
-		})
-	}
-}
-
-func TestShouldIgnoreNilConfig(t *testing.T) {
-	var cfg *config.Config
-	if cfg.ShouldIgnore("anything") {
-		t.Error("nil config should not ignore any files")
-	}
-}
-
 func TestHasHooks(t *testing.T) {
 	tests := []struct {
 		name string

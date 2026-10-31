@@ -38,41 +38,6 @@ func parsePattern(raw string) ignorePattern {
 	}
 }
 
-// shouldIgnore checks if a file or directory name should be ignored based on patterns.
-// Used internally by CopyDir where matching is done on entry names only.
-func shouldIgnore(name string, patterns []string) bool {
-	for _, raw := range patterns {
-		if raw == "" {
-			continue
-		}
-
-		p := parsePattern(raw)
-		pattern := p.normalized
-
-		if pattern == "" {
-			continue
-		}
-
-		// Handle recursive patterns - simplified for name matching
-		if p.isRecursive {
-			pattern = strings.ReplaceAll(pattern, "**", "*")
-		}
-
-		// Exact match
-		if name == pattern {
-			return true
-		}
-
-		// Wildcard pattern (glob)
-		if strings.ContainsAny(pattern, "*?") {
-			if matched, _ := filepath.Match(pattern, name); matched {
-				return true
-			}
-		}
-	}
-	return false
-}
-
 // ShouldIgnorePath checks if a relative path should be ignored based on patterns.
 // It matches against both the full relative path and the basename, supporting
 // exact match and glob patterns. Used during project creation (copyTemplate).
@@ -246,79 +211,41 @@ func LoadIgnoreFile(srcDir string) []string {
 }
 
 // ApplyIgnorePatterns reads the .lancherignore file from dir and removes matching files/directories.
-// Used after git clone or ZIP extraction to apply ignore rules retroactively.
+// Used after git clone or ZIP extraction. The root .git directory is always kept,
+// so cloned templates can still be updated.
 func ApplyIgnorePatterns(dir string) error {
 	patterns := LoadIgnoreFile(dir)
 	if len(patterns) == 0 {
 		return nil
 	}
 
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return fmt.Errorf("failed to read directory: %w", err)
-	}
-
-	for _, entry := range entries {
-		name := entry.Name()
-		if shouldIgnore(name, patterns) {
-			path := filepath.Join(dir, name)
-			if err := os.RemoveAll(path); err != nil {
-				return fmt.Errorf("failed to remove ignored path %s: %w", path, err)
-			}
+	return filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
 		}
-	}
 
-	// Recurse into remaining subdirectories
-	entries, err = os.ReadDir(dir)
-	if err != nil {
-		return fmt.Errorf("failed to re-read directory: %w", err)
-	}
-
-	for _, entry := range entries {
-		if entry.IsDir() {
-			subDir := filepath.Join(dir, entry.Name())
-			if err := applyIgnorePatternsRecursive(subDir, patterns); err != nil {
-				return err
-			}
+		relPath, err := filepath.Rel(dir, path)
+		if err != nil {
+			return err
 		}
-	}
-
-	return nil
-}
-
-// applyIgnorePatternsRecursive removes entries matching patterns within subdirectories
-func applyIgnorePatternsRecursive(dir string, patterns []string) error {
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return fmt.Errorf("failed to read directory: %w", err)
-	}
-
-	for _, entry := range entries {
-		name := entry.Name()
-		if shouldIgnore(name, patterns) {
-			path := filepath.Join(dir, name)
-			if err := os.RemoveAll(path); err != nil {
-				return fmt.Errorf("failed to remove ignored path %s: %w", path, err)
-			}
+		if relPath == "." {
+			return nil
 		}
-	}
-
-	// Re-read and recurse into remaining subdirectories
-	entries, err = os.ReadDir(dir)
-	if err != nil {
-		return fmt.Errorf("failed to re-read directory: %w", err)
-	}
-
-	for _, entry := range entries {
-		if entry.IsDir() {
-			subDir := filepath.Join(dir, entry.Name())
-			if err := applyIgnorePatternsRecursive(subDir, patterns); err != nil {
-				return err
-			}
+		if relPath == ".git" {
+			return filepath.SkipDir
 		}
-	}
+		if !ShouldIgnorePath(relPath, patterns) {
+			return nil
+		}
 
-	return nil
+		if err := os.RemoveAll(path); err != nil {
+			return fmt.Errorf("failed to remove ignored path %s: %w", path, err)
+		}
+		if d.IsDir() {
+			return filepath.SkipDir
+		}
+		return nil
+	})
 }
 
 // CopyDir recursively copies a directory from src to dst
@@ -362,12 +289,16 @@ func copyDirWithIgnore(src, dst, rootSrc string, ignorePatterns []string) error 
 	for _, entry := range entries {
 		name := entry.Name()
 
-		// Skip if should be ignored
-		if shouldIgnore(name, ignorePatterns) {
+		srcPath := filepath.Join(src, name)
+
+		relPath, err := filepath.Rel(rootSrc, srcPath)
+		if err != nil {
+			return err
+		}
+		if ShouldIgnorePath(relPath, ignorePatterns) {
 			continue
 		}
 
-		srcPath := filepath.Join(src, name)
 		dstPath := filepath.Join(dst, name)
 
 		if entry.IsDir() {

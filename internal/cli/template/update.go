@@ -118,14 +118,29 @@ func RunUpdate(args []string) error {
 		fmt.Printf("%sPulling latest changes...%s\n", shared.ColorYellow, shared.ColorReset)
 	}
 
-	cmd := exec.Command("git", "-C", templatePath, "pull")
-	cmd.Stdout = writer.MultiWriter()
-	cmd.Stderr = writer.MultiWriter()
-	if err := cmd.Run(); err != nil {
-		if spinner != nil {
-			spinner.Fail(fmt.Sprintf("Git pull failed: %v", err))
+	// The stored template mirrors the remote: files removed by .lancherignore
+	// are restored by the reset and removed again afterwards.
+	steps := [][]string{
+		{"fetch", "--depth", "1"},
+		{"reset", "--hard", "@{upstream}"},
+	}
+	for _, step := range steps {
+		cmd := exec.Command("git", append([]string{"-C", templatePath}, step...)...)
+		cmd.Stdout = writer.MultiWriter()
+		cmd.Stderr = writer.MultiWriter()
+		if err := cmd.Run(); err != nil {
+			if spinner != nil {
+				spinner.Fail(fmt.Sprintf("git %s failed: %v", step[0], err))
+			}
+			return shared.FormatError(fmt.Sprintf("git %s failed: %v", step[0], err))
 		}
-		return shared.FormatError(fmt.Sprintf("git pull failed: %v", err))
+	}
+
+	if err := fileutil.ApplyIgnorePatterns(templatePath); err != nil {
+		if spinner != nil {
+			spinner.Fail(fmt.Sprintf("Failed to apply ignore patterns: %v", err))
+		}
+		return shared.FormatError(fmt.Sprintf("failed to apply ignore patterns: %v", err))
 	}
 
 	if spinner != nil {

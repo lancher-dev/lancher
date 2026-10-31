@@ -77,24 +77,6 @@ func LoadConfigWithDetails(templatePath string) *LoadResult {
 	return result
 }
 
-// ShouldIgnore checks if a file should be ignored during template creation
-func (c *Config) ShouldIgnore(relativePath string) bool {
-	if c == nil {
-		return false
-	}
-
-	for _, pattern := range c.Ignore {
-		if matched, _ := filepath.Match(pattern, relativePath); matched {
-			return true
-		}
-		// Also check if pattern matches any part of the path
-		if matched, _ := filepath.Match(pattern, filepath.Base(relativePath)); matched {
-			return true
-		}
-	}
-	return false
-}
-
 // HasHooks returns true if config has hooks defined
 func (c *Config) HasHooks() bool {
 	return c != nil && len(c.Hooks) > 0

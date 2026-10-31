@@ -16,13 +16,8 @@ import (
 // ignore field of cfg is used instead.
 func Copy(src, dst string, cfg *config.Config) error {
 	patterns := fileutil.LoadIgnoreFile(src)
-	useLancherIgnore := len(patterns) > 0
-
-	ignored := func(relPath string) bool {
-		if useLancherIgnore {
-			return fileutil.ShouldIgnorePath(relPath, patterns)
-		}
-		return cfg != nil && cfg.ShouldIgnore(relPath)
+	if len(patterns) == 0 && cfg != nil {
+		patterns = cfg.Ignore
 	}
 
 	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
@@ -35,7 +30,7 @@ func Copy(src, dst string, cfg *config.Config) error {
 			return err
 		}
 
-		if relPath != "." && (isGitPath(relPath) || ignored(relPath)) {
+		if relPath != "." && (isGitPath(relPath) || fileutil.ShouldIgnorePath(relPath, patterns)) {
 			if info.IsDir() {
 				return filepath.SkipDir
 			}
