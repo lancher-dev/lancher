@@ -9,7 +9,7 @@ import (
 
 	"github.com/lancher-dev/lancher/internal/cli/shared"
 	"github.com/lancher-dev/lancher/internal/config"
-	"github.com/lancher-dev/lancher/internal/fileutil"
+	"github.com/lancher-dev/lancher/internal/project"
 	"github.com/lancher-dev/lancher/internal/storage"
 )
 
@@ -246,7 +246,7 @@ func Run(args []string) error {
 		fmt.Printf("%sCreating project...%s\n", shared.ColorYellow, shared.ColorReset)
 	}
 
-	if err := copyTemplate(templatePath, destAbs, cfg); err != nil {
+	if err := project.Copy(templatePath, destAbs, cfg); err != nil {
 		if spinner != nil {
 			spinner.Fail(fmt.Sprintf("Failed to create project: %v", err))
 		}
@@ -324,22 +324,13 @@ func Run(args []string) error {
 	}
 
 	// Handle lancher config and .lancherignore files in destination
-	var copiedMetaFiles []string
-	for _, cfgFile := range config.ConfigFileNames {
-		if _, err := os.Stat(filepath.Join(destAbs, cfgFile)); err == nil {
-			copiedMetaFiles = append(copiedMetaFiles, cfgFile)
-			break // only one config file can be present
-		}
-	}
-	if _, err := os.Stat(filepath.Join(destAbs, fileutil.IgnoreFileName)); err == nil {
-		copiedMetaFiles = append(copiedMetaFiles, fileutil.IgnoreFileName)
-	}
+	copiedMetaFiles := project.MetaFiles(destAbs)
 
 	if len(copiedMetaFiles) > 0 {
 		fmt.Println()
 		if noKeepConfig {
-			for _, f := range copiedMetaFiles {
-				_ = os.Remove(filepath.Join(destAbs, f))
+			if err := project.RemoveMetaFiles(destAbs, copiedMetaFiles); err != nil {
+				return shared.FormatError(err.Error())
 			}
 			fmt.Printf("%s✓ Removed lancher config files from project%s\n", shared.ColorGreen, shared.ColorReset)
 		} else if !keepConfig {
@@ -352,8 +343,8 @@ func Run(args []string) error {
 				return shared.FormatError("failed to read confirmation")
 			}
 			if !confirmed {
-				for _, f := range copiedMetaFiles {
-					_ = os.Remove(filepath.Join(destAbs, f))
+				if err := project.RemoveMetaFiles(destAbs, copiedMetaFiles); err != nil {
+					return shared.FormatError(err.Error())
 				}
 				fmt.Printf("%s✓ Removed lancher config files from project%s\n", shared.ColorGreen, shared.ColorReset)
 			} else {
@@ -363,57 +354,6 @@ func Run(args []string) error {
 	}
 
 	return nil
-}
-
-// copyTemplate copies template directory respecting ignore patterns
-func copyTemplate(srcPath, dstPath string, cfg *config.Config) error {
-	// Load .lancherignore patterns (takes priority over config ignore)
-	ignorePatterns := fileutil.LoadIgnoreFile(srcPath)
-	useLancherIgnore := len(ignorePatterns) > 0
-
-	return filepath.Walk(srcPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		// Calculate relative path
-		relPath, err := filepath.Rel(srcPath, path)
-		if err != nil {
-			return err
-		}
-
-		// Skip .git directory (always excluded from templates)
-		if relPath == ".git" || strings.HasPrefix(relPath, ".git"+string(filepath.Separator)) {
-			if info.IsDir() {
-				return filepath.SkipDir
-			}
-			return nil
-		}
-
-		// Check ignore patterns: .lancherignore takes priority, fallback to config ignore
-		if useLancherIgnore {
-			if fileutil.ShouldIgnorePath(relPath, ignorePatterns) {
-				if info.IsDir() {
-					return filepath.SkipDir
-				}
-				return nil
-			}
-		} else if cfg != nil && cfg.ShouldIgnore(relPath) {
-			if info.IsDir() {
-				return filepath.SkipDir
-			}
-			return nil
-		}
-
-		// Construct destination path
-		targetPath := filepath.Join(dstPath, relPath)
-
-		if info.IsDir() {
-			return os.MkdirAll(targetPath, info.Mode())
-		}
-
-		return fileutil.CopyFile(path, targetPath)
-	})
 }
 
 // hasLancherCommands checks if any hook contains lancher commands to prevent infinite loops
