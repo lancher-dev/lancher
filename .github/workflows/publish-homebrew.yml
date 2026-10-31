@@ -9,7 +9,8 @@ jobs:
   publish:
     name: Publish to Homebrew
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # Tags with a suffix (v1.2.3-rc.1) are pre-releases and stay on GitHub only.
+    if: ${{ github.event.workflow_run.conclusion == 'success' && !contains(github.event.workflow_run.head_branch, '-') }}
 
     steps:
       - name: Get version
@@ -41,7 +42,7 @@ jobs:
           echo "sha256_linux_arm64=$(sha256sum lancher-linux-arm64  | awk '{print $1}')" >> $GITHUB_OUTPUT
 
       - name: Checkout Homebrew tap
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: lancher-dev/homebrew-lancher
           token: ${{ secrets.HOMEBREW_REPO_TOKEN }}
