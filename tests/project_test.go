@@ -134,3 +134,37 @@ func TestMetaFiles(t *testing.T) {
 	assertMissing(t, filepath.Join(dir, fileutil.IgnoreFileName))
 	assertExists(t, filepath.Join(dir, ".lancher.yml"))
 }
+
+func TestCheckReplaceable(t *testing.T) {
+	base := t.TempDir()
+	cwd := filepath.Join(base, "work", "current")
+	sibling := filepath.Join(base, "other")
+	for _, d := range []string{cwd, sibling} {
+		if err := os.MkdirAll(d, 0755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	t.Chdir(cwd)
+	t.Setenv("HOME", sibling)
+
+	tests := []struct {
+		name    string
+		dest    string
+		wantErr bool
+	}{
+		{"current directory", cwd, true},
+		{"parent of current directory", filepath.Join(base, "work"), true},
+		{"home directory", sibling, true},
+		{"filesystem root", string(filepath.Separator), true},
+		{"unrelated directory", filepath.Join(sibling, "project"), false},
+		{"subdirectory of current directory", filepath.Join(cwd, "app"), false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := project.CheckReplaceable(tt.dest)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("CheckReplaceable(%q) error = %v, wantErr %v", tt.dest, err, tt.wantErr)
+			}
+		})
+	}
+}

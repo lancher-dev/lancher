@@ -187,6 +187,10 @@ func Run(args []string) error {
 		}
 
 		if len(entries) > 0 {
+			if err := project.CheckReplaceable(destAbs); err != nil {
+				return shared.FormatError(fmt.Sprintf("destination is not empty: %v", err))
+			}
+
 			// Directory is not empty - ask for confirmation
 			fmt.Printf("%s⚠ Warning:%s Destination directory is not empty (%d items)\n", shared.ColorYellow, shared.ColorReset, len(entries))
 			fmt.Printf("  %sLocation:%s %s\n", shared.ColorYellow, shared.ColorReset, destAbs)

@@ -75,3 +75,37 @@ func RemoveMetaFiles(dir string, files []string) error {
 	}
 	return nil
 }
+
+// CheckReplaceable returns an error if dest must never be deleted to make
+// room for a new project: the filesystem root, the home directory, the
+// current directory or any of its parents.
+func CheckReplaceable(dest string) error {
+	dest = resolvePath(dest)
+
+	if dest == filepath.VolumeName(dest)+string(filepath.Separator) {
+		return fmt.Errorf("refusing to replace the filesystem root")
+	}
+	if home, err := os.UserHomeDir(); err == nil && dest == resolvePath(home) {
+		return fmt.Errorf("refusing to replace the home directory: %s", dest)
+	}
+	if cwd, err := os.Getwd(); err == nil {
+		rel, err := filepath.Rel(dest, resolvePath(cwd))
+		outside := rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator))
+		if err == nil && !outside {
+			return fmt.Errorf("refusing to replace the current directory or one of its parents: %s", dest)
+		}
+	}
+	return nil
+}
+
+// resolvePath returns the absolute path with symlinks resolved, or the cleaned
+// absolute path if it cannot be resolved.
+func resolvePath(path string) string {
+	if abs, err := filepath.Abs(path); err == nil {
+		path = abs
+	}
+	if resolved, err := filepath.EvalSymlinks(path); err == nil {
+		return resolved
+	}
+	return filepath.Clean(path)
+}
