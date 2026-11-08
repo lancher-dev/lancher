@@ -56,6 +56,16 @@ make install      # Install to ~/.local/bin
 make uninstall    # Remove
 ```
 
+### Website and docs
+
+The website and documentation live in `site/`. See [site/README.md](site/README.md).
+
+```bash
+cd site
+pnpm install
+pnpm dev
+```
+
 ## Submitting Changes
 
 1. Test your changes: `make test && make build`

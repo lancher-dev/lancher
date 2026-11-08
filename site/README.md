@@ -1,11 +1,25 @@
 # lancher.dev
 
-This is the [`lancher`](https://github.com/lancher-dev/lancher) website.
+Website and documentation of [`lancher`](https://github.com/lancher-dev/lancher), built with [Astro](https://astro.build) and [jaad](https://github.com/lancher-dev/jaad).
 
-## Contributions
+- `docs/`: documentation pages, served under `/docs`.
+- `public/`: static files. `install.sh` and `uninstall.sh` are copied from `../bin` at build time.
+- `scripts/build-apt.sh`: builds the signed APT repository from the GitHub release assets.
+- `wrangler.jsonc`: Cloudflare Workers configuration.
 
-This is a personal project, but suggestions and feedback are always welcome!
+## Development
 
-## License
+```sh
+pnpm install
+pnpm dev
+```
 
-lancher.dev is released under the [MIT License](https://github.com/lancher-dev/lancher.dev/blob/main/LICENSE).
+`pnpm lint`, `pnpm format` and `pnpm build` run in CI on every change under `site/`.
+
+## Deployment
+
+The `Site` workflow deploys to Cloudflare Workers:
+
+- every published release: production deploy built from the release tag, APT repository included;
+- manual run: production deploy of a given tag or branch (default: latest release);
+- push to `main` and pull requests: preview version (aliases `main` and `pr-<number>`), without touching production.

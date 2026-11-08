@@ -19,7 +19,7 @@ export default defineJaadConfig({
   social: { github: "https://github.com/lancher-dev/lancher" },
 
   ogImage: "/og-image.png",
-  editLink: true,
+  editLink: "https://github.com/lancher-dev/lancher/edit/main/site/docs/",
   footer: `© ${new Date().getFullYear()} <a href="https://lucapattocchio.dev" target="_blank" rel="noopener">Luca Pattocchio</a> (Kasui)`,
 
   head: [

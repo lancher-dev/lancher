@@ -22,3 +22,9 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+# copied from ../bin at build time
+public/install.sh
+public/uninstall.sh
+
+# wrangler
+.wrangler/
