@@ -67,7 +67,7 @@ jobs:
           EOF
 
       - name: Publish to AUR
-        uses: KSXGitHub/github-actions-deploy-aur@v2.7.0
+        uses: KSXGitHub/github-actions-deploy-aur@v4.2.0
         with:
           pkgname: lancher
           pkgbuild: ./PKGBUILD
