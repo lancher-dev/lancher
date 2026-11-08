@@ -40,10 +40,33 @@ jobs:
           GOOS=darwin GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o lancher-darwin-amd64 ./cmd/lancher
           GOOS=darwin GOARCH=arm64 go build -ldflags="${LDFLAGS}" -o lancher-darwin-arm64 ./cmd/lancher
 
+      - name: Build .deb packages
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+
+          for ARCH in amd64 arm64; do
+            mkdir -p deb-${ARCH}/DEBIAN deb-${ARCH}/usr/bin
+            install -m 755 lancher-linux-${ARCH} deb-${ARCH}/usr/bin/lancher
+
+            INSTALLED_SIZE=$(du -sk deb-${ARCH}/usr | awk '{print $1}')
+
+            cat > deb-${ARCH}/DEBIAN/control << EOF
+          Package: lancher
+          Version: ${VERSION}
+          Architecture: ${ARCH}
+          Maintainer: Kasui92 <info@lucapattocchio.dev>
+          Installed-Size: ${INSTALLED_SIZE}
+          Homepage: https://lancher.dev
+          Description: A minimal, local project-template manager written in Go.
+          EOF
+
+            dpkg-deb --build --root-owner-group deb-${ARCH} "lancher_${VERSION}_${ARCH}.deb"
+          done
+
       - name: Generate checksums
         id: checksums
         run: |
-          CHECKSUMS=$(sha256sum lancher-linux-amd64 lancher-linux-arm64 lancher-darwin-amd64 lancher-darwin-arm64)
+          CHECKSUMS=$(sha256sum lancher-linux-amd64 lancher-linux-arm64 lancher-darwin-amd64 lancher-darwin-arm64 lancher_*.deb)
           echo "checksums<<EOF" >> $GITHUB_OUTPUT
           echo "$CHECKSUMS" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
@@ -62,6 +85,7 @@ jobs:
             lancher-linux-arm64
             lancher-darwin-amd64
             lancher-darwin-arm64
+            lancher_*.deb
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}
           generate_release_notes: true
