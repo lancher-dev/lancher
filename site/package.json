@@ -15,7 +15,7 @@
     "sync:scripts": "cp ../bin/install.sh ../bin/uninstall.sh public/"
   },
   "dependencies": {
-    "@astrojs/check": "^0.9.10",
+    "@astrojs/check": "^0.9.12",
     "@lancher-dev/jaad": "^0.10.0",
     "astro": "7.3.6",
     "sharp": "^0.35.5"
