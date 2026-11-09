@@ -1,0 +1,120 @@
+name: Site
+
+# Production is deployed from release tags, so the docs always match the
+# released version. Pushes to main and pull requests get a preview URL.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - "bin/install.sh"
+      - "bin/uninstall.sh"
+      - ".github/workflows/site.yml"
+  pull_request:
+    paths:
+      - "site/**"
+      - "bin/install.sh"
+      - "bin/uninstall.sh"
+      - ".github/workflows/site.yml"
+  workflow_run:
+    workflows: ["Release"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Tag or branch to deploy to production (default: latest release)"
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  site:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+    # Pre-release tags (v1.2.3-rc.1) are not deployed.
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+      !contains(github.event.workflow_run.head_branch, '-'))
+    env:
+      PRODUCTION: ${{ github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch' }}
+      # Secrets are not available to pull requests from forks.
+      CAN_PUBLISH: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    defaults:
+      run:
+        working-directory: site
+
+    steps:
+      - name: Resolve ref
+        id: ref
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_REF: ${{ inputs.ref }}
+          RELEASE_TAG: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          case "${{ github.event_name }}" in
+            workflow_run) REF="$RELEASE_TAG" ;;
+            workflow_dispatch)
+              REF="${INPUT_REF:-$(gh release view --repo "${{ github.repository }}" --json tagName --jq .tagName)}" ;;
+            *) REF="" ;;
+          esac
+          echo "ref=$REF" >> "$GITHUB_OUTPUT"
+          echo "Building ref: ${REF:-${{ github.ref }}}"
+
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ steps.ref.outputs.ref }}
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 12
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: site/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Check formatting
+        run: pnpm format
+
+      - name: Build
+        run: pnpm build
+
+      - name: Build APT repository
+        if: env.CAN_PUBLISH == 'true'
+        env:
+          APT_GPG_PRIVATE_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY }}
+          GH_TOKEN: ${{ github.token }}
+          APT_REPO: ${{ github.repository }}
+        run: sh scripts/build-apt.sh dist
+
+      - name: Deploy to production
+        if: env.PRODUCTION == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: pnpm exec wrangler deploy
+
+      - name: Upload preview
+        if: env.PRODUCTION != 'true' && env.CAN_PUBLISH == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ALIAS: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || 'main' }}
+        run: pnpm exec wrangler versions upload --preview-alias "$ALIAS"

@@ -1,0 +1,36 @@
+{
+  "name": "lancher.dev",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "pnpm sync:scripts && astro dev",
+    "build": "pnpm sync:scripts && astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check": "astro check",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "sync:scripts": "cp ../bin/install.sh ../bin/uninstall.sh public/"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@lancher-dev/jaad": "^0.10.0",
+    "astro": "7.3.6",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@typescript-eslint/parser": "^8.71.1",
+    "eslint": "^10",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-astro": "^3.2.1",
+    "prettier": "3.9.9",
+    "prettier-plugin-astro": "1.1.0",
+    "prettier-plugin-tailwindcss": "0.8.1",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.0",
+    "wrangler": "4.156.0"
+  }
+}

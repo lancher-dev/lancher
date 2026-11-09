@@ -12,7 +12,7 @@ jobs:
     # Tags with a suffix (v1.2.3-rc.1) are pre-releases and stay on GitHub only.
     if: ${{ github.event.workflow_run.conclusion == 'success' && !contains(github.event.workflow_run.head_branch, '-') }}
     permissions:
-      contents: write
+      contents: read
 
     steps:
 
@@ -28,53 +28,12 @@ jobs:
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Deploying version: ${VERSION}"
 
-      - name: Download release binaries
-        run: |
-          VERSION=${{ steps.version.outputs.version }}
-          wget -q "https://github.com/lancher-dev/lancher/releases/download/v${VERSION}/lancher-linux-amd64"
-          wget -q "https://github.com/lancher-dev/lancher/releases/download/v${VERSION}/lancher-linux-arm64"
-
-      - name: Create .deb packages
-        run: |
-          VERSION=${{ steps.version.outputs.version }}
-
-          for ARCH in amd64 arm64; do
-            [ "$ARCH" = "amd64" ] && SRC="lancher-linux-amd64" \
-                                  || SRC="lancher-linux-arm64"
-
-            mkdir -p deb-${ARCH}/DEBIAN
-            mkdir -p deb-${ARCH}/usr/bin
-
-            cp "${SRC}" deb-${ARCH}/usr/bin/lancher
-            chmod 755   deb-${ARCH}/usr/bin/lancher
-
-            INSTALLED_SIZE=$(du -sk deb-${ARCH}/usr | awk '{print $1}')
-
-            cat > deb-${ARCH}/DEBIAN/control << EOF
-          Package: lancher
-          Version: ${VERSION}
-          Architecture: ${ARCH}
-          Maintainer: Kasui92 <info@lucapattocchio.dev>
-          Installed-Size: ${INSTALLED_SIZE}
-          Homepage: https://lancher.dev
-          Description: A minimal, local project-template manager written in Go.
-          EOF
-
-            dpkg-deb --build --root-owner-group \
-              deb-${ARCH} "lancher_${VERSION}_${ARCH}.deb"
-
-            echo "Built: lancher_${VERSION}_${ARCH}.deb"
-          done
-
-      - name: Upload .deb to GitHub Release
-        uses: softprops/action-gh-release@v3
-        with:
-          tag_name: v${{ steps.version.outputs.version }}
-          files: |
-            lancher_${{ steps.version.outputs.version }}_amd64.deb
-            lancher_${{ steps.version.outputs.version }}_arm64.deb
+      - name: Download .deb packages
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download "v${{ steps.version.outputs.version }}" \
+            --repo "${{ github.repository }}" --pattern '*.deb'
 
       - name: Checkout APT repo
         uses: actions/checkout@v7
