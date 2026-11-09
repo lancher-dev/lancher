@@ -43,8 +43,8 @@ jobs:
       !contains(github.event.workflow_run.head_branch, '-'))
     env:
       PRODUCTION: ${{ github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch' }}
-      # Secrets are not available to pull requests from forks.
-      CAN_PUBLISH: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+      # Pull requests from forks and Dependabot get no Actions secrets.
+      CAN_PUBLISH: ${{ github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') }}
     defaults:
       run:
         working-directory: site
