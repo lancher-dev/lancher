@@ -39,6 +39,10 @@ func (s *Spinner) Start() {
 	s.active = true
 	s.mu.Unlock()
 
+	if !IsTTY {
+		return
+	}
+
 	s.wg.Add(1)
 	go func() {
 		defer s.wg.Done()
@@ -67,6 +71,10 @@ func (s *Spinner) Stop() {
 	}
 	s.active = false
 	s.mu.Unlock()
+
+	if !IsTTY {
+		return
+	}
 
 	s.stop <- true
 	s.wg.Wait()
