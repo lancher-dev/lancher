@@ -1,6 +1,6 @@
 # lancher.dev
 
-Website and documentation of [`lancher`](https://github.com/lancher-dev/lancher), built with [Astro](https://astro.build) and [jaad](https://github.com/lancher-dev/jaad).
+Website and documentation of [`lancher`](https://github.com/lancher-dev/lancher), built with [Astro](https://astro.build) and [jaad](https://github.com/jaamd/jaamd).
 
 - `docs/`: documentation pages, served under `/docs`.
 - `public/`: static files. `install.sh` and `uninstall.sh` are copied from `../bin` at build time.
