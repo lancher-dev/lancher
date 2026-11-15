@@ -74,7 +74,7 @@ func selectWithArrows(prompt string, options []SelectOption) (string, error) {
 				fmt.Print("\r\033[K\n")
 			}
 			fmt.Printf("\033[%dA", len(options)+1)
-			return "", fmt.Errorf("cancelled")
+			return "", ErrCancelled
 		}
 	}
 }
@@ -233,7 +233,7 @@ func MultiSelect(prompt string, choices []string) ([]string, error) {
 				fmt.Print("\r\033[K\n")
 			}
 			fmt.Printf("\033[%dA", len(choices)+2)
-			return nil, fmt.Errorf("cancelled")
+			return nil, ErrCancelled
 		}
 	}
 }

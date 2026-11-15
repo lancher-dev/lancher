@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/lancher-dev/lancher/internal/cli/template"
 	"github.com/lancher-dev/lancher/internal/storage"
 )
 
@@ -32,9 +31,9 @@ func git(t *testing.T, dir string, args ...string) {
 	}
 }
 
-// TestTemplateAddAndUpdateWithIgnoredGit covers a git template whose
+// TestAddAndReplaceWithIgnoredGit covers a git template whose
 // .lancherignore lists .git, as the example file suggests.
-func TestTemplateAddAndUpdateWithIgnoredGit(t *testing.T) {
+func TestAddAndReplaceWithIgnoredGit(t *testing.T) {
 	gitEnv(t)
 	isolateDataDir(t)
 
@@ -47,8 +46,8 @@ func TestTemplateAddAndUpdateWithIgnoredGit(t *testing.T) {
 	git(t, repo, "add", ".")
 	git(t, repo, "commit", "-q", "-m", "v1")
 
-	if err := template.RunAdd([]string{"-p", "tpl", repo}); err != nil {
-		t.Fatalf("RunAdd failed: %v", err)
+	if _, err := runCLI(t, "add", repo, "--verbose"); err != nil {
+		t.Fatalf("add failed: %v", err)
 	}
 
 	stored, err := storage.GetTemplatePath("tpl")
@@ -62,8 +61,8 @@ func TestTemplateAddAndUpdateWithIgnoredGit(t *testing.T) {
 	writeFile(t, filepath.Join(repo, "debug.log"), "log v2")
 	git(t, repo, "commit", "-q", "-am", "v2")
 
-	if err := template.RunUpdate([]string{"tpl", "-p"}); err != nil {
-		t.Fatalf("RunUpdate failed: %v", err)
+	if _, err := runCLI(t, "add", repo, "--force"); err != nil {
+		t.Fatalf("add --force failed: %v", err)
 	}
 
 	data, err := os.ReadFile(filepath.Join(stored, "main.go"))
@@ -71,7 +70,7 @@ func TestTemplateAddAndUpdateWithIgnoredGit(t *testing.T) {
 		t.Fatal(err)
 	}
 	if string(data) != "v2" {
-		t.Errorf("main.go = %q after update, want %q", data, "v2")
+		t.Errorf("main.go = %q after add --force, want %q", data, "v2")
 	}
 	assertMissing(t, filepath.Join(stored, "debug.log"))
 	assertExists(t, filepath.Join(stored, ".git"))

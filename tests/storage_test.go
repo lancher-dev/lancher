@@ -90,3 +90,52 @@ func TestListTemplates(t *testing.T) {
 		t.Error("ListTemplates() should return empty slice, not nil")
 	}
 }
+
+func TestReplaceKeepsTemplateOnFailure(t *testing.T) {
+	isolateDataDir(t)
+	write := func(content string) func(string) error {
+		return func(dest string) error {
+			writeFile(t, filepath.Join(dest, "v"), content)
+			return nil
+		}
+	}
+
+	if err := storage.Replace("tpl", write("1")); err != nil {
+		t.Fatal(err)
+	}
+	if err := storage.Replace("tpl", func(string) error { return os.ErrNotExist }); err == nil {
+		t.Fatal("Replace with a failing fetch succeeded")
+	}
+	stored, _ := storage.GetTemplatePath("tpl")
+	if data, _ := os.ReadFile(filepath.Join(stored, "v")); string(data) != "1" {
+		t.Errorf("v = %q after a failed Replace, want %q", data, "1")
+	}
+
+	if err := storage.Replace("tpl", write("2")); err != nil {
+		t.Fatal(err)
+	}
+	if data, _ := os.ReadFile(filepath.Join(stored, "v")); string(data) != "2" {
+		t.Errorf("v = %q after Replace, want %q", data, "2")
+	}
+
+	dir, _ := storage.GetTemplatesDir()
+	entries, _ := os.ReadDir(dir)
+	if len(entries) != 1 {
+		t.Errorf("templates dir has %d entries, want only tpl", len(entries))
+	}
+}
+
+func TestListTemplatesSkipsHidden(t *testing.T) {
+	isolateDataDir(t)
+	dir, _ := storage.GetTemplatesDir()
+	writeFile(t, filepath.Join(dir, ".tpl-123", "f"), "x")
+	writeFile(t, filepath.Join(dir, "tpl", "f"), "x")
+
+	templates, err := storage.ListTemplates()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(templates) != 1 || templates[0] != "tpl" {
+		t.Errorf("ListTemplates() = %v, want [tpl]", templates)
+	}
+}

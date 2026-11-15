@@ -1,9 +1,11 @@
 package storage
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 // GetTemplatesDir returns the platform-specific templates directory
@@ -82,10 +84,50 @@ func ListTemplates() ([]string, error) {
 
 	templates := []string{}
 	for _, entry := range entries {
-		if entry.IsDir() {
+		if entry.IsDir() && !strings.HasPrefix(entry.Name(), ".") {
 			templates = append(templates, entry.Name())
 		}
 	}
 
 	return templates, nil
+}
+
+// Replace installs the template name with the contents fetch writes to dest.
+// fetch receives a path that does not exist yet; an existing template is
+// replaced only if fetch succeeds.
+func Replace(name string, fetch func(dest string) error) error {
+	templatesDir, err := GetTemplatesDir()
+	if err != nil {
+		return err
+	}
+	final := filepath.Join(templatesDir, name)
+
+	staging, err := os.MkdirTemp(templatesDir, "."+name+"-")
+	if err != nil {
+		return err
+	}
+	keep := false
+	defer func() {
+		if !keep {
+			os.RemoveAll(staging)
+		}
+	}()
+
+	tmp := filepath.Join(staging, "new")
+	if err := fetch(tmp); err != nil {
+		return err
+	}
+
+	backup := filepath.Join(staging, "old")
+	if err := os.Rename(final, backup); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("failed to move the current template aside: %w", err)
+	}
+	if err := os.Rename(tmp, final); err != nil {
+		if restoreErr := os.Rename(backup, final); restoreErr != nil && !os.IsNotExist(restoreErr) {
+			keep = true
+			return fmt.Errorf("failed to install template: %w (previous version left in %s)", err, backup)
+		}
+		return fmt.Errorf("failed to install template: %w", err)
+	}
+	return nil
 }

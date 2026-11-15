@@ -188,7 +188,7 @@ func PromptStringWithDefault(prompt, defaultValue string) (string, error) {
 			// Clear current line content and move cursor to beginning
 			fmt.Print("\r\033[K")
 			term.Restore(fd, state)
-			return "", fmt.Errorf("cancelled by user")
+			return "", ErrCancelled
 		}
 
 		// Ignore other control characters
@@ -269,7 +269,7 @@ func PromptConfirm(prompt string) (bool, error) {
 		if b == 3 {
 			fmt.Print("\r\n")
 			term.Restore(fd, state)
-			return false, fmt.Errorf("cancelled by user")
+			return false, ErrCancelled
 		}
 
 		// Convert to lowercase
@@ -363,7 +363,7 @@ func PromptConfirmWithDefault(prompt string, defaultValue bool) (bool, error) {
 			fmt.Print("\033[K") // Clear placeholder
 			fmt.Print("\r\n")
 			term.Restore(fd, state)
-			return false, fmt.Errorf("cancelled by user")
+			return false, ErrCancelled
 		}
 
 		// Convert to lowercase
