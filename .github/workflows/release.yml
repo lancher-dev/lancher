@@ -43,6 +43,8 @@ jobs:
       - name: Build .deb packages
         run: |
           VERSION=${GITHUB_REF_NAME#v}
+          # Debian sorts "~" before the empty string: 0.3.1~rc.1 < 0.3.1.
+          DEB_VERSION=$(printf '%s' "$VERSION" | tr '-' '~')
 
           for ARCH in amd64 arm64; do
             mkdir -p deb-${ARCH}/DEBIAN deb-${ARCH}/usr/bin
@@ -52,7 +54,7 @@ jobs:
 
             cat > deb-${ARCH}/DEBIAN/control << EOF
           Package: lancher
-          Version: ${VERSION}
+          Version: ${DEB_VERSION}
           Architecture: ${ARCH}
           Maintainer: Kasui92 <info@lucapattocchio.dev>
           Installed-Size: ${INSTALLED_SIZE}
