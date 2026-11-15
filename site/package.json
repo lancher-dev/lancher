@@ -15,22 +15,22 @@
     "sync:scripts": "cp ../bin/install.sh ../bin/uninstall.sh public/"
   },
   "dependencies": {
-    "@astrojs/check": "^0.9.10",
-    "@lancher-dev/jaad": "^0.10.0",
-    "astro": "7.3.6",
+    "@astrojs/check": "^0.9.12",
+    "@lancher-dev/jaad": "^0.10.2",
+    "astro": "7.4.11",
     "sharp": "^0.35.5"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.3.3",
-    "@typescript-eslint/parser": "^8.71.1",
+    "@tailwindcss/vite": "^4.3.5",
+    "@typescript-eslint/parser": "^8.72.2",
     "eslint": "^10",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-astro": "^3.2.1",
-    "prettier": "3.9.9",
-    "prettier-plugin-astro": "1.1.0",
+    "prettier": "3.10.1",
+    "prettier-plugin-astro": "1.1.2",
     "prettier-plugin-tailwindcss": "0.8.1",
-    "tailwindcss": "^4.3.3",
+    "tailwindcss": "^4.3.5",
     "typescript": "^6.0.0",
-    "wrangler": "4.156.0"
+    "wrangler": "4.160.1"
   }
 }
