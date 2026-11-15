@@ -2,46 +2,12 @@ package template
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
-	"path/filepath"
 	"strings"
 
 	"github.com/lancher-dev/lancher/internal/cli/shared"
-	"github.com/lancher-dev/lancher/internal/fileutil"
+	"github.com/lancher-dev/lancher/internal/source"
 	"github.com/lancher-dev/lancher/internal/storage"
 )
-
-// isGitURL checks if source is a git URL
-func isGitURL(source string) bool {
-	return strings.HasPrefix(source, "http://") ||
-		strings.HasPrefix(source, "https://") ||
-		strings.HasPrefix(source, "git@") ||
-		strings.HasSuffix(source, ".git")
-}
-
-// isGitHubAlias checks if source uses gh: alias
-func isGitHubAlias(source string) bool {
-	return strings.HasPrefix(source, "gh:")
-}
-
-// isGitLabAlias checks if source uses gl: alias
-func isGitLabAlias(source string) bool {
-	return strings.HasPrefix(source, "gl:")
-}
-
-// ensureGitSuffix adds .git suffix if not present
-func ensureGitSuffix(url string) string {
-	if !strings.HasSuffix(url, ".git") {
-		return url + ".git"
-	}
-	return url
-}
-
-// isZipFile checks if source is a ZIP file
-func isZipFile(source string) bool {
-	return strings.HasSuffix(strings.ToLower(source), ".zip")
-}
 
 // RunAddHelp displays help for template add command
 func RunAddHelp() error {
@@ -68,7 +34,7 @@ func RunAddHelp() error {
 
 // runAdd adds a new template from path or git repository
 func RunAdd(args []string) error {
-	var name, source string
+	var name, sourceArg string
 	var verbose bool
 
 	// Parse flags first
@@ -106,28 +72,17 @@ func RunAdd(args []string) error {
 			}
 			return shared.FormatError("failed to read input")
 		}
-		source = sourceInput
+		sourceArg = sourceInput
 
-		if source == "" {
+		if sourceArg == "" {
 			return shared.FormatError("Source cannot be empty")
 		}
 
-		// Validate source before printing confirmation
-		if !isGitURL(source) && !isGitHubAlias(source) && !isGitLabAlias(source) {
-			// For local paths and ZIP files, verify they exist
-			sourceAbs, err := filepath.Abs(source)
-			if err != nil {
-				return shared.FormatError(fmt.Sprintf("Invalid source path '%s'", source))
-			}
-			if _, err := os.Stat(sourceAbs); os.IsNotExist(err) {
-				if isZipFile(source) {
-					return shared.FormatError(fmt.Sprintf("ZIP file not found: '%s'", source))
-				}
-				return shared.FormatError(fmt.Sprintf("Directory not found: '%s'", source))
-			}
+		if _, err := source.Parse(sourceInput); err != nil {
+			return shared.FormatError(err.Error())
 		}
 
-		fmt.Printf("%s✓ Source:%s %s\n", shared.ColorGreen, shared.ColorReset, source)
+		fmt.Printf("%s✓ Source:%s %s\n", shared.ColorGreen, shared.ColorReset, sourceArg)
 	} else {
 		// Command-line arguments mode
 		if len(args) < 2 {
@@ -141,7 +96,7 @@ func RunAdd(args []string) error {
 			return shared.FormatMissingArgsError(missing, usage)
 		}
 		name = args[0]
-		source = args[1]
+		sourceArg = args[1]
 	}
 
 	// Validate template name
@@ -164,185 +119,48 @@ func RunAdd(args []string) error {
 		return shared.FormatError(fmt.Sprintf("Failed to get template path: %v", err))
 	}
 
-	// Handle GitHub alias (gh:)
-	if isGitHubAlias(source) {
-		repoPath := strings.TrimPrefix(source, "gh:")
-		return cloneWithAlias(name, repoPath, destPath, "gh", "https://github.com/", verbose)
+	src, err := source.Parse(sourceArg)
+	if err != nil {
+		return shared.FormatError(err.Error())
 	}
 
-	// Handle GitLab alias (gl:)
-	if isGitLabAlias(source) {
-		repoPath := strings.TrimPrefix(source, "gl:")
-		return cloneWithAlias(name, repoPath, destPath, "glab", "https://gitlab.com/", verbose)
+	var spinner *shared.Spinner
+	writer := shared.NewSpinnerWriter(verbose)
+	if msg := fetchMessage(src.Kind); msg != "" {
+		if verbose {
+			fmt.Printf("%s%s%s\n", shared.ColorYellow, msg, shared.ColorReset)
+		} else {
+			spinner = shared.NewSpinner(msg)
+			spinner.Start()
+			defer spinner.Stop()
+		}
 	}
 
-	// Handle git URL, ZIP file, or local path
-	if isGitURL(source) {
-		var spinner *shared.Spinner
-		writer := shared.NewSpinnerWriter(verbose)
-
-		if !verbose {
-			spinner = shared.NewSpinner("Cloning repository...")
-			spinner.Start()
-			defer spinner.Stop()
-		} else {
-			fmt.Printf("%sCloning repository...%s\n", shared.ColorYellow, shared.ColorReset)
-		}
-
-		cmd := exec.Command("git", "clone", "--depth", "1", source, destPath)
-		cmd.Stdout = writer.MultiWriter()
-		cmd.Stderr = writer.MultiWriter()
-		if err := cmd.Run(); err != nil {
-			if spinner != nil {
-				spinner.Fail(fmt.Sprintf("Failed to clone repository: %v", err))
-			}
-			return shared.FormatError(fmt.Sprintf("Failed to clone repository: %v", err))
-		}
-
-		// Apply .lancherignore patterns after cloning
-		if err := fileutil.ApplyIgnorePatterns(destPath); err != nil {
-			if spinner != nil {
-				spinner.Fail(fmt.Sprintf("Failed to apply ignore patterns: %v", err))
-			}
-			return shared.FormatError(fmt.Sprintf("Failed to apply ignore patterns: %v", err))
-		}
-
+	if err := src.Fetch(destPath, writer.MultiWriter()); err != nil {
 		if spinner != nil {
-			spinner.Success(fmt.Sprintf("Template '%s' added from git repository", name))
-		} else {
-			fmt.Printf("%s✓ Template '%s' added from git repository%s\n", shared.ColorGreen, name, shared.ColorReset)
+			spinner.Fail(err.Error())
 		}
-		fmt.Printf("  %sSource:%s %s\n", shared.ColorYellow, shared.ColorReset, source)
-	} else if isZipFile(source) {
-		// ZIP file
-		sourceAbs, err := filepath.Abs(source)
-		if err != nil {
-			return shared.FormatError(fmt.Sprintf("Invalid source path: %v", err))
-		}
+		return shared.FormatError(err.Error())
+	}
 
-		if _, err := os.Stat(sourceAbs); os.IsNotExist(err) {
-			return shared.FormatError(fmt.Sprintf("ZIP file not found: '%s'", sourceAbs))
-		}
-
-		var spinner *shared.Spinner
-		if !verbose {
-			spinner = shared.NewSpinner("Extracting ZIP file...")
-			spinner.Start()
-			defer spinner.Stop()
-		} else {
-			fmt.Printf("%sExtracting ZIP file...%s\n", shared.ColorYellow, shared.ColorReset)
-		}
-
-		if err := fileutil.UnzipToDir(sourceAbs, destPath); err != nil {
-			if spinner != nil {
-				spinner.Fail(fmt.Sprintf("Failed to extract ZIP: %v", err))
-			}
-			return shared.FormatError(fmt.Sprintf("Failed to extract ZIP: %v", err))
-		}
-
-		// Apply .lancherignore patterns after extraction
-		if err := fileutil.ApplyIgnorePatterns(destPath); err != nil {
-			if spinner != nil {
-				spinner.Fail(fmt.Sprintf("Failed to apply ignore patterns: %v", err))
-			}
-			return shared.FormatError(fmt.Sprintf("Failed to apply ignore patterns: %v", err))
-		}
-
-		if spinner != nil {
-			spinner.Success(fmt.Sprintf("Template '%s' added from ZIP file", name))
-		} else {
-			fmt.Printf("%s✓ Template '%s' added from ZIP file%s\n", shared.ColorGreen, name, shared.ColorReset)
-		}
-		fmt.Printf("  %sSource:%s %s\n", shared.ColorYellow, shared.ColorReset, sourceAbs)
+	done := fmt.Sprintf("Template '%s' added", name)
+	if spinner != nil {
+		spinner.Success(done)
 	} else {
-		// Local path
-		sourceAbs, err := filepath.Abs(source)
-		if err != nil {
-			return shared.FormatError(fmt.Sprintf("Invalid source path: %v", err))
-		}
-
-		if _, err := os.Stat(sourceAbs); os.IsNotExist(err) {
-			return shared.FormatError(fmt.Sprintf("Directory not found: '%s'", sourceAbs))
-		}
-
-		// Copy directory
-		if err := fileutil.CopyDir(sourceAbs, destPath); err != nil {
-			return shared.FormatError(fmt.Sprintf("Failed to copy template: %v", err))
-		}
-
-		fmt.Printf("%s✓ Template '%s' added successfully%s\n", shared.ColorGreen, name, shared.ColorReset)
-		fmt.Printf("  %sSource:%s %s\n", shared.ColorYellow, shared.ColorReset, sourceAbs)
+		fmt.Printf("%s✓ %s%s\n", shared.ColorGreen, done, shared.ColorReset)
 	}
-
+	fmt.Printf("  %sSource:%s %s\n", shared.ColorYellow, shared.ColorReset, src.Display())
 	fmt.Printf("  %sStored:%s %s\n", shared.ColorYellow, shared.ColorReset, destPath)
 
 	return nil
 }
 
-// cloneWithAlias handles cloning with gh: or gl: alias
-// cliCmd is "gh" for GitHub or "glab" for GitLab
-// baseURL is the base HTTPS URL for the platform
-func cloneWithAlias(name, repoPath, destPath, cliCmd, baseURL string, verbose bool) error {
-	var spinner *shared.Spinner
-	writer := shared.NewSpinnerWriter(verbose)
-
-	var cmd *exec.Cmd
-	var sourceDisplay string
-
-	if shared.CommandExists(cliCmd) {
-		// Use CLI tool (gh repo clone or glab repo clone)
-		if !verbose {
-			spinner = shared.NewSpinner(fmt.Sprintf("Cloning with CLI..."))
-			spinner.Start()
-			defer spinner.Stop()
-		} else {
-			fmt.Printf("%sCloning with CLI...%s\n", shared.ColorYellow, shared.ColorReset)
-		}
-
-		cmd = exec.Command(cliCmd, "repo", "clone", repoPath, destPath, "--", "--depth", "1")
-		sourceDisplay = fmt.Sprintf("%s:%s", cliCmd, repoPath)
-	} else {
-		// Fallback to git clone with HTTPS URL
-		gitURL := baseURL + repoPath
-		gitURL = ensureGitSuffix(gitURL)
-
-		if !verbose {
-			spinner = shared.NewSpinner("Cloning repository...")
-			spinner.Start()
-			defer spinner.Stop()
-		} else {
-			fmt.Printf("%sCloning repository...%s\n", shared.ColorYellow, shared.ColorReset)
-		}
-
-		cmd = exec.Command("git", "clone", "--depth", "1", gitURL, destPath)
-		sourceDisplay = gitURL
+func fetchMessage(kind source.Kind) string {
+	switch kind {
+	case source.Git:
+		return "Cloning repository..."
+	case source.Zip:
+		return "Extracting ZIP file..."
 	}
-
-	cmd.Stdout = writer.MultiWriter()
-	cmd.Stderr = writer.MultiWriter()
-
-	if err := cmd.Run(); err != nil {
-		if spinner != nil {
-			spinner.Fail(fmt.Sprintf("Failed to clone repository: %v", err))
-		}
-		return shared.FormatError(fmt.Sprintf("Failed to clone repository: %v", err))
-	}
-
-	// Apply .lancherignore patterns after cloning
-	if err := fileutil.ApplyIgnorePatterns(destPath); err != nil {
-		if spinner != nil {
-			spinner.Fail(fmt.Sprintf("Failed to apply ignore patterns: %v", err))
-		}
-		return shared.FormatError(fmt.Sprintf("Failed to apply ignore patterns: %v", err))
-	}
-
-	if spinner != nil {
-		spinner.Success(fmt.Sprintf("Template '%s' added from repository", name))
-	} else {
-		fmt.Printf("%s✓ Template '%s' added from repository%s\n", shared.ColorGreen, name, shared.ColorReset)
-	}
-	fmt.Printf("  %sSource:%s %s\n", shared.ColorYellow, shared.ColorReset, sourceDisplay)
-	fmt.Printf("  %sStored:%s %s\n", shared.ColorYellow, shared.ColorReset, destPath)
-
-	return nil
+	return ""
 }
