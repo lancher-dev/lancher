@@ -1,1 +1,1 @@
-export { collections } from "@lancher-dev/jaad/content";
+export { collections } from "@jaamd/jaad/content";

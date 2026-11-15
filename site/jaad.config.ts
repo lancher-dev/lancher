@@ -1,4 +1,4 @@
-import { defineJaadConfig } from "@lancher-dev/jaad";
+import { defineJaadConfig } from "@jaamd/jaad";
 
 export default defineJaadConfig({
   site: "https://lancher.dev",

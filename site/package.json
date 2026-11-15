@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.12",
-    "@lancher-dev/jaad": "^0.10.2",
+    "@jaamd/jaad": "^1.0.2",
     "astro": "7.4.11",
     "sharp": "^0.35.5"
   },

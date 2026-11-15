@@ -1,1 +1,1 @@
-export { default } from "@lancher-dev/jaad/site";
+export { default } from "@jaamd/jaad/site";
