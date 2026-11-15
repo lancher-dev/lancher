@@ -26,6 +26,9 @@ html.dark {
 }
 
 :root {
+  --jaad-chrome-width: 80rem;
+  --jaad-sidebar-width: 14rem;
+
   --font-mono: "Fira Code", ui-monospace, monospace;
 }
 
