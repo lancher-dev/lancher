@@ -96,6 +96,12 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Install APT tools
+        if: env.CAN_PUBLISH == 'true'
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends apt-utils dpkg-dev gnupg
+
       - name: Build APT repository
         if: env.CAN_PUBLISH == 'true'
         env:
