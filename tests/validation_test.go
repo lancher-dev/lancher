@@ -3,7 +3,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/lancher-dev/lancher/internal/cli/shared"
+	"github.com/lancher-dev/lancher/internal/ui"
 )
 
 // TestSanitizeTemplateName ensures template names are validated correctly
@@ -25,7 +25,7 @@ func TestSanitizeTemplateName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := shared.SanitizeTemplateName(tt.input)
+			err := ui.SanitizeTemplateName(tt.input)
 			if tt.shouldErr && err == nil {
 				t.Errorf("Expected error for input %q, got nil", tt.input)
 			}

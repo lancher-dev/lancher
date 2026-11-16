@@ -7,9 +7,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/lancher-dev/lancher/internal/cli/shared"
 	"github.com/lancher-dev/lancher/internal/config"
 	"github.com/lancher-dev/lancher/internal/storage"
+	"github.com/lancher-dev/lancher/internal/ui"
 )
 
 type templateInfo struct {
@@ -57,25 +57,25 @@ func printJSON(out io.Writer, templates []string) error {
 
 func printList(out io.Writer, templates []string) {
 	if len(templates) == 0 {
-		fmt.Fprintf(out, "%sNo templates found.%s\n", shared.ColorYellow, shared.ColorReset)
-		fmt.Fprintf(out, "Add a template with: %slancher add <source>%s\n", shared.ColorCyan, shared.ColorReset)
+		fmt.Fprintf(out, "%sNo templates found.%s\n", ui.ColorYellow, ui.ColorReset)
+		fmt.Fprintf(out, "Add a template with: %slancher add <source>%s\n", ui.ColorCyan, ui.ColorReset)
 		return
 	}
 
-	fmt.Fprintf(out, "%sAvailable Templates:%s\n\n", shared.ColorBold, shared.ColorReset)
+	fmt.Fprintf(out, "%sAvailable Templates:%s\n\n", ui.ColorBold, ui.ColorReset)
 	for i, name := range templates {
 		path, _ := storage.GetTemplatePath(name)
 		result := config.LoadConfigWithDetails(path)
 
-		fmt.Fprintf(out, "  %s•%s %s%s%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorBold, name, shared.ColorReset)
-		fmt.Fprintf(out, "    %sPath:%s %s\n", shared.ColorGray, shared.ColorReset, path)
+		fmt.Fprintf(out, "  %s•%s %s%s%s\n", ui.ColorGreen, ui.ColorReset, ui.ColorBold, name, ui.ColorReset)
+		fmt.Fprintf(out, "    %sPath:%s %s\n", ui.ColorGray, ui.ColorReset, path)
 		printMetadata(out, result.Config, name)
 		if result.Err != nil {
-			fmt.Fprintf(out, "    %s⚠ Warning: %v%s\n", shared.ColorYellow, result.Err, shared.ColorReset)
+			fmt.Fprintf(out, "    %s⚠ Warning: %v%s\n", ui.ColorYellow, result.Err, ui.ColorReset)
 		}
 		if len(result.FoundFiles) > 1 {
 			fmt.Fprintf(out, "    %s⚠ Warning: Multiple config files found (%v). Using %s%s\n",
-				shared.ColorYellow, result.FoundFiles, result.UsedFile, shared.ColorReset)
+				ui.ColorYellow, result.FoundFiles, result.UsedFile, ui.ColorReset)
 		}
 		if i < len(templates)-1 {
 			fmt.Fprintln(out)
@@ -88,7 +88,7 @@ func printList(out io.Writer, templates []string) {
 func printMetadata(out io.Writer, cfg *config.Config, skipName string) {
 	for _, f := range cfg.Metadata() {
 		if f.Label != "Name" || f.Value != skipName {
-			fmt.Fprintf(out, "    %s%s:%s %s\n", shared.ColorGray, f.Label, shared.ColorReset, f.Value)
+			fmt.Fprintf(out, "    %s%s:%s %s\n", ui.ColorGray, f.Label, ui.ColorReset, f.Value)
 		}
 	}
 }

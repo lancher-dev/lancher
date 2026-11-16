@@ -8,8 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/lancher-dev/lancher/internal/cli/shared"
 	"github.com/lancher-dev/lancher/internal/storage"
+	"github.com/lancher-dev/lancher/internal/ui"
 )
 
 func newRemoveCmd() *cobra.Command {
@@ -32,14 +32,14 @@ func runRemove(names []string) error {
 			return fmt.Errorf("failed to list templates: %w", err)
 		}
 		if len(templates) == 0 {
-			fmt.Printf("%sNo templates found.%s\n", shared.ColorYellow, shared.ColorReset)
+			fmt.Printf("%sNo templates found.%s\n", ui.ColorYellow, ui.ColorReset)
 			return nil
 		}
-		if names, err = shared.MultiSelect("Select templates to remove:", templates); err != nil {
+		if names, err = ui.MultiSelect("Select templates to remove:", templates); err != nil {
 			return err
 		}
 		if len(names) == 0 {
-			fmt.Printf("%sNo templates selected.%s\n", shared.ColorYellow, shared.ColorReset)
+			fmt.Printf("%sNo templates selected.%s\n", ui.ColorYellow, ui.ColorReset)
 			return nil
 		}
 	}
@@ -47,7 +47,7 @@ func runRemove(names []string) error {
 	slices.Sort(names)
 	names = slices.Compact(names)
 	for _, name := range names {
-		if err := shared.SanitizeTemplateName(name); err != nil {
+		if err := ui.SanitizeTemplateName(name); err != nil {
 			return fmt.Errorf("invalid template name '%s': %w", name, err)
 		}
 		exists, err := storage.TemplateExists(name)
@@ -70,11 +70,11 @@ func runRemove(names []string) error {
 			errs = append(errs, fmt.Errorf("failed to remove template '%s': %w", name, err))
 			continue
 		}
-		fmt.Printf("%s✓ Template '%s' removed%s\n", shared.ColorGreen, name, shared.ColorReset)
+		fmt.Printf("%s✓ Template '%s' removed%s\n", ui.ColorGreen, name, ui.ColorReset)
 		removed++
 	}
 	if removed > 1 {
-		fmt.Printf("\n%s✓ Removed %d templates%s\n", shared.ColorGreen, removed, shared.ColorReset)
+		fmt.Printf("\n%s✓ Removed %d templates%s\n", ui.ColorGreen, removed, ui.ColorReset)
 	}
 	return errors.Join(errs...)
 }

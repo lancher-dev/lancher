@@ -9,10 +9,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/lancher-dev/lancher/internal/cli/shared"
 	"github.com/lancher-dev/lancher/internal/config"
 	"github.com/lancher-dev/lancher/internal/project"
 	"github.com/lancher-dev/lancher/internal/storage"
+	"github.com/lancher-dev/lancher/internal/ui"
 )
 
 type newOptions struct {
@@ -86,7 +86,7 @@ func runNew(args []string, opts *newOptions) error {
 		return fmt.Errorf("failed to load template config: %w", err)
 	}
 	if len(cfg.Metadata()) > 0 {
-		fmt.Printf("\n%sTemplate Information:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+		fmt.Printf("\n%sTemplate Information:%s\n", ui.ColorCyan+ui.ColorBold, ui.ColorReset)
 		printMetadata(os.Stdout, cfg, "")
 	}
 
@@ -119,13 +119,13 @@ func resolveTemplate(args []string, opts *newOptions) (string, error) {
 		if len(templates) == 0 {
 			return "", errors.New("no templates found, add one with: lancher add <source>")
 		}
-		if name, err = shared.Select("Choose a template:", templates); err != nil {
+		if name, err = ui.Select("Choose a template:", templates); err != nil {
 			return "", err
 		}
-		fmt.Printf("%s✓ Template selected:%s %s\n", shared.ColorGreen, shared.ColorReset, name)
+		fmt.Printf("%s✓ Template selected:%s %s\n", ui.ColorGreen, ui.ColorReset, name)
 	}
 
-	if err := shared.SanitizeTemplateName(name); err != nil {
+	if err := ui.SanitizeTemplateName(name); err != nil {
 		return "", err
 	}
 	exists, err := storage.TemplateExists(name)
@@ -148,10 +148,10 @@ func resolveDest(args []string, name string, opts *newOptions) (string, error) {
 		return "", errors.New("a destination is required with --yes")
 	default:
 		var err error
-		if dest, err = shared.PromptStringWithDefault("Destination directory:", name); err != nil {
+		if dest, err = ui.PromptStringWithDefault("Destination directory:", name); err != nil {
 			return "", err
 		}
-		fmt.Printf("%s✓ Destination set:%s %s\n", shared.ColorGreen, shared.ColorReset, dest)
+		fmt.Printf("%s✓ Destination set:%s %s\n", ui.ColorGreen, ui.ColorReset, dest)
 	}
 
 	abs, err := filepath.Abs(dest)
@@ -193,16 +193,16 @@ func prepareDest(dest string, force bool) error {
 	if err := os.RemoveAll(dest); err != nil {
 		return fmt.Errorf("failed to remove existing directory: %w", err)
 	}
-	fmt.Printf("%s✓ Removed existing directory%s\n", shared.ColorGreen, shared.ColorReset)
+	fmt.Printf("%s✓ Removed existing directory%s\n", ui.ColorGreen, ui.ColorReset)
 	return nil
 }
 
 func copyTemplate(name, templatePath, dest string, verbose bool) error {
-	var spinner *shared.Spinner
+	var spinner *ui.Spinner
 	if verbose {
-		fmt.Printf("%sCreating project...%s\n", shared.ColorYellow, shared.ColorReset)
+		fmt.Printf("%sCreating project...%s\n", ui.ColorYellow, ui.ColorReset)
 	} else {
-		spinner = shared.NewSpinner("Creating project...")
+		spinner = ui.NewSpinner("Creating project...")
 		spinner.Start()
 		defer spinner.Stop()
 	}
@@ -215,9 +215,9 @@ func copyTemplate(name, templatePath, dest string, verbose bool) error {
 	if spinner != nil {
 		spinner.Success(done)
 	} else {
-		fmt.Printf("%s✓ %s%s\n", shared.ColorGreen, done, shared.ColorReset)
+		fmt.Printf("%s✓ %s%s\n", ui.ColorGreen, done, ui.ColorReset)
 	}
-	fmt.Printf("  %sLocation:%s %s\n", shared.ColorYellow, shared.ColorReset, dest)
+	fmt.Printf("  %sLocation:%s %s\n", ui.ColorYellow, ui.ColorReset, dest)
 	return nil
 }
 
@@ -226,36 +226,36 @@ func hooksStep(hooks []string, dest string, opts *newOptions) error {
 		return nil
 	}
 
-	fmt.Printf("\n%sHooks found:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+	fmt.Printf("\n%sHooks found:%s\n", ui.ColorCyan+ui.ColorBold, ui.ColorReset)
 	for i, hook := range hooks {
 		fmt.Printf("  %d. %s\n", i+1, hook)
 	}
 	fmt.Println()
 
 	if project.HasLancherCommands(hooks) {
-		fmt.Printf("%s⚠ Hooks call lancher: skipped. Run them manually if needed.%s\n", shared.ColorYellow, shared.ColorReset)
+		fmt.Printf("%s⚠ Hooks call lancher: skipped. Run them manually if needed.%s\n", ui.ColorYellow, ui.ColorReset)
 		return nil
 	}
 
 	run := opts.hooks
 	if !run && !opts.yes {
 		var err error
-		if run, err = shared.PromptConfirmWithDefault("Execute hooks?", false); err != nil {
+		if run, err = ui.PromptConfirmWithDefault("Execute hooks?", false); err != nil {
 			return err
 		}
 	}
 	if !run {
-		fmt.Printf("%sSkipped hooks%s\n", shared.ColorYellow, shared.ColorReset)
+		fmt.Printf("%sSkipped hooks%s\n", ui.ColorYellow, ui.ColorReset)
 		return nil
 	}
 
 	err := project.RunHooks(hooks, dest, os.Stdout, os.Stderr, func(i int) {
-		fmt.Printf("\n%sExecuting hook %d/%d:%s %s\n", shared.ColorCyan, i+1, len(hooks), shared.ColorReset, hooks[i])
+		fmt.Printf("\n%sExecuting hook %d/%d:%s %s\n", ui.ColorCyan, i+1, len(hooks), ui.ColorReset, hooks[i])
 	})
 	if err != nil {
-		fmt.Printf("%s⚠ Some hooks failed: %v%s\n", shared.ColorYellow, err, shared.ColorReset)
+		fmt.Printf("%s⚠ Some hooks failed: %v%s\n", ui.ColorYellow, err, ui.ColorReset)
 	} else {
-		fmt.Printf("%s✓ All hooks executed successfully%s\n", shared.ColorGreen, shared.ColorReset)
+		fmt.Printf("%s✓ All hooks executed successfully%s\n", ui.ColorGreen, ui.ColorReset)
 	}
 	return nil
 }
@@ -269,25 +269,25 @@ func gitStep(dest string, opts *newOptions) error {
 	initGit := opts.git
 	if !initGit && !opts.yes {
 		var err error
-		if initGit, err = shared.PromptConfirmWithDefault("Initialize git repository?", false); err != nil {
+		if initGit, err = ui.PromptConfirmWithDefault("Initialize git repository?", false); err != nil {
 			return err
 		}
 	}
 	if !initGit {
-		fmt.Printf("%sSkipped git initialization%s\n", shared.ColorYellow, shared.ColorReset)
+		fmt.Printf("%sSkipped git initialization%s\n", ui.ColorYellow, ui.ColorReset)
 		return nil
 	}
 
 	cmd := exec.Command("git", "init")
 	cmd.Dir = dest
 	if output, err := cmd.CombinedOutput(); err != nil {
-		fmt.Printf("%s⚠ Failed to initialize git: %v%s\n", shared.ColorYellow, err, shared.ColorReset)
+		fmt.Printf("%s⚠ Failed to initialize git: %v%s\n", ui.ColorYellow, err, ui.ColorReset)
 		if len(output) > 0 {
-			fmt.Printf("%s%s%s\n", shared.ColorGray, output, shared.ColorReset)
+			fmt.Printf("%s%s%s\n", ui.ColorGray, output, ui.ColorReset)
 		}
 		return nil
 	}
-	fmt.Printf("%s✓ Git repository initialized%s\n", shared.ColorGreen, shared.ColorReset)
+	fmt.Printf("%s✓ Git repository initialized%s\n", ui.ColorGreen, ui.ColorReset)
 	return nil
 }
 
@@ -300,22 +300,22 @@ func metaFilesStep(dest string, opts *newOptions) error {
 
 	keep := opts.keepConfig
 	if !keep && !opts.noKeep && !opts.yes {
-		fmt.Printf("%sLancher files found in project:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+		fmt.Printf("%sLancher files found in project:%s\n", ui.ColorCyan+ui.ColorBold, ui.ColorReset)
 		for _, f := range files {
 			fmt.Printf("  • %s\n", f)
 		}
 		var err error
-		if keep, err = shared.PromptConfirmWithDefault("Keep lancher config and ignore files in the project?", false); err != nil {
+		if keep, err = ui.PromptConfirmWithDefault("Keep lancher config and ignore files in the project?", false); err != nil {
 			return err
 		}
 	}
 	if keep {
-		fmt.Printf("%s✓ Kept lancher config files in project%s\n", shared.ColorGreen, shared.ColorReset)
+		fmt.Printf("%s✓ Kept lancher config files in project%s\n", ui.ColorGreen, ui.ColorReset)
 		return nil
 	}
 	if err := project.RemoveMetaFiles(dest, files); err != nil {
 		return err
 	}
-	fmt.Printf("%s✓ Removed lancher config files from project%s\n", shared.ColorGreen, shared.ColorReset)
+	fmt.Printf("%s✓ Removed lancher config files from project%s\n", ui.ColorGreen, ui.ColorReset)
 	return nil
 }

@@ -9,9 +9,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/lancher-dev/lancher/internal/cli/shared"
 	"github.com/lancher-dev/lancher/internal/source"
 	"github.com/lancher-dev/lancher/internal/storage"
+	"github.com/lancher-dev/lancher/internal/ui"
 )
 
 func newAddCmd(global *globalOptions) *cobra.Command {
@@ -46,7 +46,7 @@ func runAdd(args []string, force, verbose bool) error {
 		if src, err = promptSource(); err != nil {
 			return err
 		}
-		name, err = shared.PromptStringWithDefault("Template name:", src.Name())
+		name, err = ui.PromptStringWithDefault("Template name:", src.Name())
 		if err != nil {
 			return err
 		}
@@ -60,7 +60,7 @@ func runAdd(args []string, force, verbose bool) error {
 		}
 	}
 
-	if err := shared.SanitizeTemplateName(name); err != nil {
+	if err := ui.SanitizeTemplateName(name); err != nil {
 		return err
 	}
 	exists, err := storage.TemplateExists(name)
@@ -71,7 +71,7 @@ func runAdd(args []string, force, verbose bool) error {
 		return fmt.Errorf("template '%s' already exists (use --force to replace it)", name)
 	}
 
-	var spinner *shared.Spinner
+	var spinner *ui.Spinner
 	var log bytes.Buffer
 	var out io.Writer = &log
 	if verbose {
@@ -82,9 +82,9 @@ func runAdd(args []string, force, verbose bool) error {
 	}
 	if msg := fetchMessage(src.Kind); msg != "" {
 		if verbose {
-			fmt.Printf("%s%s%s\n", shared.ColorYellow, msg, shared.ColorReset)
+			fmt.Printf("%s%s%s\n", ui.ColorYellow, msg, ui.ColorReset)
 		} else {
-			spinner = shared.NewSpinner(msg)
+			spinner = ui.NewSpinner(msg)
 			spinner.Start()
 			defer spinner.Stop()
 		}
@@ -107,16 +107,16 @@ func runAdd(args []string, force, verbose bool) error {
 	if spinner != nil {
 		spinner.Success(done)
 	} else {
-		fmt.Printf("%s✓ %s%s\n", shared.ColorGreen, done, shared.ColorReset)
+		fmt.Printf("%s✓ %s%s\n", ui.ColorGreen, done, ui.ColorReset)
 	}
 	path, _ := storage.GetTemplatePath(name)
-	fmt.Printf("  %sSource:%s %s\n", shared.ColorYellow, shared.ColorReset, src.Display())
-	fmt.Printf("  %sStored:%s %s\n", shared.ColorYellow, shared.ColorReset, path)
+	fmt.Printf("  %sSource:%s %s\n", ui.ColorYellow, ui.ColorReset, src.Display())
+	fmt.Printf("  %sStored:%s %s\n", ui.ColorYellow, ui.ColorReset, path)
 	return nil
 }
 
 func promptSource() (source.Source, error) {
-	raw, err := shared.PromptStringWithDefault("Source (local path, git URL or ZIP file):", ".")
+	raw, err := ui.PromptStringWithDefault("Source (local path, git URL or ZIP file):", ".")
 	if err != nil {
 		return source.Source{}, err
 	}

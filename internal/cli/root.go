@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/lancher-dev/lancher/internal/cli/shared"
+	"github.com/lancher-dev/lancher/internal/ui"
 	"github.com/lancher-dev/lancher/internal/version"
 )
 
@@ -41,8 +41,8 @@ func NewRootCmd() *cobra.Command {
 // Execute runs the root command and reports a cancelled prompt as success.
 func Execute() error {
 	err := NewRootCmd().Execute()
-	if errors.Is(err, shared.ErrCancelled) {
-		fmt.Printf("%sCancelled.%s\n", shared.ColorYellow, shared.ColorReset)
+	if errors.Is(err, ui.ErrCancelled) {
+		fmt.Printf("%sCancelled.%s\n", ui.ColorYellow, ui.ColorReset)
 		return nil
 	}
 	return err
