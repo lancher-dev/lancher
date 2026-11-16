@@ -1,109 +1,72 @@
 # .lancherignore
 
-Define which files and directories to exclude during template copy operations. Patterns use glob syntax and are case-sensitive, evaluated against each file's relative path within the template.
+A `.lancherignore` file in the template root lists files and directories to leave out of the template:
 
-You should always exclude version control directories like `.git`, dependency folders like `node_modules`, and build output directories. Never include secrets, API keys, or credentials in templates. Platform-specific files (`.DS_Store`, `Thumbs.db`) and IDE configurations (`.vscode`, `.idea`) should typically be excluded as well.
+- `lancher add` and `lancher sync` do not store them;
+- `lancher new` does not copy them to the project.
+
+Exclude dependency folders like `node_modules`, build output, logs and editor files. Never put secrets, API keys or credentials in templates.
 
 ## Configuration
 
-Create a `.lancherignore` file in your template root directory. Each line represents a pattern:
-
-```
-node_modules
-.git
-*.log
-dist/
-build/
-```
-
-Lines starting with `#` are treated as comments and help document why specific patterns are excluded:
+Write one pattern per line. Empty lines and lines starting with `#` are skipped:
 
 ```
 # Dependencies
-node_modules/
-pnpm-lock.yaml
+node_modules
 
-# Build output (only at root)
+# Build output, only at the root
 /dist
 /build
 
 # Logs everywhere
 *.log
-**/*.log
 ```
 
-Patterns are evaluated against each file's relative path from the template root, matching against the basename, the full relative path, and any individual path component.
-
-Patterns use the system's filepath matching. An empty `.lancherignore` file will include _ALL_ files in the template.
-
-> **Note**: Path separators are normalized automatically. Both `/` and `\` work on all platforms.
+Patterns are case-sensitive and use `/` as separator. When a directory matches, everything inside it is left out too. The root `.git` directory is never affected: lancher handles it on its own.
 
 ## Pattern Types
 
-### Exact Match
+### Names
 
-Matches the exact file or directory name anywhere in the template:
+A pattern without `/` matches a file or directory name at any depth:
 
 ```
-node_modules        # Matches node_modules at any depth
-package-lock.json   # Matches this file anywhere
-.DS_Store           # Matches .DS_Store in any directory
+node_modules        # node_modules anywhere
+package-lock.json   # this file anywhere
+.DS_Store           # .DS_Store in any directory
 ```
 
 ### Wildcards
 
-Use `*` to match any characters (except path separator) and `?` to match a single character:
+`*` matches any characters within a name, and `?` matches a single character:
 
 ```
-*.log               # Matches any file ending with .log
-*.tmp               # Matches any .tmp file
-test-*              # Matches test-1, test-data, etc.
-file.?              # Matches file.a, file.1, etc.
+*.log               # any file ending with .log
+test-*              # test-1, test-data, ...
+file.?              # file.a, file.1, ...
 ```
 
-### Root-Relative Patterns
+### Paths
 
-Patterns starting with `/` only match at the template root:
-
-```
-/config             # Matches config/ at root, NOT src/config
-/build              # Matches build/ at root only
-/*.log              # Matches .log files in root directory only
-```
-
-### Directories
-
-Trailing slash indicates a directory (optional but clarifies intent):
+A pattern that contains `/` is a path from the template root. A leading `/` makes a single name root-only:
 
 ```
-dist/               # Matches dist directory (same as 'dist')
-build/              # Matches build directory
-.cache/             # Matches .cache directory
+/config             # config at the root, not src/config
+/*.log              # .log files in the root directory only
+src/generated       # src/generated, not lib/src/generated
 ```
+
+### Trailing Slash
+
+A trailing slash is ignored: `dist/` is the same as `dist` and matches a file or a directory with that name.
 
 ### Recursive Patterns
 
-Use `**` for recursive matching across any directory depth:
+In a path, `**` matches any number of directories, including none:
 
 ```
-**/*.test.js        # Matches .test.js files at any depth
-**/node_modules     # Matches node_modules at any level
-**/vendor           # Matches vendor directory anywhere
-dist/**             # Matches everything under dist/
-src/**/test         # Matches test directories under src/
+**/*.test.js        # .test.js files at any depth
+docs/**             # everything under docs
+src/**/test         # test directories at any depth under src
 ```
-
-## Deprecated Method
-
-> [!WARNING]
-> The `ignore` field in `.lancher.yaml` is deprecated and will be removed in a future version. Migrate to `.lancherignore`.
-
-If using the old method, define patterns as an array in `.lancher.yaml`:
-
-```yaml
-ignore:
-  - node_modules
-  - "*.log"
-```
-
-**Precedence**: If both `.lancherignore` and the `ignore` field in `.lancher.yaml` exist, `.lancherignore` takes precedence and the YAML ignore field is ignored with a deprecation warning.

@@ -1,67 +1,82 @@
 # Creating Projects
 
-Lancher generates new projects by copying template files to a destination directory. You can specify templates and destinations via command-line flags or use interactive prompts to select from available options. The creation process handles validation, metadata display, file copying with pattern exclusions, and optional hook execution.
-
-## Basic Usage
-
-The simplest way to create a project is using the `-t` (template) and `-d` (destination) flags.
+`lancher new` creates a project by copying a template into a destination directory, then optionally initializes git and runs the template [hooks](/docs/configuration/hooks).
 
 ```bash
-lancher create -t <template> -d <destination>
+lancher new [template] [destination]
 ```
 
 Example:
 
 ```bash
-lancher create -t nextjs -d ./my-app
+lancher new nextjs ./my-app
 ```
-
-This command copies the `nextjs` template to `./my-app`. If the destination exists, lancher aborts to prevent overwrites.
 
 ## Interactive Mode
 
 ```bash
-lancher create
+lancher new
 ```
 
-Interactive mode prompts for template selection, destination directory, git initialization, and hook execution confirmation. It's useful when browsing available templates or when you don't remember exact template names, offering a searchable list of all stored templates.
+lancher asks for everything first, then works without further questions:
 
-## Process Flow
+1. the template, from a list;
+2. the destination, which defaults to the template name;
+3. whether to run the hooks, after listing them, if the template has any;
+4. whether to initialize a git repository;
+5. whether to copy the lancher files (`.lancher.yaml`, `.lancherignore`) to the project, if the template has any.
 
-When you create a project, Lancher first validates that the template exists and the destination is available. It then displays template metadata like name, description, and version from `.lancher.yaml` if present. After that, it copies all template files to the destination directory while respecting any ignore patterns you've configured. Finally, if the template includes hooks and you confirm their execution, Lancher runs those post-creation commands.
+The default answer to questions 3-5 is no. Flags answer the matching question in advance: `--hooks` or `--no-hooks`, `--git` or `--no-git`, `--keep-config` or `--no-keep-config`.
 
-Each step must complete successfully before proceeding. If a hook fails with a non-zero exit code, the process stops, though already-copied files remain in place.
+## Non-Interactive Mode
 
-## Examples
-
-### Web Application
+`-y, --yes` asks nothing. The template and the destination are then required, and every question gets its default answer unless a flag says otherwise:
 
 ```bash
-lancher create -t nextjs-starter -d ./client
-lancher create -t express-api -d ./server
+lancher new api ./my-api --yes                 # copy only
+lancher new api ./my-api --yes --git --hooks   # also git init and hooks
 ```
 
-### Monorepo
-
-```bash
-lancher create -t monorepo -d ./workspace
-```
-
-### Multiple Projects
+This is the form to use in scripts:
 
 ```bash
 for service in auth users products; do
-  lancher create -t microservice -d ./services/$service
+  lancher new microservice "./services/$service" --yes --git
 done
 ```
 
+## Destination
+
+The destination may not exist yet or be an empty directory; its parent directory must exist. A destination that contains files is an error:
+
+```
+✗ destination is not empty: /home/me/my-app (use --force to write into it)
+```
+
+With `--force`, lancher writes the template into it: files with the same path are overwritten and the others are left alone. Nothing is deleted.
+
+## What Gets Copied
+
+lancher copies every file of the template except:
+
+- the `.git` directory;
+- the paths matched by the template's [`.lancherignore`](/docs/configuration/lancher-ignore-file);
+- the lancher files (`.lancher.yaml`, `.lancherignore` and the other [config names](/docs/configuration/lancher-file)), unless you keep them.
+
+## Process
+
+1. lancher reads the template's `.lancher.yaml`, shows its metadata and asks the questions.
+2. It copies the files.
+3. It runs `git init`, if requested. If the destination already has a `.git` directory, it is left as it is.
+4. It runs the hooks, if requested, one after another in the project directory. If a hook fails, lancher stops and exits with an error; the project files stay in place.
+
 ## Flags
 
-- `-t, --template <name>` - Template name
-- `-d, --destination <path>` - Destination directory
-- `--git` - Init git repository
-- `--no-git` - Skip git init
-- `--hook` - Execute all hooks from `.lancher.yaml`
-- `--no-hooks` - Skip hooks execution
-- `--keep-config` - Keep lancher config and ignore files in the new project
-- `--no-keep-config` - Remove lancher config and ignore files
+- `-y, --yes` - Do not ask anything, use the defaults
+- `--force` - Write into a destination that is not empty, overwriting files
+- `--git` - Initialize a git repository
+- `--no-git` - Do not initialize a git repository
+- `--hooks` - Run the template hooks
+- `--no-hooks` - Do not run the template hooks
+- `--keep-config` - Keep lancher config and ignore files in the project
+- `--no-keep-config` - Do not copy lancher config and ignore files to the project

@@ -1,20 +1,38 @@
 # Installation
 
-Install lancher via script, package manager, or build from source.
+Install lancher with a package manager, with the install script, or from source. Package managers keep lancher updated and install shell completion for bash, zsh and fish.
 
 ## Quick Installation
 
 ```bash
-curl -sS https://lancher.dev/install.sh | sh
+curl -fsSL https://lancher.dev/install.sh | sh
 ```
 
-The installer will install `lancher` in `~/.local/bin`.
+The script:
 
-> **Note:** The install script (and the corresponding [uninstall script](https://lancher.dev/uninstall.sh)) are designed to install a **specific fixed version** of lancher. They do not automatically track or pull in newer releases. If you want automatic updates, use your OS package manager instead (see below).
+1. detects your system and, if a package manager is available (APT, AUR or Homebrew), shows the command to install lancher with it and asks whether to go on with the standalone install;
+2. downloads the latest release for your platform and verifies its SHA256 checksum;
+3. installs `lancher` in `~/.local/bin`;
+4. installs bash and fish completion in your user directories and prints the line to add to `~/.zshrc` for zsh.
+
+It never runs `sudo` and does not edit your shell files. If `~/.local/bin` is not in your `PATH`, it prints the line to add.
+
+The script does not update lancher by itself: run it again to install a newer release.
+
+| Variable                 | Effect                                                   |
+| ------------------------ | -------------------------------------------------------- |
+| `LANCHER_VERSION=v1.2.3` | Install that release instead of the latest one           |
+| `LANCHER_STANDALONE=1`   | Skip the package manager suggestion and install directly |
+
+```bash
+curl -fsSL https://lancher.dev/install.sh | LANCHER_VERSION=v0.4.0 sh
+```
+
+Without a terminal (CI, scripts) the script does not ask and installs directly.
 
 ## Arch Linux (AUR)
 
-lancher is available on the [AUR](https://aur.archlinux.org/packages/lancher). Install it with your preferred AUR helper, for example:
+lancher is available on the [AUR](https://aur.archlinux.org/packages/lancher). Install it with your preferred AUR helper:
 
 ```bash
 yay -S lancher
@@ -26,7 +44,7 @@ paru -S lancher
 
 ### Via APT repository
 
-For automatic updates alongside your system packages, add the lancher APT repository:
+Add the lancher APT repository to get updates with your system packages:
 
 ```bash
 # 1. Add the GPG public key
@@ -44,7 +62,7 @@ sudo apt update && sudo apt install lancher
 
 ### Via .deb package
 
-You can also download a `.deb` package directly from the [GitHub Releases](https://github.com/lancher-dev/lancher/releases) page and install it manually:
+Download a `.deb` package from the [GitHub Releases](https://github.com/lancher-dev/lancher/releases) page and install it:
 
 ```bash
 sudo dpkg -i lancher_<version>_linux_amd64.deb
@@ -52,37 +70,51 @@ sudo dpkg -i lancher_<version>_linux_amd64.deb
 
 ## Homebrew
 
-You can install lancher via [Homebrew Taps](https://docs.brew.sh/Taps) . All you need to do is:
+lancher is available from its [Homebrew tap](https://github.com/lancher-dev/homebrew-lancher):
 
 ```bash
-brew tap lancher-dev/lancher
-brew install lancher
+brew install lancher-dev/lancher/lancher
 ```
 
-## Manual Installation
+## From Source
 
-For manual installation you need Go 1.22+ and git. Proceed with repo clone and command installation.
+Building lancher needs git and Go at the version set in [`go.mod`](https://github.com/lancher-dev/lancher/blob/main/go.mod).
 
 ```bash
 git clone https://github.com/lancher-dev/lancher.git
 cd lancher
-make install
+make install    # builds and installs lancher in ~/.local/bin
 ```
 
-### Build from Source
+Or build the binary and place it yourself:
 
 ```bash
-# Clone and build
-git clone https://github.com/lancher-dev/lancher.git
-cd lancher
 go build -o lancher ./cmd/lancher
-
-# Install manually
 sudo mv lancher /usr/local/bin/
 ```
 
-## Third party repositories
+## Shell Completion
 
-lancher is also distributed in other repositories, for easier installation.
+The APT, AUR and Homebrew packages install completion for bash, zsh and fish, and the install script installs it for bash and fish. Completion covers commands, flags and the names of your templates.
+
+If you built lancher from source, generate the completion files yourself:
+
+```bash
+# bash
+mkdir -p ~/.local/share/bash-completion/completions
+lancher completion bash > ~/.local/share/bash-completion/completions/lancher
+
+# fish
+lancher completion fish > ~/.config/fish/completions/lancher.fish
+
+# zsh: add this line to ~/.zshrc
+source <(lancher completion zsh)
+```
+
+Bash completion needs the `bash-completion` package.
+
+## Third Party Repositories
+
+lancher is also distributed in other repositories.
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/lancher.svg)](https://repology.org/project/lancher/versions)

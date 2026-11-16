@@ -16,7 +16,7 @@ hooks:
   - command2
 ```
 
-The file can be named `.lancher.yaml`, `.lancher.yml`, `lancher.yaml`, or `lancher.yml`. If multiple configuration files exist, a warning is displayed and lancher uses the highest-priority one (`.lancher.yaml` > `.lancher.yml` > `lancher.yaml` > `lancher.yml`). View template status with `lancher template ls`.
+The file can be named `.lancher.yaml`, `.lancher.yml`, `lancher.yaml`, or `lancher.yml`. If multiple configuration files exist, a warning is displayed and lancher uses the highest-priority one (`.lancher.yaml` > `.lancher.yml` > `lancher.yaml` > `lancher.yml`). Keys that lancher does not know are reported with a warning. Check a template's configuration with `lancher info <template>`.
 
 ## Fields
 
@@ -80,25 +80,9 @@ hooks:
   - chmod +x scripts/setup.sh
 ```
 
-Commands run sequentially in the project directory. Users must confirm before execution, and the process stops on first failure.
+Commands run one after another with `sh` in the project directory, after a confirmation, and stop at the first failure. See [Hooks](/docs/configuration/hooks).
 
-### ignore
-
-> [!WARNING]
-> **Deprecated**: Use `.lancherignore` file instead. This field will be removed in a future version. See [`.lancherignore`](./03-lancher-ignore-file.md) for details.
-
-**Type:** `array of strings`
-**Optional**
-
-File patterns excluded during copy. Supports glob syntax.
-
-```yaml
-ignore:
-  - node_modules
-  - .git
-  - "*.log"
-  - .env.local
-```
+To leave files out of templates and projects, use a [`.lancherignore`](/docs/configuration/lancher-ignore-file) file.
 
 ## Examples
 
@@ -128,8 +112,8 @@ description: Python CLI application template
 version: 1.0.0
 
 hooks:
-  - python -m venv venv
-  - source venv/bin/activate && pip install -r requirements.txt
+  - python3 -m venv venv
+  - venv/bin/pip install -r requirements.txt
 ```
 
 </details>
