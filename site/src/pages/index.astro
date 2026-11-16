@@ -1,5 +1,8 @@
 ---
 import Layout from "@jaamd/jaad/layouts/Page.astro";
+import ArrowRight from "phosphor-astro/ArrowRight.astro";
+import Check from "phosphor-astro/Check.astro";
+import Copy from "phosphor-astro/Copy.astro";
 import Terminal from "../components/Terminal.astro";
 
 const install = "curl -fsSL https://lancher.dev/install.sh | sh";
@@ -38,40 +41,22 @@ const install = "curl -fsSL https://lancher.dev/install.sh | sh";
           aria-label="Copy the install command"
           title="Copy"
         >
-          <svg
-            data-copy-icon
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <rect x="9" y="9" width="13" height="13" rx="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-          <svg
+          <Copy data-copy-icon width="18" height="18" aria-hidden="true" />
+          <Check
             data-copied-icon
             class="hidden"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            width="18"
+            height="18"
             aria-hidden="true"
-          >
-            <path d="M20 6 9 17l-5-5"></path>
-          </svg>
+          />
         </button>
       </div>
-      <a href="/docs/getting-started/installation" class="text-[14px]">
-        Or with completion: Homebrew, APT, AUR →
+      <a
+        href="/docs/getting-started/installation"
+        class="inline-flex items-center gap-1.5 self-start text-[14px]"
+      >
+        <span>Or with completion: Homebrew, APT, AUR</span>
+        <ArrowRight width="14" height="14" aria-hidden="true" />
       </a>
     </div>
 
