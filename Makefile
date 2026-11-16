@@ -23,7 +23,7 @@ help:
 	@echo "  make build-all   Build for multiple platforms"
 	@echo ""
 	@echo "For end users:"
-	@echo "  curl -sS https://lancher.dev/install.sh | sh"
+	@echo "  curl -fsSL https://lancher.dev/install.sh | sh"
 
 # Build the binary
 build:

@@ -38,6 +38,13 @@ jobs:
           GOOS=darwin GOARCH=amd64 go build -trimpath -ldflags="${LDFLAGS}" -o lancher-darwin-amd64 ./cmd/lancher
           GOOS=darwin GOARCH=arm64 go build -trimpath -ldflags="${LDFLAGS}" -o lancher-darwin-arm64 ./cmd/lancher
 
+      - name: Generate shell completions
+        run: |
+          mkdir completions
+          for SHELL_NAME in bash zsh fish; do
+            ./lancher-linux-amd64 completion "$SHELL_NAME" > "completions/lancher.$SHELL_NAME"
+          done
+
       - name: Build .deb packages
         run: |
           VERSION=${GITHUB_REF_NAME#v}
@@ -45,12 +52,16 @@ jobs:
           DEB_VERSION=$(printf '%s' "$VERSION" | tr '-' '~')
 
           for ARCH in amd64 arm64; do
-            mkdir -p deb-${ARCH}/DEBIAN deb-${ARCH}/usr/bin
-            install -m 755 lancher-linux-${ARCH} deb-${ARCH}/usr/bin/lancher
+            ROOT=deb-${ARCH}
+            mkdir -p ${ROOT}/DEBIAN
+            install -Dm755 lancher-linux-${ARCH} ${ROOT}/usr/bin/lancher
+            install -Dm644 completions/lancher.bash ${ROOT}/usr/share/bash-completion/completions/lancher
+            install -Dm644 completions/lancher.zsh ${ROOT}/usr/share/zsh/vendor-completions/_lancher
+            install -Dm644 completions/lancher.fish ${ROOT}/usr/share/fish/vendor_completions.d/lancher.fish
 
-            INSTALLED_SIZE=$(du -sk deb-${ARCH}/usr | awk '{print $1}')
+            INSTALLED_SIZE=$(du -sk ${ROOT}/usr | awk '{print $1}')
 
-            cat > deb-${ARCH}/DEBIAN/control << EOF
+            cat > ${ROOT}/DEBIAN/control << EOF
           Package: lancher
           Version: ${DEB_VERSION}
           Architecture: ${ARCH}
@@ -60,17 +71,18 @@ jobs:
           Description: A minimal, local project-template manager written in Go.
           EOF
 
-            dpkg-deb --build --root-owner-group deb-${ARCH} "lancher_${VERSION}_${ARCH}.deb"
+            dpkg-deb --build --root-owner-group ${ROOT} "lancher_${VERSION}_${ARCH}.deb"
           done
 
       - name: Generate checksums
         id: checksums
         run: |
-          CHECKSUMS=$(sha256sum lancher-linux-amd64 lancher-linux-arm64 lancher-darwin-amd64 lancher-darwin-arm64 lancher_*.deb)
-          echo "checksums<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHECKSUMS" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
+          sha256sum lancher-linux-amd64 lancher-linux-arm64 lancher-darwin-amd64 lancher-darwin-arm64 lancher_*.deb > checksums.txt
+          {
+            echo "checksums<<EOF"
+            cat checksums.txt
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create Release
         uses: softprops/action-gh-release@v3
@@ -81,6 +93,7 @@ jobs:
             lancher-darwin-amd64
             lancher-darwin-arm64
             lancher_*.deb
+            checksums.txt
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}
           generate_release_notes: true

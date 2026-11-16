@@ -1,75 +1,73 @@
 #!/bin/sh
-set -e
+# Removes what install.sh installed and, after confirmation, the lancher data.
+#
+#   curl -fsSL https://lancher.dev/uninstall.sh | sh
+set -eu
 
-BINARY_NAME="lancher"
-INSTALL_DIR="$HOME/.local/bin"
+BIN="$HOME/.local/bin/lancher"
+BASH_COMPLETION="${XDG_DATA_HOME:-$HOME/.local/share}/bash-completion/completions/lancher"
+FISH_COMPLETION="${XDG_CONFIG_HOME:-$HOME/.config}/fish/completions/lancher.fish"
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+    GREEN='\033[32m' YELLOW='\033[33m' CYAN='\033[36m' RESET='\033[0m'
+else
+    GREEN='' YELLOW='' CYAN='' RESET=''
+fi
 
-info() {
-    printf "${BLUE}ℹ${NC} %s\n" "$1"
-}
+info() { printf '%b→%b %s\n' "$CYAN" "$RESET" "$1"; }
+success() { printf '%b✓%b %s\n' "$GREEN" "$RESET" "$1"; }
+warn() { printf '%b⚠%b %s\n' "$YELLOW" "$RESET" "$1"; }
 
-success() {
-    printf "${GREEN}✓${NC} %s\n" "$1"
-}
-
-warn() {
-    printf "${YELLOW}⚠${NC} %s\n" "$1"
-}
-
-# Detect template storage location
-get_templates_dir() {
-    if [[ "$OSTYPE" == "darwin"* ]]; then
+data_dir() {
+    if [ "$(uname -s)" = Darwin ]; then
         echo "$HOME/Library/Application Support/lancher"
     else
-        local xdg_data="${XDG_DATA_HOME:-$HOME/.local/share}"
-        echo "$xdg_data/lancher"
+        echo "${XDG_DATA_HOME:-$HOME/.local/share}/lancher"
     fi
+}
+
+# confirm asks a yes/no question on the terminal; the answer is no without
+# one.
+confirm() {
+    (: </dev/tty) 2>/dev/null || return 1
+    printf "%s [y/N] " "$1"
+    read -r answer </dev/tty || answer=""
+    case "$answer" in
+        [yY]*) return 0 ;;
+    esac
+    return 1
 }
 
 main() {
-    echo ""
-    # Try to use rocket emoji with fallback
-    if printf "🚀" 2>/dev/null | grep -q "🚀"; then
-        echo "🚀  lancher uninstaller"
+    if [ -e "$BIN" ]; then
+        rm -f "$BIN"
+        success "Removed $BIN"
     else
-        echo ">>  lancher uninstaller"
-    fi
-    echo ""
-
-    # Remove binary
-    if [ -f "${INSTALL_DIR}/${BINARY_NAME}" ]; then
-        info "Removing ${BINARY_NAME} from ${INSTALL_DIR}..."
-        rm "${INSTALL_DIR}/${BINARY_NAME}"
-        success "Binary removed"
-    else
-        warn "${BINARY_NAME} not found in ${INSTALL_DIR}"
+        warn "$BIN not found."
+        info "If lancher came from a package manager, remove it there:"
+        echo "  sudo apt remove lancher     # APT"
+        echo "  sudo pacman -R lancher      # AUR"
+        echo "  brew uninstall lancher      # Homebrew"
     fi
 
-    # Ask about templates
-    local templates_dir=$(get_templates_dir)
-    if [ -d "$templates_dir" ]; then
+    for file in "$BASH_COMPLETION" "$FISH_COMPLETION"; do
+        if [ -e "$file" ]; then
+            rm -f "$file"
+            success "Removed $file"
+        fi
+    done
+
+    dir=$(data_dir)
+    if [ -d "$dir" ]; then
         echo ""
-        warn "Found templates directory: $templates_dir"
-        read -p "Do you want to remove all stored templates? [y/N] " -n 1 -r
-        echo ""
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            rm -rf "$templates_dir"
-            success "Templates directory removed"
+        warn "Your templates are in $dir"
+        if confirm "Remove them too?"; then
+            rm -rf "$dir"
+            success "Removed $dir"
         else
-            info "Templates directory preserved"
+            info "Kept $dir"
         fi
     fi
-
-    echo ""
-    success "Uninstallation complete!"
-    echo ""
 }
 
 main "$@"
