@@ -75,14 +75,14 @@ For detailed usage instructions, command reference, and advanced features, visit
 ## Quick Start
 
 ```bash
-# Create a new project (interactive mode)
-lancher create
-
 # Add a template from a git repository
-lancher template add mytemplate https://github.com/user/template-repo
+lancher add https://github.com/user/template-repo mytemplate
+
+# Create a new project (interactive mode)
+lancher new
 
 # List all templates
-lancher template list
+lancher list
 
 # Get help
 lancher help

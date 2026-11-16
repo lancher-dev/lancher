@@ -34,7 +34,7 @@ make build
 
 ```bash
 make run ARGS="list"
-make run ARGS="create"
+make run ARGS="new"
 ```
 
 Or with Go:
