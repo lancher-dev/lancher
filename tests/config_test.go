@@ -3,6 +3,7 @@ package tests
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 
 	"github.com/lancher-dev/lancher/internal/config"
@@ -17,7 +18,6 @@ func TestLoadConfig(t *testing.T) {
 		wantAuthor  string
 		wantVersion string
 		wantHooks   int
-		wantIgnore  int
 		wantErr     bool
 	}{
 		{
@@ -28,27 +28,22 @@ author: Test Author
 version: 1.0.0
 hooks:
   - npm install
-  - git init
-ignore:
-  - node_modules
-  - "*.log"`,
+  - git init`,
 			wantName:    "Test Template",
 			wantDesc:    "A test template",
 			wantAuthor:  "Test Author",
 			wantVersion: "1.0.0",
 			wantHooks:   2,
-			wantIgnore:  2,
 			wantErr:     false,
 		},
 		{
 			name: "minimal config",
 			yamlContent: `name: Minimal
 description: Minimal template`,
-			wantName:   "Minimal",
-			wantDesc:   "Minimal template",
-			wantHooks:  0,
-			wantIgnore: 0,
-			wantErr:    false,
+			wantName:  "Minimal",
+			wantDesc:  "Minimal template",
+			wantHooks: 0,
+			wantErr:   false,
 		},
 		{
 			name:        "invalid yaml",
@@ -100,9 +95,6 @@ description: Minimal template`,
 			}
 			if len(cfg.Hooks) != tt.wantHooks {
 				t.Errorf("Hooks count = %d, want %d", len(cfg.Hooks), tt.wantHooks)
-			}
-			if len(cfg.Ignore) != tt.wantIgnore {
-				t.Errorf("Ignore count = %d, want %d", len(cfg.Ignore), tt.wantIgnore)
 			}
 		})
 	}
@@ -162,85 +154,17 @@ func TestHasHooks(t *testing.T) {
 	}
 }
 
-func TestHasIgnore(t *testing.T) {
-	cfg := &config.Config{Ignore: []string{"node_modules"}}
-	if !cfg.HasIgnore() {
-		t.Error("HasIgnore() should return true when ignore patterns exist")
+func TestMetadata(t *testing.T) {
+	cfg := &config.Config{Name: "Minimal", Version: "0.1.0"}
+	want := []config.Field{{Label: "Name", Value: "Minimal"}, {Label: "Version", Value: "0.1.0"}}
+	if got := cfg.Metadata(); !slices.Equal(got, want) {
+		t.Errorf("Metadata() = %v, want %v", got, want)
 	}
 
 	var nilCfg *config.Config
-	if nilCfg.HasIgnore() {
-		t.Error("HasIgnore() should return false for nil config")
+	if got := nilCfg.Metadata(); len(got) != 0 {
+		t.Errorf("Metadata() on nil config = %v, want none", got)
 	}
-}
-
-func TestGetMetadata(t *testing.T) {
-	tests := []struct {
-		name     string
-		cfg      *config.Config
-		wantText []string
-	}{
-		{
-			name: "full metadata",
-			cfg: &config.Config{
-				Name:        "My Template",
-				Description: "A great template",
-				Author:      "John Doe",
-				Version:     "1.0.0",
-			},
-			wantText: []string{"My Template", "A great template", "John Doe", "1.0.0"},
-		},
-		{
-			name: "partial metadata",
-			cfg: &config.Config{
-				Name:    "Minimal",
-				Version: "0.1.0",
-			},
-			wantText: []string{"Minimal", "0.1.0"},
-		},
-		{
-			name:     "empty config",
-			cfg:      &config.Config{},
-			wantText: []string{},
-		},
-		{
-			name:     "nil config",
-			cfg:      nil,
-			wantText: []string{},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.cfg.GetMetadata()
-
-			if len(tt.wantText) == 0 {
-				if got != "" {
-					t.Errorf("expected empty metadata, got: %q", got)
-				}
-				return
-			}
-
-			for _, want := range tt.wantText {
-				if len(want) > 0 && !contains(got, want) {
-					t.Errorf("GetMetadata() missing %q\nGot: %s", want, got)
-				}
-			}
-		})
-	}
-}
-
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(s) > len(substr) && (s[:len(substr)] == substr || s[len(s)-len(substr):] == substr || containsMiddle(s, substr)))
-}
-
-func containsMiddle(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
 }
 
 func TestLoadConfigWithDetailsInvalidYAML(t *testing.T) {

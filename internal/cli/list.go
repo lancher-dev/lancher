@@ -68,15 +68,8 @@ func printList(out io.Writer, templates []string) {
 		result := config.LoadConfigWithDetails(path)
 
 		fmt.Fprintf(out, "  %s•%s %s%s%s\n", shared.ColorGreen, shared.ColorReset, shared.ColorBold, name, shared.ColorReset)
-		field(out, "Path", path)
-		if cfg := result.Config; cfg != nil {
-			if cfg.Name != name {
-				field(out, "Name", cfg.Name)
-			}
-			field(out, "Description", cfg.Description)
-			field(out, "Author", cfg.Author)
-			field(out, "Version", cfg.Version)
-		}
+		fmt.Fprintf(out, "    %sPath:%s %s\n", shared.ColorGray, shared.ColorReset, path)
+		printMetadata(out, result.Config, name)
 		if result.Err != nil {
 			fmt.Fprintf(out, "    %s⚠ Warning: %v%s\n", shared.ColorYellow, result.Err, shared.ColorReset)
 		}
@@ -90,8 +83,12 @@ func printList(out io.Writer, templates []string) {
 	}
 }
 
-func field(out io.Writer, label, value string) {
-	if value != "" {
-		fmt.Fprintf(out, "    %s%s:%s %s\n", shared.ColorGray, label, shared.ColorReset, value)
+// printMetadata prints the metadata of cfg, leaving out a name equal to
+// skipName.
+func printMetadata(out io.Writer, cfg *config.Config, skipName string) {
+	for _, f := range cfg.Metadata() {
+		if f.Label != "Name" || f.Value != skipName {
+			fmt.Fprintf(out, "    %s%s:%s %s\n", shared.ColorGray, f.Label, shared.ColorReset, f.Value)
+		}
 	}
 }

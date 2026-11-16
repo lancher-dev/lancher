@@ -23,7 +23,6 @@ type Config struct {
 	Author      string   `yaml:"author"`
 	Version     string   `yaml:"version"`
 	Hooks       []string `yaml:"hooks"`
-	Ignore      []string `yaml:"ignore"`
 }
 
 // LoadResult contains the loaded config and metadata about the loading process
@@ -82,29 +81,26 @@ func (c *Config) HasHooks() bool {
 	return c != nil && len(c.Hooks) > 0
 }
 
-// HasIgnore returns true if config has deprecated ignore patterns defined in YAML
-func (c *Config) HasIgnore() bool {
-	return c != nil && len(c.Ignore) > 0
+// Field is a labelled metadata value.
+type Field struct {
+	Label, Value string
 }
 
-// GetMetadata returns formatted metadata string for display
-func (c *Config) GetMetadata() string {
+// Metadata returns the metadata fields that are set, in display order.
+func (c *Config) Metadata() []Field {
 	if c == nil {
-		return ""
+		return nil
 	}
-
-	var metadata string
-	if c.Name != "" {
-		metadata += fmt.Sprintf("Name: %s\n", c.Name)
+	var fields []Field
+	for _, f := range []Field{
+		{"Name", c.Name},
+		{"Description", c.Description},
+		{"Author", c.Author},
+		{"Version", c.Version},
+	} {
+		if f.Value != "" {
+			fields = append(fields, f)
+		}
 	}
-	if c.Description != "" {
-		metadata += fmt.Sprintf("Description: %s\n", c.Description)
-	}
-	if c.Author != "" {
-		metadata += fmt.Sprintf("Author: %s\n", c.Author)
-	}
-	if c.Version != "" {
-		metadata += fmt.Sprintf("Version: %s\n", c.Version)
-	}
-	return metadata
+	return fields
 }

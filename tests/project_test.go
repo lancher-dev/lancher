@@ -40,7 +40,7 @@ func TestCopyExcludesGit(t *testing.T) {
 	writeFile(t, filepath.Join(src, ".git", "config"), "git config")
 	writeFile(t, filepath.Join(src, "README.md"), "# Test")
 
-	if err := project.Copy(src, dst, nil); err != nil {
+	if err := project.Copy(src, dst); err != nil {
 		t.Fatalf("Copy failed: %v", err)
 	}
 
@@ -54,45 +54,12 @@ func TestCopyKeepsMetaFiles(t *testing.T) {
 	writeFile(t, filepath.Join(src, fileutil.IgnoreFileName), "*.log\n")
 	writeFile(t, filepath.Join(src, "main.go"), "package main")
 
-	if err := project.Copy(src, dst, nil); err != nil {
+	if err := project.Copy(src, dst); err != nil {
 		t.Fatalf("Copy failed: %v", err)
 	}
 
 	assertExists(t, filepath.Join(dst, config.ConfigFileNames[0]))
 	assertExists(t, filepath.Join(dst, fileutil.IgnoreFileName))
-	assertExists(t, filepath.Join(dst, "main.go"))
-}
-
-func TestCopyLancherIgnorePriority(t *testing.T) {
-	src, dst := t.TempDir(), t.TempDir()
-	cfg := &config.Config{Ignore: []string{"dist"}}
-	writeFile(t, filepath.Join(src, fileutil.IgnoreFileName), "vendor\n")
-	writeFile(t, filepath.Join(src, "dist", "bundle.js"), "bundle")
-	writeFile(t, filepath.Join(src, "vendor", "lib.go"), "lib")
-	writeFile(t, filepath.Join(src, "main.go"), "package main")
-
-	if err := project.Copy(src, dst, cfg); err != nil {
-		t.Fatalf("Copy failed: %v", err)
-	}
-
-	assertMissing(t, filepath.Join(dst, "vendor"))
-	assertExists(t, filepath.Join(dst, "dist", "bundle.js"))
-	assertExists(t, filepath.Join(dst, "main.go"))
-}
-
-func TestCopyFallbackToConfigIgnore(t *testing.T) {
-	src, dst := t.TempDir(), t.TempDir()
-	cfg := &config.Config{Ignore: []string{"dist", "*.tmp"}}
-	writeFile(t, filepath.Join(src, "dist", "bundle.js"), "bundle")
-	writeFile(t, filepath.Join(src, "cache.tmp"), "temp")
-	writeFile(t, filepath.Join(src, "main.go"), "package main")
-
-	if err := project.Copy(src, dst, cfg); err != nil {
-		t.Fatalf("Copy failed: %v", err)
-	}
-
-	assertMissing(t, filepath.Join(dst, "dist"))
-	assertMissing(t, filepath.Join(dst, "cache.tmp"))
 	assertExists(t, filepath.Join(dst, "main.go"))
 }
 
@@ -102,7 +69,7 @@ func TestCopyRootPatternOnlyMatchesRoot(t *testing.T) {
 	writeFile(t, filepath.Join(src, "build", "out.js"), "out")
 	writeFile(t, filepath.Join(src, "src", "build", "keep.js"), "keep")
 
-	if err := project.Copy(src, dst, nil); err != nil {
+	if err := project.Copy(src, dst); err != nil {
 		t.Fatalf("Copy failed: %v", err)
 	}
 

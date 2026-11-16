@@ -20,8 +20,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v7
@@ -31,8 +29,7 @@ jobs:
       - name: Build binaries
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
-          COMMIT=$(git rev-parse HEAD)
-          LDFLAGS="-s -w -X github.com/lancher-dev/lancher/internal/version.Version=${VERSION} -X github.com/lancher-dev/lancher/internal/version.Commit=${COMMIT}"
+          LDFLAGS="-s -w -X github.com/lancher-dev/lancher/internal/version.Version=${VERSION}"
 
           # Build for all platforms
           GOOS=linux GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o lancher-linux-amd64 ./cmd/lancher

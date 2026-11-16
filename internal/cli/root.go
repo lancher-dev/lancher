@@ -22,13 +22,9 @@ func NewRootCmd() *cobra.Command {
 	root := &cobra.Command{
 		Use:           "lancher",
 		Short:         "A minimal local project template manager",
-		Version:       version.Get(),
+		Version:       version.Version,
 		SilenceErrors: true,
 		SilenceUsage:  true,
-		Args:          cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return cmd.Help()
-		},
 	}
 	root.SetVersionTemplate("lancher {{.Version}}\n")
 	root.PersistentFlags().BoolVar(&opts.verbose, "verbose", false, "show command output instead of a spinner")

@@ -11,37 +11,12 @@ import (
 	"github.com/lancher-dev/lancher/internal/fileutil"
 )
 
-// Copy copies a template into dst, skipping .git and ignored paths.
-// Patterns come from .lancherignore; if it is absent or empty, the deprecated
-// ignore field of cfg is used instead.
-func Copy(src, dst string, cfg *config.Config) error {
-	patterns := fileutil.LoadIgnoreFile(src)
-	if len(patterns) == 0 && cfg != nil {
-		patterns = cfg.Ignore
-	}
-
-	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		relPath, err := filepath.Rel(src, path)
-		if err != nil {
-			return err
-		}
-
-		if relPath != "." && (isGitPath(relPath) || fileutil.ShouldIgnorePath(relPath, patterns)) {
-			if info.IsDir() {
-				return filepath.SkipDir
-			}
-			return nil
-		}
-
-		targetPath := filepath.Join(dst, relPath)
-		if info.IsDir() {
-			return os.MkdirAll(targetPath, info.Mode())
-		}
-		return fileutil.CopyFile(path, targetPath)
+// Copy copies a template into dst, leaving out the root .git directory and
+// the paths matched by the template's .lancherignore.
+func Copy(src, dst string) error {
+	ignored := fileutil.IgnoreMatcher(src)
+	return fileutil.CopyTree(src, dst, func(rel string) bool {
+		return isGitPath(rel) || ignored(rel)
 	})
 }
 

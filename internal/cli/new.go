@@ -85,18 +85,12 @@ func runNew(args []string, opts *newOptions) error {
 	if err != nil {
 		return fmt.Errorf("failed to load template config: %w", err)
 	}
-	if cfg != nil && cfg.HasIgnore() {
-		fmt.Printf("%s⚠ Warning:%s The 'ignore' field in lancher.yml is deprecated. Use a .lancherignore file instead.\n", shared.ColorYellow, shared.ColorReset)
-	}
-	if cfg != nil {
-		if metadata := cfg.GetMetadata(); metadata != "" {
-			fmt.Printf("\n%sTemplate Information:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
-			fmt.Print(metadata)
-			fmt.Println()
-		}
+	if len(cfg.Metadata()) > 0 {
+		fmt.Printf("\n%sTemplate Information:%s\n", shared.ColorCyan+shared.ColorBold, shared.ColorReset)
+		printMetadata(os.Stdout, cfg, "")
 	}
 
-	if err := copyTemplate(name, templatePath, dest, cfg, opts.verbose); err != nil {
+	if err := copyTemplate(name, templatePath, dest, opts.verbose); err != nil {
 		return err
 	}
 	if cfg != nil && cfg.HasHooks() {
@@ -203,7 +197,7 @@ func prepareDest(dest string, force bool) error {
 	return nil
 }
 
-func copyTemplate(name, templatePath, dest string, cfg *config.Config, verbose bool) error {
+func copyTemplate(name, templatePath, dest string, verbose bool) error {
 	var spinner *shared.Spinner
 	if verbose {
 		fmt.Printf("%sCreating project...%s\n", shared.ColorYellow, shared.ColorReset)
@@ -213,7 +207,7 @@ func copyTemplate(name, templatePath, dest string, cfg *config.Config, verbose b
 		defer spinner.Stop()
 	}
 
-	if err := project.Copy(templatePath, dest, cfg); err != nil {
+	if err := project.Copy(templatePath, dest); err != nil {
 		return fmt.Errorf("failed to create project: %w", err)
 	}
 
