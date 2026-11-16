@@ -15,9 +15,10 @@ jobs:
     steps:
       - name: Get version
         id: version
+        env:
+          TAG: ${{ github.event.workflow_run.head_branch }}
         run: |
-          RAW="${{ github.event.workflow_run.head_branch }}"
-          VERSION="${RAW#v}"
+          VERSION="${TAG#v}"
           if [ -z "${VERSION}" ]; then
             echo "ERROR: could not determine version from workflow_run event" >&2
             exit 1
