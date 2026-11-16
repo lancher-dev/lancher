@@ -38,14 +38,4 @@ export default defineJaadConfig({
     ' · Made by <a href="https://lucapattocchio.dev" rel="noopener">Luca Pattocchio</a>',
     "</span>",
   ].join(""),
-
-  head: [
-    {
-      tag: "link",
-      attrs: {
-        rel: "stylesheet",
-        href: "https://www.nerdfonts.com/assets/css/webfont.css",
-      },
-    },
-  ],
 });

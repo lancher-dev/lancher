@@ -44,10 +44,6 @@ header .font-brand::before {
   color: var(--color-foreground-bright);
 }
 
-i.nf {
-  color: var(--color-foreground-bright);
-}
-
 .jaad-header {
   border-bottom: 1px solid var(--color-border-dark);
 }
