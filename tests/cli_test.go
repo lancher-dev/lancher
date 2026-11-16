@@ -164,20 +164,73 @@ func TestNewUnknownTemplate(t *testing.T) {
 
 func TestNewNonEmptyDestination(t *testing.T) {
 	isolateDataDir(t)
-	addTemplate(t, "web", map[string]string{"index.html": "hi"})
+	addTemplate(t, "web", map[string]string{"index.html": "new"})
 	dest := filepath.Join(t.TempDir(), "app")
 	writeFile(t, filepath.Join(dest, "old.txt"), "old")
+	writeFile(t, filepath.Join(dest, "index.html"), "old")
 
 	if _, err := runCLI(t, "new", "web", dest, "-y"); err == nil || !strings.Contains(err.Error(), "not empty") {
 		t.Fatalf("new into a non-empty destination: err = %v", err)
 	}
-	assertExists(t, filepath.Join(dest, "old.txt"))
-
 	if _, err := runCLI(t, "new", "web", dest, "-y", "--force"); err != nil {
 		t.Fatal(err)
 	}
-	assertMissing(t, filepath.Join(dest, "old.txt"))
-	assertExists(t, filepath.Join(dest, "index.html"))
+	assertExists(t, filepath.Join(dest, "old.txt"))
+	if data, _ := os.ReadFile(filepath.Join(dest, "index.html")); string(data) != "new" {
+		t.Errorf("index.html = %q, want it overwritten", data)
+	}
+}
+
+func TestNewIntoCurrentRepository(t *testing.T) {
+	gitEnv(t)
+	isolateDataDir(t)
+	addTemplate(t, "web", map[string]string{"index.html": "hi"})
+	repo := t.TempDir()
+	git(t, repo, "init", "-q")
+	t.Chdir(repo)
+
+	if _, err := runCLI(t, "new", "web", ".", "-y", "--force", "--git"); err != nil {
+		t.Fatal(err)
+	}
+	assertExists(t, filepath.Join(repo, "index.html"))
+	assertExists(t, filepath.Join(repo, ".git"))
+}
+
+func TestNewKeepConfig(t *testing.T) {
+	isolateDataDir(t)
+	addTemplate(t, "web", map[string]string{"lancher.yml": "name: Web\n", "f": "x"})
+	dest := filepath.Join(t.TempDir(), "app")
+
+	if _, err := runCLI(t, "new", "web", dest, "-y", "--keep-config"); err != nil {
+		t.Fatal(err)
+	}
+	assertExists(t, filepath.Join(dest, "lancher.yml"))
+}
+
+func TestNewHooksRunAfterGitInit(t *testing.T) {
+	gitEnv(t)
+	isolateDataDir(t)
+	addTemplate(t, "web", map[string]string{
+		"lancher.yml": "hooks:\n  - test -d .git && test ! -e lancher.yml && test -n \"$LANCHER_HOOK\" && touch ok\n",
+	})
+	dest := filepath.Join(t.TempDir(), "app")
+
+	if _, err := runCLI(t, "new", "web", dest, "-y", "--git", "--hooks"); err != nil {
+		t.Fatal(err)
+	}
+	assertExists(t, filepath.Join(dest, "ok"))
+}
+
+func TestNewSkipsHooksInsideHook(t *testing.T) {
+	isolateDataDir(t)
+	addTemplate(t, "web", map[string]string{"lancher.yml": "hooks:\n  - touch ran\n"})
+	dest := filepath.Join(t.TempDir(), "app")
+	t.Setenv("LANCHER_HOOK", "1")
+
+	if _, err := runCLI(t, "new", "web", dest, "-y", "--hooks"); err != nil {
+		t.Fatal(err)
+	}
+	assertMissing(t, filepath.Join(dest, "ran"))
 }
 
 func TestNewHooksNeedFlagWithYes(t *testing.T) {

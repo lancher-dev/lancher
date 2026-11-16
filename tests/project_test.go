@@ -40,7 +40,7 @@ func TestCopyExcludesGit(t *testing.T) {
 	writeFile(t, filepath.Join(src, ".git", "config"), "git config")
 	writeFile(t, filepath.Join(src, "README.md"), "# Test")
 
-	if err := project.Copy(src, dst); err != nil {
+	if err := project.Copy(src, dst, true); err != nil {
 		t.Fatalf("Copy failed: %v", err)
 	}
 
@@ -54,7 +54,7 @@ func TestCopyKeepsMetaFiles(t *testing.T) {
 	writeFile(t, filepath.Join(src, fileutil.IgnoreFileName), "*.log\n")
 	writeFile(t, filepath.Join(src, "main.go"), "package main")
 
-	if err := project.Copy(src, dst); err != nil {
+	if err := project.Copy(src, dst, true); err != nil {
 		t.Fatalf("Copy failed: %v", err)
 	}
 
@@ -69,7 +69,7 @@ func TestCopyRootPatternOnlyMatchesRoot(t *testing.T) {
 	writeFile(t, filepath.Join(src, "build", "out.js"), "out")
 	writeFile(t, filepath.Join(src, "src", "build", "keep.js"), "keep")
 
-	if err := project.Copy(src, dst); err != nil {
+	if err := project.Copy(src, dst, true); err != nil {
 		t.Fatalf("Copy failed: %v", err)
 	}
 
@@ -83,55 +83,49 @@ func TestMetaFiles(t *testing.T) {
 		t.Errorf("MetaFiles on empty dir = %v, want none", got)
 	}
 
-	// Two config files: only the highest-priority one is reported.
 	writeFile(t, filepath.Join(dir, ".lancher.yml"), "name: low")
 	writeFile(t, filepath.Join(dir, ".lancher.yaml"), "name: high")
 	writeFile(t, filepath.Join(dir, fileutil.IgnoreFileName), "*.log\n")
 
-	want := []string{".lancher.yaml", fileutil.IgnoreFileName}
-	got := project.MetaFiles(dir)
-	if !slices.Equal(got, want) {
+	want := []string{".lancher.yaml", ".lancher.yml", fileutil.IgnoreFileName}
+	if got := project.MetaFiles(dir); !slices.Equal(got, want) {
 		t.Fatalf("MetaFiles = %v, want %v", got, want)
 	}
-
-	if err := project.RemoveMetaFiles(dir, got); err != nil {
-		t.Fatalf("RemoveMetaFiles failed: %v", err)
-	}
-	assertMissing(t, filepath.Join(dir, ".lancher.yaml"))
-	assertMissing(t, filepath.Join(dir, fileutil.IgnoreFileName))
-	assertExists(t, filepath.Join(dir, ".lancher.yml"))
 }
 
-func TestCheckReplaceable(t *testing.T) {
-	base := t.TempDir()
-	cwd := filepath.Join(base, "work", "current")
-	sibling := filepath.Join(base, "other")
-	for _, d := range []string{cwd, sibling} {
-		if err := os.MkdirAll(d, 0755); err != nil {
-			t.Fatal(err)
-		}
-	}
-	t.Chdir(cwd)
-	t.Setenv("HOME", sibling)
+func TestCopyLeavesOutMetaFiles(t *testing.T) {
+	src, dst := t.TempDir(), t.TempDir()
+	writeFile(t, filepath.Join(src, "lancher.yml"), "name: test")
+	writeFile(t, filepath.Join(src, fileutil.IgnoreFileName), "*.log\n")
+	writeFile(t, filepath.Join(src, "sub", "lancher.yml"), "nested")
+	writeFile(t, filepath.Join(src, "main.go"), "package main")
 
-	tests := []struct {
-		name    string
-		dest    string
-		wantErr bool
-	}{
-		{"current directory", cwd, true},
-		{"parent of current directory", filepath.Join(base, "work"), true},
-		{"home directory", sibling, true},
-		{"filesystem root", string(filepath.Separator), true},
-		{"unrelated directory", filepath.Join(sibling, "project"), false},
-		{"subdirectory of current directory", filepath.Join(cwd, "app"), false},
+	if err := project.Copy(src, dst, false); err != nil {
+		t.Fatal(err)
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := project.CheckReplaceable(tt.dest)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("CheckReplaceable(%q) error = %v, wantErr %v", tt.dest, err, tt.wantErr)
-			}
-		})
+	assertMissing(t, filepath.Join(dst, "lancher.yml"))
+	assertMissing(t, filepath.Join(dst, fileutil.IgnoreFileName))
+	assertExists(t, filepath.Join(dst, "sub", "lancher.yml"))
+	assertExists(t, filepath.Join(dst, "main.go"))
+}
+
+func TestCopyIntoExistingDirectory(t *testing.T) {
+	src, dst := t.TempDir(), t.TempDir()
+	writeFile(t, filepath.Join(src, "README.md"), "new")
+	writeFile(t, filepath.Join(src, "src", "main.go"), "package main")
+	writeFile(t, filepath.Join(dst, "README.md"), "old")
+	writeFile(t, filepath.Join(dst, "src", "keep.go"), "keep")
+	writeFile(t, filepath.Join(dst, ".git", "config"), "mine")
+
+	if err := project.Copy(src, dst, false); err != nil {
+		t.Fatal(err)
+	}
+	if data, _ := os.ReadFile(filepath.Join(dst, "README.md")); string(data) != "new" {
+		t.Errorf("README.md = %q, want it overwritten", data)
+	}
+	assertExists(t, filepath.Join(dst, "src", "keep.go"))
+	assertExists(t, filepath.Join(dst, "src", "main.go"))
+	if data, _ := os.ReadFile(filepath.Join(dst, ".git", "config")); string(data) != "mine" {
+		t.Errorf(".git/config = %q, want it untouched", data)
 	}
 }

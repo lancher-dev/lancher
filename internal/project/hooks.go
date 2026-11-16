@@ -3,21 +3,16 @@ package project
 import (
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
-	"strings"
 )
 
-// HasLancherCommands reports whether any hook invokes lancher, in a chain or
-// pipeline too.
-func HasLancherCommands(hooks []string) bool {
-	for _, hook := range hooks {
-		for _, part := range strings.FieldsFunc(hook, func(r rune) bool { return r == ';' || r == '|' || r == '&' }) {
-			if fields := strings.Fields(part); len(fields) > 0 && fields[0] == "lancher" {
-				return true
-			}
-		}
-	}
-	return false
+// HookEnv is set in the environment of running hooks.
+const HookEnv = "LANCHER_HOOK"
+
+// InHook reports whether lancher was started by a hook.
+func InHook() bool {
+	return os.Getenv(HookEnv) != ""
 }
 
 // RunHooks runs each hook with sh -c in dir, stopping at the first failure.
@@ -29,6 +24,7 @@ func RunHooks(hooks []string, dir string, stdout, stderr io.Writer, before func(
 		}
 		cmd := exec.Command("sh", "-c", hook)
 		cmd.Dir = dir
+		cmd.Env = append(os.Environ(), HookEnv+"=1")
 		cmd.Stdout = stdout
 		cmd.Stderr = stderr
 		if err := cmd.Run(); err != nil {
