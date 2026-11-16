@@ -13,6 +13,11 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' && !contains(github.event.workflow_run.head_branch, '-') }}
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
       - name: Get version
         id: version
         env:
@@ -23,7 +28,7 @@ jobs:
             echo "ERROR: could not determine version from workflow_run event" >&2
             exit 1
           fi
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "Deploying version: ${VERSION}"
 
       - name: Download release binaries
@@ -37,10 +42,12 @@ jobs:
       - name: Calculate checksums
         id: checksums
         run: |
-          echo "sha256_darwin_amd64=$(sha256sum lancher-darwin-amd64 | awk '{print $1}')" >> $GITHUB_OUTPUT
-          echo "sha256_darwin_arm64=$(sha256sum lancher-darwin-arm64 | awk '{print $1}')" >> $GITHUB_OUTPUT
-          echo "sha256_linux_amd64=$(sha256sum lancher-linux-amd64  | awk '{print $1}')" >> $GITHUB_OUTPUT
-          echo "sha256_linux_arm64=$(sha256sum lancher-linux-arm64  | awk '{print $1}')" >> $GITHUB_OUTPUT
+          {
+            echo "sha256_darwin_amd64=$(sha256sum lancher-darwin-amd64 | awk '{print $1}')"
+            echo "sha256_darwin_arm64=$(sha256sum lancher-darwin-arm64 | awk '{print $1}')"
+            echo "sha256_linux_amd64=$(sha256sum lancher-linux-amd64 | awk '{print $1}')"
+            echo "sha256_linux_arm64=$(sha256sum lancher-linux-arm64 | awk '{print $1}')"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Checkout Homebrew tap
         uses: actions/checkout@v7
@@ -57,8 +64,9 @@ jobs:
           SHA_LINUX_AMD64:  ${{ steps.checksums.outputs.sha256_linux_amd64 }}
           SHA_LINUX_ARM64:  ${{ steps.checksums.outputs.sha256_linux_arm64 }}
         run: |
-          envsubst < homebrew-tap/.github/templates/lancher.rb.tpl \
-            > homebrew-tap/Formula/lancher.rb
+          # shellcheck disable=SC2016
+          envsubst '$VERSION $SHA_DARWIN_AMD64 $SHA_DARWIN_ARM64 $SHA_LINUX_AMD64 $SHA_LINUX_ARM64' \
+            < packaging/homebrew/lancher.rb.tpl > homebrew-tap/Formula/lancher.rb
 
       - name: Push Homebrew tap
         run: |

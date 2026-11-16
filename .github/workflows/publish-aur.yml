@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Get version
         id: version
@@ -26,7 +28,7 @@ jobs:
             echo "ERROR: could not determine version from workflow_run event" >&2
             exit 1
           fi
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "Deploying version: ${VERSION}"
 
       - name: Download release binaries
@@ -38,34 +40,17 @@ jobs:
       - name: Calculate checksums
         id: checksums
         run: |
-          echo "sha256_x86_64=$(sha256sum lancher-linux-amd64 | awk '{print $1}')" >> $GITHUB_OUTPUT
-          echo "sha256_aarch64=$(sha256sum lancher-linux-arm64 | awk '{print $1}')" >> $GITHUB_OUTPUT
+          echo "sha256_x86_64=$(sha256sum lancher-linux-amd64 | awk '{print $1}')" >> "$GITHUB_OUTPUT"
+          echo "sha256_aarch64=$(sha256sum lancher-linux-arm64 | awk '{print $1}')" >> "$GITHUB_OUTPUT"
 
       - name: Update PKGBUILD
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          SHA256_X86_64: ${{ steps.checksums.outputs.sha256_x86_64 }}
+          SHA256_AARCH64: ${{ steps.checksums.outputs.sha256_aarch64 }}
         run: |
-          VERSION=${{ steps.version.outputs.version }}
-          SHA256_X86_64=${{ steps.checksums.outputs.sha256_x86_64 }}
-          SHA256_AARCH64=${{ steps.checksums.outputs.sha256_aarch64 }}
-
-          cat > PKGBUILD << EOF
-          # Maintainer: Kasui92 <me@lucapattocchio.dev>
-          pkgname=lancher
-          pkgver=${VERSION}
-          pkgrel=1
-          pkgdesc="A minimal, local project-template manager written in Go"
-          arch=('x86_64' 'aarch64')
-          url="https://github.com/lancher-dev/lancher"
-          license=('MIT')
-          depends=('glibc')
-          source_x86_64=("\$pkgname-\$pkgver-x86_64::\$url/releases/download/v\$pkgver/\$pkgname-linux-amd64")
-          source_aarch64=("\$pkgname-\$pkgver-aarch64::\$url/releases/download/v\$pkgver/\$pkgname-linux-arm64")
-          sha256sums_x86_64=('${SHA256_X86_64}')
-          sha256sums_aarch64=('${SHA256_AARCH64}')
-
-          package() {
-            install -Dm755 "\$srcdir/\$pkgname-\$pkgver-\$CARCH" "\$pkgdir/usr/bin/\$pkgname"
-          }
-          EOF
+          # shellcheck disable=SC2016
+          envsubst '$VERSION $SHA256_X86_64 $SHA256_AARCH64' < packaging/aur/PKGBUILD.tpl > PKGBUILD
 
       - name: Publish to AUR
         uses: KSXGitHub/github-actions-deploy-aur@v4.2.0
