@@ -8,7 +8,7 @@
 A minimal, local project-template manager written in Go.
 
 <center>
-  <img src=".github/demo.gif" alt="A demo of lancher in action">
+  <img src=".github/demo.svg" alt="lancher new creates a project from a template, and lancher add saves it back as a new template">
 </center>
 
 `lancher` lets you organize and use project templates stored on your machine. You can register directories as templates, list them, and generate new projects from them. Templates can come from local directories, ZIP files or git repositories (via HTTPS or SSH), and can be synced again from their source. Each template may include a `.lancher.yaml` file for metadata and post-creation hooks, allowing you to customize how new projects are initialized.

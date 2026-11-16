@@ -1,0 +1,381 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="458" viewBox="0 0 760 458" role="img" aria-label="lancher new creates a project from a template, and lancher add saves it back as a new template">
+<style>
+text{font-family:"Fira Code",ui-monospace,SFMono-Regular,Menlo,Consolas,"DejaVu Sans Mono",monospace;font-size:14px;dominant-baseline:central;white-space:pre}
+.t{font-size:12px;fill:#9a949a;text-anchor:middle}
+.l{opacity:0;animation-duration:24466ms;animation-timing-function:step-end;animation-iteration-count:infinite}
+.c{animation:blink 1s step-end infinite}
+#s{animation:scroll 24466ms step-end infinite}
+@keyframes blink{50%{opacity:0}}
+@keyframes scroll{0%{transform:translateY(0px)}30.369%{transform:translateY(-22px)}35.273%{transform:translateY(-44px)}40.992%{transform:translateY(-66px)}51.823%{transform:translateY(-88px)}53.867%{transform:translateY(-110px)}64.976%{transform:translateY(-132px)}74.373%{transform:translateY(-154px)}78.828%{transform:translateY(-176px)}79.196%{transform:translateY(-198px)}79.563%{transform:translateY(-220px)}}
+@keyframes k0{0%{opacity:1}40.992%{opacity:0}}
+@keyframes k1{0%{opacity:0}1.635%{opacity:1}3.679%{opacity:0}}
+@keyframes k2{0%{opacity:0}3.679%{opacity:1}3.834%{opacity:0}}
+@keyframes k3{0%{opacity:0}3.834%{opacity:1}4.14%{opacity:0}}
+@keyframes k4{0%{opacity:0}4.14%{opacity:1}4.414%{opacity:0}}
+@keyframes k5{0%{opacity:0}4.414%{opacity:1}4.655%{opacity:0}}
+@keyframes k6{0%{opacity:0}4.655%{opacity:1}4.864%{opacity:0}}
+@keyframes k7{0%{opacity:0}4.864%{opacity:1}5.04%{opacity:0}}
+@keyframes k8{0%{opacity:0}5.04%{opacity:1}5.367%{opacity:0}}
+@keyframes k9{0%{opacity:0}5.367%{opacity:1}5.661%{opacity:0}}
+@keyframes k10{0%{opacity:0}5.661%{opacity:1}5.923%{opacity:0}}
+@keyframes k11{0%{opacity:0}5.923%{opacity:1}6.151%{opacity:0}}
+@keyframes k12{0%{opacity:0}6.151%{opacity:1}6.348%{opacity:0}}
+@keyframes k13{0%{opacity:0}6.348%{opacity:1}6.511%{opacity:0}}
+@keyframes k14{0%{opacity:0}6.511%{opacity:1}6.826%{opacity:0}}
+@keyframes k15{0%{opacity:0}6.826%{opacity:1}7.108%{opacity:0}}
+@keyframes k16{0%{opacity:0}7.108%{opacity:1}7.357%{opacity:0}}
+@keyframes k17{0%{opacity:0}7.357%{opacity:1}7.574%{opacity:0}}
+@keyframes k18{0%{opacity:0}7.574%{opacity:1}7.758%{opacity:0}}
+@keyframes k19{0%{opacity:0}7.758%{opacity:1}8.093%{opacity:0}}
+@keyframes k20{0%{opacity:0}8.093%{opacity:1}8.395%{opacity:0}}
+@keyframes k21{0%{opacity:0}8.395%{opacity:1}8.665%{opacity:0}}
+@keyframes k22{0%{opacity:0}8.665%{opacity:1}8.902%{opacity:0}}
+@keyframes k23{0%{opacity:0}8.902%{opacity:1}9.107%{opacity:0}}
+@keyframes k24{0%{opacity:0}9.107%{opacity:1}9.278%{opacity:0}}
+@keyframes k25{0%{opacity:0}9.278%{opacity:1}9.601%{opacity:0}}
+@keyframes k26{0%{opacity:0}9.601%{opacity:1}11.322%{opacity:0}}
+@keyframes k27{0%{opacity:0}11.322%{opacity:1}}
+@keyframes k28{0%{opacity:0}11.322%{opacity:1}}
+@keyframes k29{0%{opacity:0}11.485%{opacity:1}}
+@keyframes k30{0%{opacity:0}11.853%{opacity:1}}
+@keyframes k31{0%{opacity:0}12.221%{opacity:1}}
+@keyframes k32{0%{opacity:0}12.589%{opacity:1}}
+@keyframes k33{0%{opacity:0}12.752%{opacity:1}}
+@keyframes k34{0%{opacity:0}13.12%{opacity:1}}
+@keyframes k35{0%{opacity:0}13.488%{opacity:1}16.145%{opacity:0}}
+@keyframes k36{0%{opacity:0}16.145%{opacity:1}17.167%{opacity:0}}
+@keyframes k37{0%{opacity:0}17.167%{opacity:1}}
+@keyframes k38{0%{opacity:0}17.167%{opacity:1}19.823%{opacity:0}}
+@keyframes k39{0%{opacity:0}19.823%{opacity:1}20.845%{opacity:0}}
+@keyframes k40{0%{opacity:0}20.845%{opacity:1}}
+@keyframes k41{0%{opacity:0}20.845%{opacity:1}}
+@keyframes k42{0%{opacity:0}21.009%{opacity:1}}
+@keyframes k43{0%{opacity:0}21.377%{opacity:1}24.033%{opacity:0}}
+@keyframes k44{0%{opacity:0}24.033%{opacity:1}25.055%{opacity:0}}
+@keyframes k45{0%{opacity:0}25.055%{opacity:1}}
+@keyframes k46{0%{opacity:0}25.055%{opacity:1}25.464%{opacity:0}}
+@keyframes k47{0%{opacity:0}25.464%{opacity:1}25.873%{opacity:0}}
+@keyframes k48{0%{opacity:0}25.873%{opacity:1}26.281%{opacity:0}}
+@keyframes k49{0%{opacity:0}26.281%{opacity:1}26.69%{opacity:0}}
+@keyframes k50{0%{opacity:0}26.69%{opacity:1}27.099%{opacity:0}}
+@keyframes k51{0%{opacity:0}27.099%{opacity:1}27.508%{opacity:0}}
+@keyframes k52{0%{opacity:0}27.508%{opacity:1}27.916%{opacity:0}}
+@keyframes k53{0%{opacity:0}27.916%{opacity:1}28.325%{opacity:0}}
+@keyframes k54{0%{opacity:0}28.325%{opacity:1}28.734%{opacity:0}}
+@keyframes k55{0%{opacity:0}28.734%{opacity:1}}
+@keyframes k56{0%{opacity:0}29.102%{opacity:1}}
+@keyframes k57{0%{opacity:0}29.469%{opacity:1}}
+@keyframes k58{0%{opacity:0}29.837%{opacity:1}}
+@keyframes k59{0%{opacity:0}30.001%{opacity:1}}
+@keyframes k60{0%{opacity:0}30.369%{opacity:1}}
+@keyframes k61{0%{opacity:0}35.273%{opacity:1}37.317%{opacity:0}}
+@keyframes k62{0%{opacity:0}37.317%{opacity:1}37.472%{opacity:0}}
+@keyframes k63{0%{opacity:0}37.472%{opacity:1}37.779%{opacity:0}}
+@keyframes k64{0%{opacity:0}37.779%{opacity:1}38.053%{opacity:0}}
+@keyframes k65{0%{opacity:0}38.053%{opacity:1}38.294%{opacity:0}}
+@keyframes k66{0%{opacity:0}38.294%{opacity:1}38.502%{opacity:0}}
+@keyframes k67{0%{opacity:0}38.502%{opacity:1}38.678%{opacity:0}}
+@keyframes k68{0%{opacity:0}38.678%{opacity:1}39.005%{opacity:0}}
+@keyframes k69{0%{opacity:0}39.005%{opacity:1}39.299%{opacity:0}}
+@keyframes k70{0%{opacity:0}39.299%{opacity:1}40.992%{opacity:0}}
+@keyframes k71{0%{opacity:0}40.992%{opacity:1}}
+@keyframes k72{0%{opacity:0}40.992%{opacity:1}}
+@keyframes k73{0%{opacity:0}40.992%{opacity:1}43.035%{opacity:0}}
+@keyframes k74{0%{opacity:0}43.035%{opacity:1}43.191%{opacity:0}}
+@keyframes k75{0%{opacity:0}43.191%{opacity:1}43.497%{opacity:0}}
+@keyframes k76{0%{opacity:0}43.497%{opacity:1}43.771%{opacity:0}}
+@keyframes k77{0%{opacity:0}43.771%{opacity:1}44.012%{opacity:0}}
+@keyframes k78{0%{opacity:0}44.012%{opacity:1}44.221%{opacity:0}}
+@keyframes k79{0%{opacity:0}44.221%{opacity:1}44.396%{opacity:0}}
+@keyframes k80{0%{opacity:0}44.396%{opacity:1}44.723%{opacity:0}}
+@keyframes k81{0%{opacity:0}44.723%{opacity:1}45.018%{opacity:0}}
+@keyframes k82{0%{opacity:0}45.018%{opacity:1}45.279%{opacity:0}}
+@keyframes k83{0%{opacity:0}45.279%{opacity:1}45.508%{opacity:0}}
+@keyframes k84{0%{opacity:0}45.508%{opacity:1}45.704%{opacity:0}}
+@keyframes k85{0%{opacity:0}45.704%{opacity:1}45.868%{opacity:0}}
+@keyframes k86{0%{opacity:0}45.868%{opacity:1}46.182%{opacity:0}}
+@keyframes k87{0%{opacity:0}46.182%{opacity:1}46.464%{opacity:0}}
+@keyframes k88{0%{opacity:0}46.464%{opacity:1}46.714%{opacity:0}}
+@keyframes k89{0%{opacity:0}46.714%{opacity:1}46.93%{opacity:0}}
+@keyframes k90{0%{opacity:0}46.93%{opacity:1}47.114%{opacity:0}}
+@keyframes k91{0%{opacity:0}47.114%{opacity:1}47.45%{opacity:0}}
+@keyframes k92{0%{opacity:0}47.45%{opacity:1}47.752%{opacity:0}}
+@keyframes k93{0%{opacity:0}47.752%{opacity:1}48.022%{opacity:0}}
+@keyframes k94{0%{opacity:0}48.022%{opacity:1}48.259%{opacity:0}}
+@keyframes k95{0%{opacity:0}48.259%{opacity:1}48.463%{opacity:0}}
+@keyframes k96{0%{opacity:0}48.463%{opacity:1}48.635%{opacity:0}}
+@keyframes k97{0%{opacity:0}48.635%{opacity:1}48.958%{opacity:0}}
+@keyframes k98{0%{opacity:0}48.958%{opacity:1}49.248%{opacity:0}}
+@keyframes k99{0%{opacity:0}49.248%{opacity:1}49.505%{opacity:0}}
+@keyframes k100{0%{opacity:0}49.505%{opacity:1}49.73%{opacity:0}}
+@keyframes k101{0%{opacity:0}49.73%{opacity:1}49.922%{opacity:0}}
+@keyframes k102{0%{opacity:0}49.922%{opacity:1}50.082%{opacity:0}}
+@keyframes k103{0%{opacity:0}50.082%{opacity:1}51.823%{opacity:0}}
+@keyframes k104{0%{opacity:0}51.823%{opacity:1}}
+@keyframes k105{0%{opacity:0}51.823%{opacity:1}}
+@keyframes k106{0%{opacity:0}53.867%{opacity:1}55.91%{opacity:0}}
+@keyframes k107{0%{opacity:0}55.91%{opacity:1}56.066%{opacity:0}}
+@keyframes k108{0%{opacity:0}56.066%{opacity:1}56.372%{opacity:0}}
+@keyframes k109{0%{opacity:0}56.372%{opacity:1}56.646%{opacity:0}}
+@keyframes k110{0%{opacity:0}56.646%{opacity:1}56.887%{opacity:0}}
+@keyframes k111{0%{opacity:0}56.887%{opacity:1}57.096%{opacity:0}}
+@keyframes k112{0%{opacity:0}57.096%{opacity:1}57.271%{opacity:0}}
+@keyframes k113{0%{opacity:0}57.271%{opacity:1}57.598%{opacity:0}}
+@keyframes k114{0%{opacity:0}57.598%{opacity:1}57.893%{opacity:0}}
+@keyframes k115{0%{opacity:0}57.893%{opacity:1}58.154%{opacity:0}}
+@keyframes k116{0%{opacity:0}58.154%{opacity:1}58.383%{opacity:0}}
+@keyframes k117{0%{opacity:0}58.383%{opacity:1}58.579%{opacity:0}}
+@keyframes k118{0%{opacity:0}58.579%{opacity:1}58.743%{opacity:0}}
+@keyframes k119{0%{opacity:0}58.743%{opacity:1}59.057%{opacity:0}}
+@keyframes k120{0%{opacity:0}59.057%{opacity:1}59.339%{opacity:0}}
+@keyframes k121{0%{opacity:0}59.339%{opacity:1}59.589%{opacity:0}}
+@keyframes k122{0%{opacity:0}59.589%{opacity:1}59.805%{opacity:0}}
+@keyframes k123{0%{opacity:0}59.805%{opacity:1}59.989%{opacity:0}}
+@keyframes k124{0%{opacity:0}59.989%{opacity:1}60.325%{opacity:0}}
+@keyframes k125{0%{opacity:0}60.325%{opacity:1}60.627%{opacity:0}}
+@keyframes k126{0%{opacity:0}60.627%{opacity:1}60.897%{opacity:0}}
+@keyframes k127{0%{opacity:0}60.897%{opacity:1}61.134%{opacity:0}}
+@keyframes k128{0%{opacity:0}61.134%{opacity:1}61.338%{opacity:0}}
+@keyframes k129{0%{opacity:0}61.338%{opacity:1}61.51%{opacity:0}}
+@keyframes k130{0%{opacity:0}61.51%{opacity:1}61.833%{opacity:0}}
+@keyframes k131{0%{opacity:0}61.833%{opacity:1}62.123%{opacity:0}}
+@keyframes k132{0%{opacity:0}62.123%{opacity:1}62.38%{opacity:0}}
+@keyframes k133{0%{opacity:0}62.38%{opacity:1}62.605%{opacity:0}}
+@keyframes k134{0%{opacity:0}62.605%{opacity:1}62.797%{opacity:0}}
+@keyframes k135{0%{opacity:0}62.797%{opacity:1}62.957%{opacity:0}}
+@keyframes k136{0%{opacity:0}62.957%{opacity:1}63.267%{opacity:0}}
+@keyframes k137{0%{opacity:0}63.267%{opacity:1}64.976%{opacity:0}}
+@keyframes k138{0%{opacity:0}64.976%{opacity:1}}
+@keyframes k139{0%{opacity:0}64.976%{opacity:1}67.02%{opacity:0}}
+@keyframes k140{0%{opacity:0}67.02%{opacity:1}67.175%{opacity:0}}
+@keyframes k141{0%{opacity:0}67.175%{opacity:1}67.481%{opacity:0}}
+@keyframes k142{0%{opacity:0}67.481%{opacity:1}67.755%{opacity:0}}
+@keyframes k143{0%{opacity:0}67.755%{opacity:1}67.996%{opacity:0}}
+@keyframes k144{0%{opacity:0}67.996%{opacity:1}68.205%{opacity:0}}
+@keyframes k145{0%{opacity:0}68.205%{opacity:1}68.381%{opacity:0}}
+@keyframes k146{0%{opacity:0}68.381%{opacity:1}68.708%{opacity:0}}
+@keyframes k147{0%{opacity:0}68.708%{opacity:1}69.002%{opacity:0}}
+@keyframes k148{0%{opacity:0}69.002%{opacity:1}69.263%{opacity:0}}
+@keyframes k149{0%{opacity:0}69.263%{opacity:1}69.492%{opacity:0}}
+@keyframes k150{0%{opacity:0}69.492%{opacity:1}69.689%{opacity:0}}
+@keyframes k151{0%{opacity:0}69.689%{opacity:1}69.852%{opacity:0}}
+@keyframes k152{0%{opacity:0}69.852%{opacity:1}70.167%{opacity:0}}
+@keyframes k153{0%{opacity:0}70.167%{opacity:1}70.449%{opacity:0}}
+@keyframes k154{0%{opacity:0}70.449%{opacity:1}70.698%{opacity:0}}
+@keyframes k155{0%{opacity:0}70.698%{opacity:1}70.915%{opacity:0}}
+@keyframes k156{0%{opacity:0}70.915%{opacity:1}71.099%{opacity:0}}
+@keyframes k157{0%{opacity:0}71.099%{opacity:1}71.434%{opacity:0}}
+@keyframes k158{0%{opacity:0}71.434%{opacity:1}71.736%{opacity:0}}
+@keyframes k159{0%{opacity:0}71.736%{opacity:1}72.006%{opacity:0}}
+@keyframes k160{0%{opacity:0}72.006%{opacity:1}72.243%{opacity:0}}
+@keyframes k161{0%{opacity:0}72.243%{opacity:1}72.447%{opacity:0}}
+@keyframes k162{0%{opacity:0}72.447%{opacity:1}72.619%{opacity:0}}
+@keyframes k163{0%{opacity:0}72.619%{opacity:1}74.373%{opacity:0}}
+@keyframes k164{0%{opacity:0}74.373%{opacity:1}}
+@keyframes k165{0%{opacity:0}74.373%{opacity:1}74.781%{opacity:0}}
+@keyframes k166{0%{opacity:0}74.781%{opacity:1}75.19%{opacity:0}}
+@keyframes k167{0%{opacity:0}75.19%{opacity:1}75.599%{opacity:0}}
+@keyframes k168{0%{opacity:0}75.599%{opacity:1}76.008%{opacity:0}}
+@keyframes k169{0%{opacity:0}76.008%{opacity:1}76.416%{opacity:0}}
+@keyframes k170{0%{opacity:0}76.416%{opacity:1}76.825%{opacity:0}}
+@keyframes k171{0%{opacity:0}76.825%{opacity:1}77.234%{opacity:0}}
+@keyframes k172{0%{opacity:0}77.234%{opacity:1}77.642%{opacity:0}}
+@keyframes k173{0%{opacity:0}77.642%{opacity:1}78.051%{opacity:0}}
+@keyframes k174{0%{opacity:0}78.051%{opacity:1}78.46%{opacity:0}}
+@keyframes k175{0%{opacity:0}78.46%{opacity:1}}
+@keyframes k176{0%{opacity:0}78.828%{opacity:1}}
+@keyframes k177{0%{opacity:0}79.196%{opacity:1}}
+@keyframes k178{0%{opacity:0}79.563%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.l,.c,#s{animation:none}.f{opacity:1}#s{transform:translateY(-220px)}}
+</style>
+<clipPath id="w"><rect width="760" height="458" rx="10"/></clipPath>
+<clipPath id="b"><rect y="48" width="760" height="396"/></clipPath>
+<g clip-path="url(#w)">
+<rect width="760" height="458" fill="#141214"/>
+<rect width="760" height="34" fill="#1b181b"/>
+<rect y="33" width="760" height="1" fill="#2e2a2e"/>
+<circle cx="18" cy="17" r="6" fill="#3f3a3f"/><circle cx="38" cy="17" r="6" fill="#3f3a3f"/><circle cx="58" cy="17" r="6" fill="#3f3a3f"/>
+<text class="l" style="animation-name:k0" class="t" x="380" y="17">lancher · ~/code</text>
+<text class="l f" style="animation-name:k71" class="t" x="380" y="17">lancher · ~/code/my-api</text>
+<g clip-path="url(#b)"><g id="s">
+<text class="l" style="animation-name:k1" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k2" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">l</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k3" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">la</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k4" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lan</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k5" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lanc</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k6" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lanch</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k7" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lanche</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k8" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k9" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher </tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k10" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher n</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k11" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher ne</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k12" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher new</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k13" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher new </tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k14" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher new g</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k15" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher new go</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k16" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher new go-</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k17" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher new go-a</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k18" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher new go-ap</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k19" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher new go-api</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k20" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher new go-api </tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k21" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher new go-api m</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k22" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher new go-api my</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k23" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher new go-api my-</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k24" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher new go-api my-a</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k25" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher new go-api my-ap</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k26" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher new go-api my-api</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l f" style="animation-name:k27" x="18" y="59"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher new go-api my-api</tspan></text>
+<text class="l f" style="animation-name:k28" x="18" y="81"></text>
+<text class="l f" style="animation-name:k29" x="18" y="103"><tspan fill="#7fc8c8" font-weight="700">Template Information:</tspan></text>
+<text class="l f" style="animation-name:k30" x="18" y="125"><tspan fill="#9a949a">    Name:</tspan><tspan fill="#e0e0e0"> Go API</tspan></text>
+<text class="l f" style="animation-name:k31" x="18" y="147"><tspan fill="#9a949a">    Description:</tspan><tspan fill="#e0e0e0"> HTTP service with chi</tspan></text>
+<text class="l f" style="animation-name:k32" x="18" y="169"></text>
+<text class="l f" style="animation-name:k33" x="18" y="191"><tspan fill="#7fc8c8" font-weight="700">Hooks found:</tspan></text>
+<text class="l f" style="animation-name:k34" x="18" y="213"><tspan fill="#e0e0e0">  1. go mod tidy</tspan></text>
+<text class="l" style="animation-name:k35" x="18" y="235"><tspan fill="#e0af68">Execute hooks? (y/N): </tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k36" x="18" y="235"><tspan fill="#e0af68">Execute hooks? (y/N): </tspan><tspan fill="#e0e0e0">y</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l f" style="animation-name:k37" x="18" y="235"><tspan fill="#e0af68">Execute hooks? (y/N): </tspan><tspan fill="#e0e0e0">y</tspan></text>
+<text class="l" style="animation-name:k38" x="18" y="257"><tspan fill="#e0af68">Initialize git repository? (y/N): </tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k39" x="18" y="257"><tspan fill="#e0af68">Initialize git repository? (y/N): </tspan><tspan fill="#e0e0e0">y</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l f" style="animation-name:k40" x="18" y="257"><tspan fill="#e0af68">Initialize git repository? (y/N): </tspan><tspan fill="#e0e0e0">y</tspan></text>
+<text class="l f" style="animation-name:k41" x="18" y="279"></text>
+<text class="l f" style="animation-name:k42" x="18" y="301"><tspan fill="#7fc8c8" font-weight="700">Lancher files in the template:</tspan><tspan fill="#e0e0e0"> .lancher.yaml</tspan></text>
+<text class="l" style="animation-name:k43" x="18" y="323"><tspan fill="#e0af68">Copy them to the project? (y/N): </tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k44" x="18" y="323"><tspan fill="#e0af68">Copy them to the project? (y/N): </tspan><tspan fill="#e0e0e0">y</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l f" style="animation-name:k45" x="18" y="323"><tspan fill="#e0af68">Copy them to the project? (y/N): </tspan><tspan fill="#e0e0e0">y</tspan></text>
+<text class="l" style="animation-name:k46" x="18" y="345"><tspan fill="#e0af68">-</tspan><tspan fill="#e0e0e0"> Creating project...</tspan></text>
+<text class="l" style="animation-name:k47" x="18" y="345"><tspan fill="#e0af68">\</tspan><tspan fill="#e0e0e0"> Creating project...</tspan></text>
+<text class="l" style="animation-name:k48" x="18" y="345"><tspan fill="#e0af68">|</tspan><tspan fill="#e0e0e0"> Creating project...</tspan></text>
+<text class="l" style="animation-name:k49" x="18" y="345"><tspan fill="#e0af68">/</tspan><tspan fill="#e0e0e0"> Creating project...</tspan></text>
+<text class="l" style="animation-name:k50" x="18" y="345"><tspan fill="#e0af68">-</tspan><tspan fill="#e0e0e0"> Creating project...</tspan></text>
+<text class="l" style="animation-name:k51" x="18" y="345"><tspan fill="#e0af68">\</tspan><tspan fill="#e0e0e0"> Creating project...</tspan></text>
+<text class="l" style="animation-name:k52" x="18" y="345"><tspan fill="#e0af68">|</tspan><tspan fill="#e0e0e0"> Creating project...</tspan></text>
+<text class="l" style="animation-name:k53" x="18" y="345"><tspan fill="#e0af68">/</tspan><tspan fill="#e0e0e0"> Creating project...</tspan></text>
+<text class="l" style="animation-name:k54" x="18" y="345"><tspan fill="#e0af68">-</tspan><tspan fill="#e0e0e0"> Creating project...</tspan></text>
+<text class="l f" style="animation-name:k55" x="18" y="345"><tspan fill="#89b29e">✓ Project created from template 'go-api'</tspan></text>
+<text class="l f" style="animation-name:k56" x="18" y="367"><tspan fill="#e0af68">  Location:</tspan><tspan fill="#e0e0e0"> /home/me/code/my-api</tspan></text>
+<text class="l f" style="animation-name:k57" x="18" y="389"><tspan fill="#89b29e">✓ Git repository initialized</tspan></text>
+<text class="l f" style="animation-name:k58" x="18" y="411"></text>
+<text class="l f" style="animation-name:k59" x="18" y="433"><tspan fill="#7fc8c8">Executing hook 1/1:</tspan><tspan fill="#e0e0e0"> go mod tidy</tspan></text>
+<text class="l f" style="animation-name:k60" x="18" y="455"><tspan fill="#89b29e">✓ All hooks executed successfully</tspan></text>
+<text class="l" style="animation-name:k61" x="18" y="477"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k62" x="18" y="477"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">c</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k63" x="18" y="477"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cd</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k64" x="18" y="477"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cd </tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k65" x="18" y="477"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cd m</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k66" x="18" y="477"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cd my</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k67" x="18" y="477"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cd my-</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k68" x="18" y="477"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cd my-a</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k69" x="18" y="477"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cd my-ap</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k70" x="18" y="477"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cd my-api</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l f" style="animation-name:k72" x="18" y="477"><tspan fill="#c5d4c8">~/code </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cd my-api</tspan></text>
+<text class="l" style="animation-name:k73" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k74" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">g</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k75" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k76" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go </tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k77" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go g</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k78" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go ge</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k79" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k80" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get </tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k81" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get g</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k82" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get gi</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k83" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get git</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k84" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get gith</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k85" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get githu</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k86" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get github</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k87" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get github.</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k88" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get github.c</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k89" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get github.co</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k90" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get github.com</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k91" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get github.com/</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k92" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get github.com/j</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k93" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get github.com/ja</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k94" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get github.com/jac</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k95" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get github.com/jack</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k96" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get github.com/jackc</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k97" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get github.com/jackc/</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k98" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get github.com/jackc/p</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k99" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get github.com/jackc/pg</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k100" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get github.com/jackc/pgx</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k101" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get github.com/jackc/pgx/</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k102" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get github.com/jackc/pgx/v</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k103" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get github.com/jackc/pgx/v5</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l f" style="animation-name:k104" x="18" y="499"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">go get github.com/jackc/pgx/v5</tspan></text>
+<text class="l f" style="animation-name:k105" x="18" y="521"><tspan fill="#9a949a">go: added github.com/jackc/pgx/v5 v5.7.2</tspan></text>
+<text class="l" style="animation-name:k106" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k107" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">c</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k108" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k109" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp </tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k110" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k111" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k112" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r </tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k113" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k114" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k115" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/s</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k116" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/sn</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k117" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/sni</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k118" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/snip</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k119" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/snipp</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k120" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/snippe</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k121" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/snippet</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k122" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/snippets</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k123" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/snippets/</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k124" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/snippets/d</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k125" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/snippets/db</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k126" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/snippets/db </tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k127" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/snippets/db i</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k128" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/snippets/db in</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k129" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/snippets/db int</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k130" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/snippets/db inte</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k131" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/snippets/db inter</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k132" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/snippets/db intern</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k133" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/snippets/db interna</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k134" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/snippets/db internal</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k135" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/snippets/db internal/</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k136" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/snippets/db internal/d</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k137" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/snippets/db internal/db</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l f" style="animation-name:k138" x="18" y="543"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">cp -r ~/snippets/db internal/db</tspan></text>
+<text class="l" style="animation-name:k139" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k140" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">l</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k141" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">la</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k142" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lan</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k143" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lanc</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k144" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lanch</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k145" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lanche</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k146" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k147" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher </tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k148" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher a</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k149" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher ad</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k150" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher add</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k151" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher add </tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k152" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher add .</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k153" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher add . </tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k154" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher add . g</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k155" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher add . go</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k156" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher add . go-</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k157" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher add . go-a</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k158" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher add . go-ap</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k159" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher add . go-api</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k160" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher add . go-api-</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k161" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher add . go-api-p</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k162" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher add . go-api-pg</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l" style="animation-name:k163" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher add . go-api-pgx</tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+<text class="l f" style="animation-name:k164" x="18" y="565"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan fill="#e0e0e0">lancher add . go-api-pgx</tspan></text>
+<text class="l" style="animation-name:k165" x="18" y="587"><tspan fill="#e0af68">-</tspan><tspan fill="#e0e0e0"> Copying template...</tspan></text>
+<text class="l" style="animation-name:k166" x="18" y="587"><tspan fill="#e0af68">\</tspan><tspan fill="#e0e0e0"> Copying template...</tspan></text>
+<text class="l" style="animation-name:k167" x="18" y="587"><tspan fill="#e0af68">|</tspan><tspan fill="#e0e0e0"> Copying template...</tspan></text>
+<text class="l" style="animation-name:k168" x="18" y="587"><tspan fill="#e0af68">/</tspan><tspan fill="#e0e0e0"> Copying template...</tspan></text>
+<text class="l" style="animation-name:k169" x="18" y="587"><tspan fill="#e0af68">-</tspan><tspan fill="#e0e0e0"> Copying template...</tspan></text>
+<text class="l" style="animation-name:k170" x="18" y="587"><tspan fill="#e0af68">\</tspan><tspan fill="#e0e0e0"> Copying template...</tspan></text>
+<text class="l" style="animation-name:k171" x="18" y="587"><tspan fill="#e0af68">|</tspan><tspan fill="#e0e0e0"> Copying template...</tspan></text>
+<text class="l" style="animation-name:k172" x="18" y="587"><tspan fill="#e0af68">/</tspan><tspan fill="#e0e0e0"> Copying template...</tspan></text>
+<text class="l" style="animation-name:k173" x="18" y="587"><tspan fill="#e0af68">-</tspan><tspan fill="#e0e0e0"> Copying template...</tspan></text>
+<text class="l" style="animation-name:k174" x="18" y="587"><tspan fill="#e0af68">\</tspan><tspan fill="#e0e0e0"> Copying template...</tspan></text>
+<text class="l f" style="animation-name:k175" x="18" y="587"><tspan fill="#89b29e">✓ Template 'go-api-pgx' added</tspan></text>
+<text class="l f" style="animation-name:k176" x="18" y="609"><tspan fill="#e0af68">  Source:</tspan><tspan fill="#e0e0e0"> /home/me/code/my-api</tspan></text>
+<text class="l f" style="animation-name:k177" x="18" y="631"><tspan fill="#e0af68">  Stored:</tspan><tspan fill="#e0e0e0"> /home/me/.local/share/lancher/templates/go-api-pgx</tspan></text>
+<text class="l f" style="animation-name:k178" x="18" y="653"><tspan fill="#c5d4c8">~/code/my-api </tspan><tspan fill="#89b29e">$ </tspan><tspan class="c" fill="#c5d4c8">█</tspan></text>
+</g></g>
+</g>
+<rect x="0.5" y="0.5" width="759" height="457" rx="10" fill="none" stroke="#3a353a"/>
+</svg>

@@ -8,6 +8,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "check": "astro check",
+    "demo": "node scripts/demo-svg.ts ../.github/demo.svg",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
     "lint": "eslint .",
