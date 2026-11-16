@@ -1,109 +1,159 @@
 # Managing Templates
 
-Lancher manages project templates from multiple sources: local filesystem, Zip files, or git repositories (HTTPS/SSH). Templates are stored in platform-specific directories and can be listed, updated, or removed as needed.
+lancher stores templates in its [data directory](/docs/reference/storage). A template can come from a local directory, a ZIP file or a git repository, and lancher remembers its source so that `lancher sync` can fetch it again.
 
 ## Add Templates
 
-Templates can be sourced from local directories, remote git repositories, or GitHub/GitLab. Local templates are copied to lancher's storage, while git templates are cloned and can be kept up-to-date. Use the interactive mode to get guided through the process.
-
-### From Local Directory
-
-Copies the directory structure from the specified path into lancher's template storage.
-
 ```bash
-lancher template add <name> <path>
+lancher add <source> [name]
 ```
 
-Example:
+The name defaults to the repository, directory or ZIP file name. Names use letters, digits, `.`, `_` and `-`, and start with a letter or a digit.
+
+Without arguments, lancher asks for the source and the name:
 
 ```bash
-lancher template add nextjs ~/projects/nextjs-base
+lancher add
 ```
 
-### From Git Repository
-
-Git-based templates maintain their repository history for pulling updates later. Authentication uses your git configuration.
+If a template with the same name exists, `add` stops. Use `--force` to replace it: the old template is replaced only after the new one has been fetched.
 
 ```bash
-lancher template add <name> <git-url>
+lancher add --force ~/projects/api-base
 ```
 
-Examples:
+### From a Local Directory
+
+lancher copies the directory, without its `.git` directory and without the paths listed in its [`.lancherignore`](/docs/configuration/lancher-ignore-file).
+
+```bash
+lancher add ~/projects/api-base
+lancher add ~/projects/api-base api
+```
+
+### From a ZIP File
+
+lancher extracts the file. If every entry is inside a single top-level directory, that directory becomes the template root.
+
+```bash
+lancher add ./starter.zip
+```
+
+### From a Git Repository
+
+lancher clones the latest commit of the default branch. Authentication uses your git configuration: SSH keys or a credential helper. git does not prompt for a password unless you pass `--verbose`, which also shows its output.
 
 ```bash
 # HTTPS
-lancher template add react https://github.com/user/react-template
+lancher add https://github.com/user/react-template
 
 # SSH
-lancher template add vue git@github.com:user/vue-template.git
+lancher add git@github.com:user/vue-template.git
 ```
 
-### From GitHub/GitLab CLI
+### From GitHub or GitLab
 
-Use the `gh:` (GitHub) and `gl:` (GitLab) aliases to add templates via [github-cli](https://cli.github.com/) or [gitlab-cli](https://gitlab.com/gitlab-org/cli). Lancher checks for CLI presence first, otherwise falls back to HTTPS URLs.
+`gh:` and `gl:` are short forms for GitHub and GitLab repositories. lancher clones them with [GitHub CLI](https://cli.github.com/) or [GitLab CLI](https://gitlab.com/gitlab-org/cli) when installed, so their login is used, and with git over HTTPS otherwise.
 
 ```bash
-lancher template add <name> gh:<user/organization>/<repo>
-lancher template add <name> gl:<user/team>/<repo>
+lancher add gh:user/react-template
+lancher add gl:group/vue-template
 ```
 
-Examples:
-
-```bash
-# GitHub
-lancher template add react gh:user/react-template
-
-# GitLab
-lancher template add vue gl:user/vue-template.git
-```
+> [!NOTE]
+> A git template keeps its `.git` directory, which `lancher sync` and `lancher info` use. `lancher new` never copies it to new projects.
 
 ## List Templates
 
 ```bash
-lancher template list
+lancher list
 # or
-lancher template ls
+lancher ls
 ```
 
-The list command provides a quick overview of all available templates, showing name, storage path, and any metadata from the template configuration (description, author, version) when a `.lancher.yaml` is present.
+For each template, `list` shows its path, its source and the metadata from its [`.lancher.yaml`](/docs/configuration/lancher-file), with any warning about the config file.
 
-## Update Templates
+```
+Available Templates:
 
-Keep your templates synchronized with their sources. Git templates can fetch latest changes, while any template can be completely replaced.
+  • api-base
+    Path: ~/.local/share/lancher/templates/api-base
+    Source: ~/projects/api-base (local)
+    Name: API base
+    Description: Go HTTP API
+```
 
-### Git Templates
+`--json` prints the templates as JSON, for scripts:
 
 ```bash
-lancher template update <name>
+lancher list --json
 ```
 
-Performs `git pull` to fetch latest changes from the remote repository. Only works for templates added via git.
-
-> [!Note]
-> Although a git configuration may be present in the template, all references to it are not imported when creating a new project. To keep new projects always "fresh", everything in the `.git/` folder is ignored.
-
-### Overwrite with New Files
+## Inspect a Template
 
 ```bash
-lancher template update <name> -d <new-path>
+lancher info <template>
 ```
 
-Replaces the entire template with content from the new path.
+`info` shows the path, the source, the git commit, when the template was added and synced, its metadata and its hooks. Read the hooks here before running them with `lancher new`.
+
+```
+api-base
+    Path: ~/.local/share/lancher/templates/api-base
+    Source: ~/projects/api-base (local)
+    Added: 2026-11-16 18:12
+    Synced: 2026-11-16 18:12
+    Name: API base
+    Description: Go HTTP API
+    Hooks:
+      1. go mod tidy
+      2. git add -A
+```
+
+## Sync Templates
+
+```bash
+lancher sync [template...]
+```
+
+`sync` fetches templates again from their sources: a new clone for git repositories, a new copy for directories and ZIP files. A template is replaced only if the fetch succeeds. Without arguments, lancher syncs every template.
+
+```bash
+lancher sync           # every template
+lancher sync api web   # only these
+```
+
+`sync` skips, with a warning, a template whose source is unknown or no longer exists, and goes on with the others. It exits with an error if a fetch fails.
+
+```
+⚠ 'handmade' skipped: unknown source (re-add it with: lancher add --force <source> handmade)
+```
+
+To change the source of a template, add it again with `--force`.
 
 ## Remove Templates
 
-Delete templates from storage when no longer needed. This permanently removes the template directory.
-
 ```bash
-lancher template remove <name>
+lancher remove <name...>
 # or
-lancher template rm <name>
+lancher rm <name...>
 ```
 
-Interactive mode (multiple select from list):
+Without arguments, lancher lists the templates and lets you select the ones to remove:
 
 ```bash
-lancher template remove
+lancher remove
 ```
 
-**Warning:** This action cannot be undone.
+> [!WARNING]
+> Removing a template deletes its directory. It cannot be undone.
+
+## Open the Templates Directory
+
+```bash
+lancher cd [template]
+```
+
+`cd` opens a shell in the templates directory, or in the directory of a template. Edit the files there, then `exit` to return. It needs a terminal, and cannot be started from a shell that `cd` opened. The shell has `LANCHER_CD` set to its directory, which you can show in your prompt.
+
+Changes made there are lost at the next `lancher sync` of that template.

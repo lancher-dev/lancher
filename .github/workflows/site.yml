@@ -7,12 +7,14 @@ on:
     branches: [main]
     paths:
       - "site/**"
+      - ".github/demo.svg"
       - "bin/install.sh"
       - "bin/uninstall.sh"
       - ".github/workflows/site.yml"
   pull_request:
     paths:
       - "site/**"
+      - ".github/demo.svg"
       - "bin/install.sh"
       - "bin/uninstall.sh"
       - ".github/workflows/site.yml"
@@ -92,6 +94,12 @@ jobs:
 
       - name: Check formatting
         run: pnpm format
+
+      - name: Check types
+        run: pnpm check
+
+      - name: Check the README demo is up to date
+        run: pnpm demo && git diff --exit-code ../.github/demo.svg
 
       - name: Build
         run: pnpm build

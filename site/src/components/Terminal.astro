@@ -1,0 +1,256 @@
+---
+import ArrowCounterClockwise from "phosphor-astro/ArrowCounterClockwise.astro";
+import { END_DIR, finalLines } from "./terminal/story";
+
+const lines = finalLines();
+---
+
+<div class="term" data-terminal>
+  <div class="term-bar">
+    <span class="term-dots" aria-hidden="true">
+      <span></span>
+      <span></span>
+      <span></span>
+    </span>
+    <span class="term-title" data-term-title>
+      lancher · {END_DIR}
+    </span>
+    <button
+      class="term-replay"
+      type="button"
+      data-term-replay
+      hidden
+      aria-label="Replay the demo"
+      title="Replay"
+    >
+      <ArrowCounterClockwise width="14" height="14" aria-hidden="true" />
+    </button>
+  </div>
+  <div
+    class="term-body"
+    data-term-body
+    role="img"
+    aria-label="Terminal: lancher new creates my-api from the go-api template, the project gets a database driver, and lancher add saves it as the template go-api-pgx."
+  >
+    {lines.map((line) => (
+      <div class="term-line">
+        {line.segs.map(([color, text, bold]) => (
+          <span class:list={[`term-${color}`, { "term-bold": bold }]}>
+            {text}
+          </span>
+        ))}
+        {line.cursor && <span class="term-cursor" />}
+      </div>
+    ))}
+  </div>
+</div>
+
+<style is:global>
+  .term {
+    --term-green: #89b29e;
+    --term-cyan: #7fc8c8;
+    --term-yellow: #e0af68;
+    --term-gray: #9a949a;
+    --term-text: #e0e0e0;
+    --term-dir: #c5d4c8;
+
+    overflow: hidden;
+    border: 1px solid #3a353a;
+    border-radius: 10px;
+    background: #141214;
+    box-shadow: 0 24px 60px rgb(0 0 0 / 0.45);
+    font-family: var(--font-mono);
+  }
+
+  .term-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-bottom: 1px solid #2e2a2e;
+    background: #1b181b;
+  }
+
+  .term-dots {
+    display: flex;
+    gap: 8px;
+  }
+
+  .term-dots span {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #3f3a3f;
+  }
+
+  .term-title {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    color: var(--term-gray);
+  }
+
+  .term-replay {
+    display: flex;
+    width: 28px;
+    height: 28px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid #3a353a;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--color-foreground-muted);
+    cursor: pointer;
+  }
+
+  .term-replay:hover {
+    color: var(--color-foreground-bright);
+  }
+
+  .term-replay[hidden] {
+    display: none;
+  }
+
+  .term-body {
+    height: calc(var(--term-rows, 18) * 1.6em);
+    overflow: hidden;
+    margin-block: 14px;
+    padding-inline: 18px;
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+
+  .term-line {
+    min-height: 1.6em;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .term-green {
+    color: var(--term-green);
+  }
+  .term-cyan {
+    color: var(--term-cyan);
+  }
+  .term-yellow {
+    color: var(--term-yellow);
+  }
+  .term-gray {
+    color: var(--term-gray);
+  }
+  .term-text {
+    color: var(--term-text);
+  }
+  .term-dir {
+    color: var(--term-dir);
+  }
+  .term-bold {
+    font-weight: 700;
+  }
+
+  .term-cursor {
+    display: inline-block;
+    width: 0.6em;
+    height: 1.2em;
+    vertical-align: -0.25em;
+    background: var(--term-dir);
+    animation: term-blink 1s steps(1) infinite;
+  }
+
+  @keyframes term-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .term-cursor {
+      animation: none;
+    }
+  }
+
+  @media (max-width: 40rem) {
+    .term-body {
+      margin-block: 12px;
+      padding-inline: 14px;
+      font-size: 12px;
+    }
+  }
+</style>
+
+<script>
+  import { finalLines, frames, type Line } from "./terminal/story";
+
+  function lineElement(line: Line): HTMLElement {
+    const el = document.createElement("div");
+    el.className = "term-line";
+    for (const [color, text, bold] of line.segs) {
+      const span = document.createElement("span");
+      span.className = bold ? `term-${color} term-bold` : `term-${color}`;
+      span.textContent = text;
+      el.append(span);
+    }
+    if (line.cursor) {
+      const cursor = document.createElement("span");
+      cursor.className = "term-cursor";
+      el.append(cursor);
+    }
+    return el;
+  }
+
+  function setup(root: HTMLElement) {
+    if (root.dataset.ready) return;
+    root.dataset.ready = "1";
+
+    const body = root.querySelector<HTMLElement>("[data-term-body]")!;
+    const title = root.querySelector<HTMLElement>("[data-term-title]")!;
+    const replay = root.querySelector<HTMLButtonElement>("[data-term-replay]")!;
+
+    let lines: Line[] = [];
+    let run = 0;
+
+    const paint = () => {
+      body.replaceChildren(...lines.map(lineElement));
+      body.scrollTop = body.scrollHeight;
+    };
+
+    // Resolves after ms of visible time; false once the run is stale.
+    const wait = async (ms: number, current: number) => {
+      await new Promise((resolve) => setTimeout(resolve, ms));
+      while (document.hidden && root.isConnected) {
+        await new Promise((resolve) =>
+          document.addEventListener("visibilitychange", resolve, {
+            once: true,
+          }),
+        );
+      }
+      return current === run && root.isConnected;
+    };
+
+    const play = async () => {
+      const current = ++run;
+      for (const frame of frames()) {
+        lines = frame.lines;
+        title.textContent = `lancher · ${frame.dir}`;
+        paint();
+        if (!(await wait(frame.ms, current))) return;
+      }
+      play();
+    };
+
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      lines = finalLines();
+      paint();
+      return;
+    }
+    replay.hidden = false;
+    replay.addEventListener("click", play);
+    play();
+  }
+
+  const init = () =>
+    document.querySelectorAll<HTMLElement>("[data-terminal]").forEach(setup);
+  init();
+  document.addEventListener("astro:page-load", init);
+</script>

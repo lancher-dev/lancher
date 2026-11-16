@@ -1,128 +1,97 @@
 # Troubleshooting
 
-Common errors and solutions. Issues typically stem from missing templates, git authentication, file permissions, or failed hooks.
+Common errors and how to solve them. lancher prints errors with a `✗` and exits with a non-zero code.
 
 ## Template Not Found
 
-This error occurs when the specified template name doesn't exist in storage.
-
-**Error:**
-
 ```
-Error: template 'myapp' not found
+✗ template 'myapp' not found
 ```
 
-**Solution:**
+The name does not match any installed template. Check the names with `lancher list`, then add the template if it is missing.
 
-```bash
-lancher template list
+## Template Already Exists
+
+```
+✗ template 'api-base' already exists (use --force to replace it)
 ```
 
-Verify template name and add if missing.
+`lancher add` does not overwrite templates. Pass another name as second argument, or `--force` to replace the template.
+
+## Invalid Template Name
+
+```
+✗ invalid template name "my app": use letters, digits, '.', '_' and '-', starting with a letter or a digit
+```
+
+Pass a valid name as second argument to `lancher add`.
 
 ## Git Clone Failed
 
-Git cloning can fail due to authentication, network, or invalid URLs.
-
-**Error:**
-
 ```
-Error: failed to clone repository
+✗ failed to clone repository: exit status 128
+fatal: repository 'https://github.com/user/missing/' not found
 ```
 
-**Solutions:** Check network connectivity and verify your git credentials (SSH keys, tokens). Test the URL manually with `git clone <url>` and try switching between HTTPS and SSH if one fails.
+lancher shows the last lines of git's output. Check the URL with `git clone <url>`, and your access to the repository: SSH keys for SSH URLs, a credential helper for HTTPS. lancher stops git from asking for a password; run the command again with `--verbose` to see the whole output and to let git ask.
 
-## Hook Execution Failed
-
-Hooks fail when commands return non-zero exit codes, usually indicating missing dependencies or configuration issues.
-
-**Error:**
+## Template Skipped by Sync
 
 ```
-Error: hook 'npm install' failed with exit code 1
+⚠ 'handmade' skipped: unknown source (re-add it with: lancher add --force <source> handmade)
+⚠ 'api-base' skipped: directory not found: '/home/me/projects/api-base'
 ```
 
-**Solutions:** Verify the required tools are installed (`npm`, `git`, etc.) and test the command manually in the project directory. Review the command syntax in `.lancher.yaml` and read the output carefully for specific error details.
+lancher does not know where the template comes from, or its source is gone. Add the template again from its current source:
 
-## Permission Denied
-
-**Error:**
-
-```
-Error: permission denied writing to storage directory
+```bash
+lancher add --force ~/projects/new-place/api-base api-base
 ```
 
-**Solutions:** Check directory permissions with `ls -la ~/.local/share/lancher`, ensure the storage directory exists, verify available disk space with `df -h`, and confirm lancher is running as your own user (avoid `sudo`).
-
-## Destination Already Exists
-
-**Error:**
+## Destination Is Not Empty
 
 ```
-Error: destination directory already exists
+✗ destination is not empty: /home/me/my-app (use --force to write into it)
 ```
 
-**Solution:**
-Remove or rename the existing directory, or choose a different destination.
+Choose another destination, or pass `--force` to write the template into it: files with the same path are overwritten, the others are kept.
+
+## Hook Failed
+
+```
+✗ hook "npm install" failed: exit status 1
+```
+
+The project files are in place; the hooks after the failed one did not run. Read the hook output above the error, fix the cause (often a missing tool), and run the remaining commands by hand in the project directory. Hooks run with `sh`: bash syntax like `[[ ]]` or `source` fails on systems where `sh` is `dash`.
 
 ## Invalid YAML
 
-**Error:**
-
 ```
-Error: invalid .lancher.yaml syntax
+✗ failed to load template config: invalid YAML in .lancher.yaml: yaml: line 3: did not find expected key
 ```
 
-**Solutions:** Validate the YAML syntax at https://www.yamllint.com. Use spaces (not tabs) for indentation, quote strings that contain special characters, and double-check the array/object structure.
+Fix the file at the line shown: use spaces, not tabs, for indentation, and quote strings that contain `:` or `#`. Open the template with `lancher cd <template>`.
 
-## Build Failed
-
-**Error:**
+## Invalid Manifest
 
 ```
-Error: failed to build lancher
+✗ invalid manifest /home/me/.local/share/lancher/templates.yaml (fix or delete it): yaml: line 12: did not find expected key
 ```
 
-**Solutions:** Verify your Go version (`go version`, requires 1.22+) and update if necessary. Check that `GOPATH` and `GOBIN` are configured correctly, then try `go clean -cache && go build`.
+Fix the file, or delete it: lancher rebuilds it from the template directories, and templates that are not git clones get an unknown source until you add them again.
 
-## Template Update Failed
+## Permission Denied
 
-**Error:**
-
-```
-Error: cannot update non-git template
-```
-
-**Solution:**
-Use `-d` flag to specify new source:
+Run lancher as your own user, not with `sudo`, and check that you own the data directory:
 
 ```bash
-lancher template update <name> -d <new-path>
+ls -la ~/.local/share/lancher
 ```
 
-Or remove and re-add template.
+## Hooks Do Not Run
 
-## Common Issues
-
-### Templates Not Listed
-
-```bash
-lancher template ls  # Verify storage location
-ls -la ~/.local/share/lancher/templates
-```
-
-### Hooks Don't Execute
-
-Check that you confirmed the prompt (or used `--hooks` to skip it), verify the hook syntax in `.lancher.yaml`, and test the commands manually in the project directory.
-
-### Git Updates Don't Work
-
-Verify the template was originally added from a git URL. Check that you still have access to the remote repository, or try running `git pull` manually inside the template directory (`cd <template-dir> && git pull`).
+Hooks run only after you confirm, or with `--hooks`. With `-y` they need `--hooks`. Check them with `lancher info <template>`.
 
 ## Getting Help
 
-If you can't find a solution to your problem, the best way to get help is through the lancher GitHub repository. Start by searching existing [issues](https://github.com/lancher-dev/lancher/issues) and [discussions](https://github.com/lancher-dev/lancher/discussions) to see if someone has encountered the same problem. Many common questions have already been answered in these threads.
-
-If you don't find what you're looking for, feel free to [open a new issue](https://github.com/lancher-dev/lancher/issues/new). When opening an issue, include your lancher version (`lancher --version`), operating system and version, complete error messages, steps to reproduce the problem, and the template configuration (`.lancher.yaml`) if relevant.
-
-The community and maintainers will help diagnose and resolve your issue.
+Search the existing [issues](https://github.com/lancher-dev/lancher/issues) and [discussions](https://github.com/lancher-dev/lancher/discussions) first. If you do not find an answer, [open an issue](https://github.com/lancher-dev/lancher/issues/new) with your lancher version (`lancher --version`), your operating system, the complete error message, the steps to reproduce the problem and, if relevant, the template's `.lancher.yaml`.

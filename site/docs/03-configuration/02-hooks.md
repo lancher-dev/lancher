@@ -1,25 +1,34 @@
 # Hooks
 
-Hooks are shell commands that automate post-creation tasks, executing sequentially in the new project directory after file copying. Each command requires explicit user confirmation, displays real-time output, and halts the sequence on failure.
+Hooks are shell commands that `lancher new` runs in the new project after copying the files, for tasks like installing dependencies.
 
 ## Configuration
 
-Define hooks as an array of shell command strings in `.lancher.yaml`.
+Define hooks as a list of commands in `.lancher.yaml`:
 
 ```yaml
 hooks:
   - npm install
-  - git init
   - ./scripts/setup.sh
 ```
 
-Keep your hooks simple and focused on single tasks. For complex operations, extract the logic into separate shell scripts. Always use relative paths to ensure portability, and handle errors gracefully so failures provide clear feedback.
+Keep each hook focused on one task, and move longer logic into a script inside the template.
 
-## Execution Behavior
+## Execution
 
-Hooks execute after all template files have been copied to the destination directory, running sequentially in the order you defined them. Each command executes in the newly created project directory, and before running, Lancher requires explicit user confirmation while displaying the full command text. The output of each command appears in real-time as it executes. If any command returns a non-zero exit code, the entire hook sequence stops immediately.
+1. `lancher new` lists the hooks and asks once whether to run them. The default answer is no.
+2. After copying the files and running `git init` (if requested), lancher runs the hooks in the order they are listed, each with `sh -c` in the project directory, showing their output as it comes.
+3. If a hook exits with a non-zero code, lancher stops: the following hooks do not run, and the project files stay in place.
 
-This behavior ensures you maintain control over potentially destructive operations like dependency installation or git initialization. Since files are already copied before hooks run, failed commands won't leave your project in a partial state. You can bypass confirmation prompts using the `--hooks` flag, but exercise caution—only use it with templates you trust and have reviewed.
+Flags skip the question:
+
+- `--hooks` runs the hooks without asking;
+- `--no-hooks` skips them;
+- with `-y, --yes`, hooks run only if `--hooks` is also given.
+
+Hooks run with `LANCHER_HOOK=1` in their environment. A `lancher new` started from a hook does not run the hooks of its own template.
+
+Hooks run with `sh`, which is `dash` on Debian and Ubuntu: write them in POSIX shell, without bash features like `[[ ]]` or `source`.
 
 ## Common Patterns
 
@@ -32,20 +41,16 @@ hooks:
 
 ```yaml
 hooks:
-  - pnpm install
-```
-
-```yaml
-hooks:
   - pip install -r requirements.txt
 ```
 
-### Git Initialization
+### First Commit
+
+Run `lancher new` with `--git`, then commit with a hook:
 
 ```yaml
 hooks:
-  - git init
-  - git add .
+  - git add -A
   - git commit -m "Initial commit"
 ```
 
@@ -62,7 +67,6 @@ hooks:
 ```yaml
 hooks:
   - cp .env.example .env
-  - echo "Configure .env file"
 ```
 
 ### Database Setup
@@ -73,24 +77,13 @@ hooks:
   - npm run db:seed
 ```
 
-### Multi-Step Setup
-
-```yaml
-hooks:
-  - npm install
-  - npm run build
-  - git init
-  - npx husky install
-  - chmod +x scripts/*.sh
-```
-
 ## Conditional Execution
 
 ### Check Command Availability
 
 ```yaml
 hooks:
-  - command -v pnpm && pnpm install || npm install
+  - if command -v pnpm >/dev/null; then pnpm install; else npm install; fi
 ```
 
 ### Platform-Specific
@@ -98,8 +91,8 @@ hooks:
 ```yaml
 hooks:
   - |
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-      brew install something
+    if [ "$(uname -s)" = Darwin ]; then
+      brew bundle
     fi
 ```
 
@@ -107,11 +100,15 @@ hooks:
 
 ```yaml
 hooks:
-  - test -f package.json && npm install || echo "No package.json"
+  - if [ -f package.json ]; then npm install; fi
 ```
 
 ## Security
 
-Hooks execute shell commands on your system, so always review them before running. Lancher requires explicit confirmation and displays the full command text before execution.
+Hooks run commands on your machine with your permissions. Before running the hooks of a template from someone else, read them:
 
-The `--hooks` flag automatically confirms all prompts. **Never use `--hooks` with templates from untrusted sources** without first inspecting the `.lancher.yaml` file. Take standard shell security precautions and note that hooks cannot execute other `lancher` commands to prevent infinite loops—design your hooks to perform direct operations.
+```bash
+lancher info <template>
+```
+
+`lancher new` also lists them before asking. **Never use `--hooks` with templates you have not reviewed.** A `lancher sync` can change the hooks of a template, so review them again after syncing.

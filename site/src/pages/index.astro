@@ -1,65 +1,111 @@
 ---
 import Layout from "@jaamd/jaad/layouts/Page.astro";
-import { Image } from "astro:assets";
-import Hero from "../components/Hero.astro";
-
-import DemoGif from "../assets/demo.gif";
+import ArrowRight from "phosphor-astro/ArrowRight.astro";
+import Check from "phosphor-astro/Check.astro";
+import Copy from "phosphor-astro/Copy.astro";
+import Terminal from "../components/Terminal.astro";
 
 const install = "curl -fsSL https://lancher.dev/install.sh | sh";
 ---
 
-<Layout>
-  <Hero />
-
-  <section class="mx-auto mb-12 max-w-200" aria-labelledby="intro-heading">
-    <h2 class="sr-only" id="intro-heading">
-      Introduction
-    </h2>
-
-    <Image
-      src={DemoGif}
-      alt="A demo of lancher in action, showing how it can be used to quickly launch a development server for a project."
-      class="mx-auto h-auto max-w-full rounded-lg object-cover shadow-lg"
-    />
-
-    <p class="text-foreground-muted mt-6 text-[1.1rem] leading-[1.8]">
-      To install <strong>lancher</strong>, run the following command in your
-      terminal:
-    </p>
-
-    <div
-      class="border-border bg-background-secondary relative mx-0 my-6 flex items-center gap-4 rounded-sm border p-4"
-      role="group"
-      aria-label="Installation command for lancher"
-    >
-      <code
-        class="scrollbar-hide text-primary/90 flex flex-1 items-center overflow-x-auto bg-none text-[0.9rem] whitespace-nowrap lg:overflow-visible"
-        aria-label="Installation command"
-        style="scrollbar-width: none; -ms-overflow-style: none;"
+<Layout bare class="home">
+  <section
+    class="jaad-chrome flex flex-wrap items-center gap-x-12 gap-y-10 py-8"
+    aria-labelledby="home-title"
+  >
+    <div class="flex min-w-0 flex-[1_1_22rem] flex-col gap-5">
+      <h1
+        id="home-title"
+        class="text-foreground-bright m-0 font-sans text-[2.75rem] leading-[1.1] font-bold tracking-[-0.02em] max-sm:text-[2.1rem]"
       >
-        {install}
-      </code>
-      <button
-        class="border-border-light bg-border-dark text-foreground-muted hover:bg-border hover:text-foreground-bright flex shrink-0 cursor-pointer items-center justify-center rounded border px-4 py-2 text-[0.75rem] transition-colors"
-        onclick={`navigator.clipboard.writeText('${install}')`}
-        title="Copy to clipboard"
-        aria-label="Copy installation command to clipboard"
+        Start from a template.{" "}
+        <span class="text-primary">Save what you build.</span>
+      </h1>
+      <p class="text-foreground-muted m-0 text-[17px] leading-[1.6]">
+        lancher is a local project-template manager. Create a project from a
+        template, make it yours, and save it back as a new template for next
+        time.
+      </p>
+      <div
+        class="border-border-dark bg-background-secondary flex items-center gap-2.5 rounded-lg border py-1 pr-1 pl-4"
+        role="group"
+        aria-label="Install command"
       >
-        <i class="nf nf-md-content_copy"></i>
-      </button>
+        <code class="text-primary-light before:text-primary min-w-0 flex-1 overflow-x-auto bg-transparent font-mono text-[13.5px] whitespace-nowrap before:content-['$_']">
+          {install}
+        </code>
+        <button
+          type="button"
+          class="text-foreground-muted hover:bg-background-tertiary hover:text-foreground-bright flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md"
+          data-copy={install}
+          aria-label="Copy the install command"
+          title="Copy"
+        >
+          <Copy data-copy-icon width="18" height="18" aria-hidden="true" />
+          <Check
+            data-copied-icon
+            class="hidden"
+            width="18"
+            height="18"
+            aria-hidden="true"
+          />
+        </button>
+      </div>
+      <a
+        href="/docs/getting-started/installation"
+        class="inline-flex items-center gap-1.5 self-start text-[14px]"
+      >
+        <span>Or with completion: Homebrew, APT, AUR</span>
+        <ArrowRight width="14" height="14" aria-hidden="true" />
+      </a>
     </div>
 
-    <p class="text-foreground-secondary mt-2 mb-16 text-[0.85rem] italic">
-      Currently available for <i>macOS</i> and <i>Linux</i>. You can also
-      download pre-compiled binaries from the{" "}
-      <a
-        href="https://github.com/lancher-dev/lancher/releases/latest"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        latest release
-      </a>
-      .
-    </p>
+    <div class="min-w-0 flex-[1_1_36rem]">
+      <Terminal />
+    </div>
   </section>
 </Layout>
+
+<style is:global>
+  body.home .jaad-main-bare {
+    display: flex;
+    align-items: center;
+  }
+
+  body.home .term {
+    --term-rows: 18;
+  }
+
+  @media (max-height: 760px) {
+    body.home .term {
+      --term-rows: 15;
+    }
+  }
+
+  @media (max-height: 640px) {
+    body.home .term {
+      --term-rows: 12;
+    }
+  }
+</style>
+
+<script>
+  for (const button of document.querySelectorAll<HTMLButtonElement>(
+    "[data-copy]",
+  )) {
+    const copyIcon = button.querySelector<SVGElement>("[data-copy-icon]")!;
+    const copiedIcon = button.querySelector<SVGElement>("[data-copied-icon]")!;
+    const label = button.getAttribute("aria-label")!;
+    button.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(button.dataset.copy!);
+      copyIcon.classList.add("hidden");
+      copiedIcon.classList.remove("hidden");
+      button.setAttribute("aria-label", "Copied");
+      setTimeout(() => {
+        copyIcon.classList.remove("hidden");
+        copiedIcon.classList.add("hidden");
+        button.setAttribute("aria-label", label);
+      }, 1600);
+    });
+  }
+</script>
