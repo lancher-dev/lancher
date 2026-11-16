@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 
 	"go.yaml.in/yaml/v3"
 )
@@ -23,7 +24,6 @@ type Config struct {
 	Author      string   `yaml:"author"`
 	Version     string   `yaml:"version"`
 	Hooks       []string `yaml:"hooks"`
-	Ignore      []string `yaml:"ignore"`
 }
 
 // LoadResult contains the loaded config and metadata about the loading process
@@ -31,6 +31,7 @@ type LoadResult struct {
 	Config     *Config
 	FoundFiles []string // All config files found
 	UsedFile   string   // The config file that was loaded
+	Unknown    []string // Top-level keys of UsedFile that lancher does not use
 	Err        error    // Read or parse error of UsedFile
 }
 
@@ -72,9 +73,27 @@ func LoadConfigWithDetails(templatePath string) *LoadResult {
 			continue
 		}
 		result.Config = &cfg
+		result.Unknown = unknownKeys(data)
 	}
 
 	return result
+}
+
+var knownKeys = []string{"name", "description", "author", "version", "hooks"}
+
+func unknownKeys(data []byte) []string {
+	var raw map[string]any
+	if yaml.Unmarshal(data, &raw) != nil {
+		return nil
+	}
+	var unknown []string
+	for key := range raw {
+		if !slices.Contains(knownKeys, key) {
+			unknown = append(unknown, key)
+		}
+	}
+	slices.Sort(unknown)
+	return unknown
 }
 
 // HasHooks returns true if config has hooks defined
@@ -82,29 +101,26 @@ func (c *Config) HasHooks() bool {
 	return c != nil && len(c.Hooks) > 0
 }
 
-// HasIgnore returns true if config has deprecated ignore patterns defined in YAML
-func (c *Config) HasIgnore() bool {
-	return c != nil && len(c.Ignore) > 0
+// Field is a labelled metadata value.
+type Field struct {
+	Label, Value string
 }
 
-// GetMetadata returns formatted metadata string for display
-func (c *Config) GetMetadata() string {
+// Metadata returns the metadata fields that are set, in display order.
+func (c *Config) Metadata() []Field {
 	if c == nil {
-		return ""
+		return nil
 	}
-
-	var metadata string
-	if c.Name != "" {
-		metadata += fmt.Sprintf("Name: %s\n", c.Name)
+	var fields []Field
+	for _, f := range []Field{
+		{"Name", c.Name},
+		{"Description", c.Description},
+		{"Author", c.Author},
+		{"Version", c.Version},
+	} {
+		if f.Value != "" {
+			fields = append(fields, f)
+		}
 	}
-	if c.Description != "" {
-		metadata += fmt.Sprintf("Description: %s\n", c.Description)
-	}
-	if c.Author != "" {
-		metadata += fmt.Sprintf("Author: %s\n", c.Author)
-	}
-	if c.Version != "" {
-		metadata += fmt.Sprintf("Version: %s\n", c.Version)
-	}
-	return metadata
+	return fields
 }

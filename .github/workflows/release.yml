@@ -20,8 +20,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v7
@@ -31,14 +29,14 @@ jobs:
       - name: Build binaries
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
-          COMMIT=$(git rev-parse HEAD)
-          LDFLAGS="-s -w -X github.com/lancher-dev/lancher/internal/version.Version=${VERSION} -X github.com/lancher-dev/lancher/internal/version.Commit=${COMMIT}"
+          export CGO_ENABLED=0
+          LDFLAGS="-s -w -X github.com/lancher-dev/lancher/internal/version.Version=${VERSION}"
 
           # Build for all platforms
-          GOOS=linux GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o lancher-linux-amd64 ./cmd/lancher
-          GOOS=linux GOARCH=arm64 go build -ldflags="${LDFLAGS}" -o lancher-linux-arm64 ./cmd/lancher
-          GOOS=darwin GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o lancher-darwin-amd64 ./cmd/lancher
-          GOOS=darwin GOARCH=arm64 go build -ldflags="${LDFLAGS}" -o lancher-darwin-arm64 ./cmd/lancher
+          GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="${LDFLAGS}" -o lancher-linux-amd64 ./cmd/lancher
+          GOOS=linux GOARCH=arm64 go build -trimpath -ldflags="${LDFLAGS}" -o lancher-linux-arm64 ./cmd/lancher
+          GOOS=darwin GOARCH=amd64 go build -trimpath -ldflags="${LDFLAGS}" -o lancher-darwin-amd64 ./cmd/lancher
+          GOOS=darwin GOARCH=arm64 go build -trimpath -ldflags="${LDFLAGS}" -o lancher-darwin-arm64 ./cmd/lancher
 
       - name: Build .deb packages
         run: |
@@ -73,11 +71,6 @@ jobs:
           echo "$CHECKSUMS" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-          # Extract individual checksums for AUR
-          SHA256_X86_64=$(sha256sum lancher-linux-amd64 | awk '{print $1}')
-          SHA256_AARCH64=$(sha256sum lancher-linux-arm64 | awk '{print $1}')
-          echo "sha256_x86_64=${SHA256_X86_64}" >> $GITHUB_OUTPUT
-          echo "sha256_aarch64=${SHA256_AARCH64}" >> $GITHUB_OUTPUT
 
       - name: Create Release
         uses: softprops/action-gh-release@v3

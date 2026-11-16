@@ -94,10 +94,12 @@ func Parse(raw string) (Source, error) {
 }
 
 func isGitURL(s string) bool {
-	return strings.HasPrefix(s, "http://") ||
-		strings.HasPrefix(s, "https://") ||
-		strings.HasPrefix(s, "git@") ||
-		strings.HasSuffix(s, ".git")
+	for _, prefix := range []string{"http://", "https://", "ssh://", "git://", "file://", "git@"} {
+		if strings.HasPrefix(s, prefix) {
+			return true
+		}
+	}
+	return strings.HasSuffix(s, ".git")
 }
 
 // Name derives a template name from the source: the repository, directory or
@@ -149,15 +151,7 @@ func (s Source) Fetch(dest string, out io.Writer) error {
 func (s Source) fetch(dest string, out io.Writer) error {
 	switch s.Kind {
 	case Git:
-		var cmd *exec.Cmd
-		if s.CLI != "" && commandExists(s.CLI) {
-			cmd = exec.Command(s.CLI, "repo", "clone", s.Repo, dest, "--", "--depth", "1")
-		} else {
-			cmd = exec.Command("git", "clone", "--depth", "1", s.Location, dest)
-		}
-		cmd.Stdout = out
-		cmd.Stderr = out
-		if err := cmd.Run(); err != nil {
+		if err := s.clone(dest, out); err != nil {
 			return fmt.Errorf("failed to clone repository: %w", err)
 		}
 	case Zip:
@@ -165,6 +159,9 @@ func (s Source) fetch(dest string, out io.Writer) error {
 			return fmt.Errorf("failed to extract ZIP: %w", err)
 		}
 	case Local:
+		if rel, err := filepath.Rel(s.Location, dest); err == nil && filepath.IsLocal(rel) {
+			return fmt.Errorf("source contains the lancher data directory: '%s'", s.Location)
+		}
 		if err := fileutil.CopyDir(s.Location, dest); err != nil {
 			return fmt.Errorf("failed to copy template: %w", err)
 		}
@@ -179,7 +176,22 @@ func (s Source) fetch(dest string, out io.Writer) error {
 	return nil
 }
 
-func commandExists(name string) bool {
-	_, err := exec.LookPath(name)
-	return err == nil
+// clone uses the alias CLI when it is installed and falls back to git.
+func (s Source) clone(dest string, out io.Writer) error {
+	run := func(name string, args ...string) error {
+		cmd := exec.Command(name, args...)
+		cmd.Stdout = out
+		cmd.Stderr = out
+		return cmd.Run()
+	}
+
+	if s.CLI != "" {
+		if _, err := exec.LookPath(s.CLI); err == nil {
+			if run(s.CLI, "repo", "clone", s.Repo, dest, "--", "--depth", "1") == nil {
+				return nil
+			}
+			os.RemoveAll(dest)
+		}
+	}
+	return run("git", "clone", "--depth", "1", "--", s.Location, dest)
 }

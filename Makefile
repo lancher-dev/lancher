@@ -1,4 +1,4 @@
-.PHONY: build install uninstall clean test run help
+.PHONY: build install uninstall clean test run deps build-all help
 
 # Binary name
 BINARY_NAME=lancher
@@ -6,8 +6,8 @@ INSTALL_PATH=$(HOME)/.local/bin
 
 # Version info
 VERSION?=$(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
-COMMIT?=$(shell git rev-parse HEAD 2>/dev/null || echo "unknown")
-LDFLAGS=-ldflags "-X github.com/lancher-dev/lancher/internal/version.Version=$(VERSION) -X github.com/lancher-dev/lancher/internal/version.Commit=$(COMMIT)"
+export CGO_ENABLED=0
+LDFLAGS=-trimpath -ldflags "-X github.com/lancher-dev/lancher/internal/version.Version=$(VERSION)"
 
 help:
 	@echo "lancher - Development Makefile"
@@ -19,6 +19,7 @@ help:
 	@echo "  make test        Run all tests"
 	@echo "  make run         Run locally (use ARGS='...' for arguments)"
 	@echo "  make clean       Clean build artifacts"
+	@echo "  make deps        Download and tidy dependencies"
 	@echo "  make build-all   Build for multiple platforms"
 	@echo ""
 	@echo "For end users:"

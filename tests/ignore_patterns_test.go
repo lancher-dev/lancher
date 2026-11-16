@@ -211,6 +211,15 @@ func TestEdgeCasePatterns(t *testing.T) {
 		{"no patterns", []string{}, "any/path", false},
 		{"nested directory pattern", []string{"**/test"}, "src/test/file.js", true},
 		{"path with double extension", []string{"*.tar.gz"}, "archive.tar.gz", true},
+		{"prefix/** keeps similar names", []string{"foo/**"}, "foobar/x.txt", false},
+		{"prefix/** matches inside", []string{"foo/**"}, "foo/x.txt", true},
+		{"**/name keeps similar names", []string{"**/env"}, "config/myenv", false},
+		{"**/name matches at depth", []string{"**/env"}, "config/env", true},
+		{"a/**/b keeps similar names", []string{"src/**/gen"}, "srcx/a/generated.go", false},
+		{"a/**/b matches", []string{"src/**/gen"}, "src/a/b/gen/x.go", true},
+		{"a/**/b matches with no middle", []string{"src/**/gen"}, "src/gen", true},
+		{"slash pattern is anchored", []string{"src/gen"}, "lib/src/gen", false},
+		{"child of an ignored directory", []string{"/build"}, "build/out/app.js", true},
 	}
 
 	for _, tt := range tests {
