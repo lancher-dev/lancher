@@ -9,7 +9,13 @@ export default defineJaadConfig({
 
   tailwind: true,
 
-  nav: [{ label: "Docs", href: "/docs" }],
+  nav: [
+    { label: "Docs", href: "/docs" },
+    {
+      label: "Releases",
+      href: "https://github.com/lancher-dev/lancher/releases",
+    },
+  ],
 
   docsDir: "./docs",
   routeBase: "/docs",
@@ -20,7 +26,18 @@ export default defineJaadConfig({
 
   ogImage: "/og-image.png",
   editLink: "https://github.com/lancher-dev/lancher/edit/main/site/docs/",
-  footer: `© ${new Date().getFullYear()} <a href="https://lucapattocchio.dev" target="_blank" rel="noopener">Luca Pattocchio</a> (Kasui)`,
+  footer: [
+    '<span class="site-footer-links">',
+    '<a href="/docs">Docs</a>',
+    '<a href="/docs/getting-started/installation">Installation</a>',
+    '<a href="https://github.com/lancher-dev/lancher/releases" rel="noopener">Releases</a>',
+    '<a href="https://github.com/lancher-dev/lancher" rel="noopener">GitHub</a>',
+    "</span>",
+    "<span>",
+    '<a href="https://github.com/lancher-dev/lancher/blob/main/LICENSE" rel="noopener">MIT License</a>',
+    ' · Made by <a href="https://lucapattocchio.dev" rel="noopener">Luca Pattocchio</a>',
+    "</span>",
+  ].join(""),
 
   head: [
     {

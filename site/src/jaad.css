@@ -48,8 +48,41 @@ i.nf {
   color: var(--color-foreground-bright);
 }
 
-/* Nav only outside the docs. */
-[data-docs] .jaad-nav,
+.jaad-header {
+  border-bottom: 1px solid var(--color-border-dark);
+}
+
+[data-docs] .jaad-nav-link[href="/docs"] {
+  color: var(--color-primary-light);
+  font-weight: 600;
+}
+
+/* The docs have their own mobile navigation. */
 [data-docs] .jaad-nav-mobile {
   display: none;
+}
+
+.jaad-footer-credit {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1.5rem;
+  font-size: 13px;
+  font-style: normal;
+  text-align: left;
+}
+
+.jaad-footer-credit a {
+  color: var(--color-foreground-muted);
+  text-decoration: none;
+}
+
+.jaad-footer-credit a:hover {
+  color: var(--color-foreground-bright);
+}
+
+.site-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
 }
