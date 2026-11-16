@@ -71,25 +71,6 @@ func TestCopyDir(t *testing.T) {
 	}
 }
 
-func TestRemoveDir(t *testing.T) {
-	tmpDir := t.TempDir()
-
-	// Create directory to remove
-	dirToRemove := filepath.Join(tmpDir, "to-remove")
-	os.MkdirAll(dirToRemove, 0755)
-	os.WriteFile(filepath.Join(dirToRemove, "file.txt"), []byte("content"), 0644)
-
-	// Remove directory
-	if err := fileutil.RemoveDir(dirToRemove); err != nil {
-		t.Fatalf("RemoveDir() failed: %v", err)
-	}
-
-	// Verify it's gone
-	if _, err := os.Stat(dirToRemove); !os.IsNotExist(err) {
-		t.Error("Directory was not removed")
-	}
-}
-
 func TestUnzipToDir(t *testing.T) {
 	tmpDir := t.TempDir()
 
@@ -290,4 +271,64 @@ func TestCopyDirRootPattern(t *testing.T) {
 
 	assertMissing(t, filepath.Join(dst, "build"))
 	assertExists(t, filepath.Join(dst, "src", "build", "keep.js"))
+}
+
+func writeZip(t *testing.T, path string, files map[string]string) {
+	t.Helper()
+	f, err := os.Create(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	w := zip.NewWriter(f)
+	for name, content := range files {
+		fw, err := w.Create(name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fw.Write([]byte(content))
+	}
+	if err := w.Close(); err != nil {
+		t.Fatal(err)
+	}
+	f.Close()
+}
+
+func TestUnzipStripsSingleRoot(t *testing.T) {
+	zipPath := filepath.Join(t.TempDir(), "repo-main.zip")
+	writeZip(t, zipPath, map[string]string{
+		"repo-main/":                "",
+		"repo-main/README.md":       "readme",
+		"repo-main/src/main.go":     "package main",
+		"__MACOSX/repo-main/._file": "junk",
+	})
+	dest := filepath.Join(t.TempDir(), "out")
+
+	if err := fileutil.UnzipToDir(zipPath, dest); err != nil {
+		t.Fatal(err)
+	}
+	assertExists(t, filepath.Join(dest, "README.md"))
+	assertExists(t, filepath.Join(dest, "src", "main.go"))
+	assertMissing(t, filepath.Join(dest, "repo-main"))
+	assertMissing(t, filepath.Join(dest, "__MACOSX"))
+}
+
+func TestUnzipKeepsSeveralRoots(t *testing.T) {
+	zipPath := filepath.Join(t.TempDir(), "t.zip")
+	writeZip(t, zipPath, map[string]string{"a/x": "x", "b/y": "y"})
+	dest := filepath.Join(t.TempDir(), "out")
+
+	if err := fileutil.UnzipToDir(zipPath, dest); err != nil {
+		t.Fatal(err)
+	}
+	assertExists(t, filepath.Join(dest, "a", "x"))
+	assertExists(t, filepath.Join(dest, "b", "y"))
+}
+
+func TestUnzipRejectsPathTraversal(t *testing.T) {
+	zipPath := filepath.Join(t.TempDir(), "evil.zip")
+	writeZip(t, zipPath, map[string]string{"ok.txt": "ok", "../evil.txt": "evil"})
+
+	if err := fileutil.UnzipToDir(zipPath, filepath.Join(t.TempDir(), "out")); err == nil {
+		t.Error("UnzipToDir accepted a path outside the destination")
+	}
 }

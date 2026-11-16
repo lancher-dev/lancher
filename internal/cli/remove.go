@@ -3,12 +3,12 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"os"
 	"slices"
 
 	"github.com/spf13/cobra"
 
 	"github.com/lancher-dev/lancher/internal/cli/shared"
-	"github.com/lancher-dev/lancher/internal/fileutil"
 	"github.com/lancher-dev/lancher/internal/storage"
 )
 
@@ -64,7 +64,7 @@ func runRemove(names []string) error {
 	for _, name := range names {
 		path, err := storage.GetTemplatePath(name)
 		if err == nil {
-			err = fileutil.RemoveDir(path)
+			err = os.RemoveAll(path)
 		}
 		if err != nil {
 			errs = append(errs, fmt.Errorf("failed to remove template '%s': %w", name, err))
