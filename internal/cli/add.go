@@ -1,7 +1,11 @@
 package cli
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -68,7 +72,14 @@ func runAdd(args []string, force, verbose bool) error {
 	}
 
 	var spinner *shared.Spinner
-	writer := shared.NewSpinnerWriter(verbose)
+	var log bytes.Buffer
+	var out io.Writer = &log
+	if verbose {
+		out = os.Stdout
+	} else {
+		// git fails instead of asking for credentials.
+		os.Setenv("GIT_TERMINAL_PROMPT", "0")
+	}
 	if msg := fetchMessage(src.Kind); msg != "" {
 		if verbose {
 			fmt.Printf("%s%s%s\n", shared.ColorYellow, msg, shared.ColorReset)
@@ -80,11 +91,11 @@ func runAdd(args []string, force, verbose bool) error {
 	}
 
 	err = storage.Replace(name, func(dest string) error {
-		return src.Fetch(dest, writer.MultiWriter())
+		return src.Fetch(dest, out)
 	})
 	if err != nil {
-		if spinner != nil {
-			spinner.Stop()
+		if tail := lastLines(log.String(), 5); tail != "" {
+			return fmt.Errorf("%w\n%s", err, tail)
 		}
 		return err
 	}
@@ -120,4 +131,18 @@ func fetchMessage(kind source.Kind) string {
 		return "Extracting ZIP file..."
 	}
 	return ""
+}
+
+// lastLines returns the last n lines of s, without git's "Cloning into" line.
+func lastLines(s string, n int) string {
+	var lines []string
+	for _, line := range strings.Split(strings.TrimSpace(s), "\n") {
+		if !strings.HasPrefix(line, "Cloning into") {
+			lines = append(lines, line)
+		}
+	}
+	if len(lines) > n {
+		lines = lines[len(lines)-n:]
+	}
+	return strings.TrimSpace(strings.Join(lines, "\n"))
 }

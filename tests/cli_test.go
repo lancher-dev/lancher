@@ -90,6 +90,17 @@ func TestAddForceKeepsTemplateOnFailure(t *testing.T) {
 	assertExists(t, filepath.Join(stored, "v"))
 }
 
+func TestAddReportsGitOutput(t *testing.T) {
+	gitEnv(t)
+	isolateDataDir(t)
+	missing := filepath.Join(t.TempDir(), "missing.git")
+
+	_, err := runCLI(t, "add", missing)
+	if err == nil || !strings.Contains(err.Error(), "failed to clone") || !strings.Contains(err.Error(), "missing.git") {
+		t.Errorf("add of a missing repository: err = %v, want git's message", err)
+	}
+}
+
 func TestListJSON(t *testing.T) {
 	isolateDataDir(t)
 

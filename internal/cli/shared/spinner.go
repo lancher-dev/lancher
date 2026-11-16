@@ -1,10 +1,7 @@
 package shared
 
 import (
-	"bytes"
 	"fmt"
-	"io"
-	"os"
 	"sync"
 	"time"
 )
@@ -84,45 +81,4 @@ func (s *Spinner) Stop() {
 func (s *Spinner) Success(message string) {
 	s.Stop()
 	fmt.Printf("%s✓%s %s\n", ColorGreen, ColorReset, message)
-}
-
-// Fail stops the spinner and shows error message
-func (s *Spinner) Fail(message string) {
-	s.Stop()
-	fmt.Printf("%s✗%s %s\n", ColorRed, ColorReset, message)
-}
-
-// SpinnerWriter wraps an io.Writer to suppress output during spinner
-type SpinnerWriter struct {
-	buffer  *bytes.Buffer
-	verbose bool
-}
-
-// NewSpinnerWriter creates a writer that buffers output unless verbose mode
-func NewSpinnerWriter(verbose bool) *SpinnerWriter {
-	return &SpinnerWriter{
-		buffer:  &bytes.Buffer{},
-		verbose: verbose,
-	}
-}
-
-// Write implements io.Writer
-func (w *SpinnerWriter) Write(p []byte) (n int, err error) {
-	if w.verbose {
-		return os.Stdout.Write(p)
-	}
-	return w.buffer.Write(p)
-}
-
-// GetOutput returns the buffered output
-func (w *SpinnerWriter) GetOutput() string {
-	return w.buffer.String()
-}
-
-// MultiWriter returns stdout in verbose mode, buffer otherwise
-func (w *SpinnerWriter) MultiWriter() io.Writer {
-	if w.verbose {
-		return os.Stdout
-	}
-	return w.buffer
 }
