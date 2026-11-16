@@ -9,13 +9,7 @@ export default defineJaadConfig({
 
   tailwind: true,
 
-  nav: [
-    { label: "Docs", href: "/docs" },
-    {
-      label: "Releases",
-      href: "https://github.com/lancher-dev/lancher/releases",
-    },
-  ],
+  nav: [{ label: "Docs", href: "/docs" }],
 
   docsDir: "./docs",
   routeBase: "/docs",
