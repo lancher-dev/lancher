@@ -70,6 +70,15 @@ func Parse(raw string) (Source, error) {
 	if isGitURL(raw) {
 		return Source{Raw: raw, Kind: Git, Location: raw}, nil
 	}
+	if strings.HasSuffix(raw, ".git") {
+		location := raw
+		if _, err := os.Stat(raw); err == nil {
+			if abs, err := filepath.Abs(raw); err == nil {
+				location = abs
+			}
+		}
+		return Source{Raw: raw, Kind: Git, Location: location}, nil
+	}
 
 	abs, err := filepath.Abs(raw)
 	if err != nil {
@@ -99,7 +108,7 @@ func isGitURL(s string) bool {
 			return true
 		}
 	}
-	return strings.HasSuffix(s, ".git")
+	return false
 }
 
 // Name derives a template name from the source: the repository, directory or

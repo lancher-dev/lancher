@@ -226,3 +226,18 @@ func TestFetchRejectsSourceContainingDestination(t *testing.T) {
 		t.Error("Fetch into the source directory succeeded")
 	}
 }
+
+func TestParseLocalGitPathIsAbsolute(t *testing.T) {
+	dir := t.TempDir()
+	t.Chdir(dir)
+	if err := os.Mkdir("tpl.git", 0o755); err != nil {
+		t.Fatal(err)
+	}
+	src, err := source.Parse("tpl.git")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := filepath.Join(dir, "tpl.git"); src.Kind != source.Git || src.Location != want {
+		t.Errorf("Parse(tpl.git) = %s %q, want git %q", src.Kind, src.Location, want)
+	}
+}
