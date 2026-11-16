@@ -11,17 +11,17 @@ A minimal, local project-template manager written in Go.
   <img src=".github/demo.gif" alt="A demo of lancher in action">
 </center>
 
-`lancher` lets you organize and use project templates stored on your machine. You can register directories as templates, list them, and generate new projects from them. Templates can come from local paths or from git repositories (via HTTPS or SSH). Each template may include a `.lancher.yaml` file for metadata and post-creation hooks, allowing you to customize how new projects are initialized.
+`lancher` lets you organize and use project templates stored on your machine. You can register directories as templates, list them, and generate new projects from them. Templates can come from local directories, ZIP files or git repositories (via HTTPS or SSH), and can be synced again from their source. Each template may include a `.lancher.yaml` file for metadata and post-creation hooks, allowing you to customize how new projects are initialized.
 
 ## Installation
 
 Download and install the latest release with a single command:
 
 ```bash
-curl -sS https://lancher.dev/install.sh | sh
+curl -fsSL https://lancher.dev/install.sh | sh
 ```
 
-The installer automatically detects your platform and downloads the appropriate pre-built binary.
+The installer detects your platform, suggests your package manager when one is available, and installs a verified pre-built binary with shell completion. The packages below install completion for bash, zsh and fish.
 
 <details>
 <summary style="font-weight: bold">
@@ -30,7 +30,7 @@ Arch Linux
 <br />
 
 ```sh
-yay -Sy lancher
+yay -S lancher
 ```
 </details>
 
@@ -62,8 +62,7 @@ Homebrew
 <br />
 
 ```sh
-brew tap lancher-dev/lancher
-brew install lancher
+brew install lancher-dev/lancher/lancher
 ```
 </details>
 
@@ -75,7 +74,7 @@ For detailed usage instructions, command reference, and advanced features, visit
 ## Quick Start
 
 ```bash
-# Add a template from a git repository
+# Add a template from a git repository, a directory or a ZIP file
 lancher add https://github.com/user/template-repo mytemplate
 
 # Create a new project (interactive mode)
@@ -85,7 +84,7 @@ lancher new
 lancher list
 
 # Get help
-lancher help
+lancher --help
 ```
 
 For more information and examples, visit [lancher.dev](https://lancher.dev).
