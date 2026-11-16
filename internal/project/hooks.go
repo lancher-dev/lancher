@@ -32,7 +32,7 @@ func RunHooks(hooks []string, dir string, stdout, stderr io.Writer, before func(
 		cmd.Stdout = stdout
 		cmd.Stderr = stderr
 		if err := cmd.Run(); err != nil {
-			return fmt.Errorf("hook '%s' failed: %w", hook, err)
+			return fmt.Errorf("hook %q failed: %w", hook, err)
 		}
 	}
 	return nil

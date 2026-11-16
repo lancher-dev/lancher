@@ -47,12 +47,9 @@ func runRemove(names []string) error {
 	slices.Sort(names)
 	names = slices.Compact(names)
 	for _, name := range names {
-		if err := ui.SanitizeTemplateName(name); err != nil {
-			return fmt.Errorf("invalid template name '%s': %w", name, err)
-		}
 		exists, err := storage.TemplateExists(name)
 		if err != nil {
-			return fmt.Errorf("failed to check template '%s': %w", name, err)
+			return err
 		}
 		if !exists {
 			return fmt.Errorf("template '%s' not found", name)

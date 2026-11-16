@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -73,6 +74,10 @@ func printList(out io.Writer, templates []string) {
 		if result.Err != nil {
 			fmt.Fprintf(out, "    %s⚠ Warning: %v%s\n", ui.ColorYellow, result.Err, ui.ColorReset)
 		}
+		if len(result.Unknown) > 0 {
+			fmt.Fprintf(out, "    %s⚠ Warning: unknown keys in %s: %s%s\n",
+				ui.ColorYellow, result.UsedFile, ui.Clean(strings.Join(result.Unknown, ", ")), ui.ColorReset)
+		}
 		if len(result.FoundFiles) > 1 {
 			fmt.Fprintf(out, "    %s⚠ Warning: Multiple config files found (%v). Using %s%s\n",
 				ui.ColorYellow, result.FoundFiles, result.UsedFile, ui.ColorReset)
@@ -88,7 +93,7 @@ func printList(out io.Writer, templates []string) {
 func printMetadata(out io.Writer, cfg *config.Config, skipName string) {
 	for _, f := range cfg.Metadata() {
 		if f.Label != "Name" || f.Value != skipName {
-			fmt.Fprintf(out, "    %s%s:%s %s\n", ui.ColorGray, f.Label, ui.ColorReset, f.Value)
+			fmt.Fprintf(out, "    %s%s:%s %s\n", ui.ColorGray, f.Label, ui.ColorReset, ui.Clean(f.Value))
 		}
 	}
 }

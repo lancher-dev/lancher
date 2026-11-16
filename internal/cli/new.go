@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -16,7 +17,6 @@ import (
 )
 
 type newOptions struct {
-	*globalOptions
 	yes        bool
 	force      bool
 	git        bool
@@ -27,8 +27,8 @@ type newOptions struct {
 	noKeep     bool
 }
 
-func newNewCmd(global *globalOptions) *cobra.Command {
-	opts := &newOptions{globalOptions: global}
+func newNewCmd() *cobra.Command {
+	opts := &newOptions{}
 
 	cmd := &cobra.Command{
 		Use:   "new [template] [destination]",
@@ -73,35 +73,44 @@ func runNew(args []string, opts *newOptions) error {
 	if err != nil {
 		return err
 	}
-	if err := prepareDest(dest, opts.force); err != nil {
-		return err
-	}
-
 	templatePath, err := storage.GetTemplatePath(name)
 	if err != nil {
-		return fmt.Errorf("failed to get template path: %w", err)
+		return err
 	}
-	cfg, err := config.LoadConfig(templatePath)
-	if err != nil {
-		return fmt.Errorf("failed to load template config: %w", err)
+	loaded := config.LoadConfigWithDetails(templatePath)
+	if loaded.Err != nil {
+		return fmt.Errorf("failed to load template config: %w", loaded.Err)
+	}
+	cfg := loaded.Config
+	if len(loaded.Unknown) > 0 {
+		fmt.Printf("%s⚠ Warning: unknown keys in %s: %s%s\n",
+			ui.ColorYellow, loaded.UsedFile, ui.Clean(strings.Join(loaded.Unknown, ", ")), ui.ColorReset)
+	}
+
+	if err := prepareDest(dest, opts.force); err != nil {
+		return err
 	}
 	if len(cfg.Metadata()) > 0 {
 		fmt.Printf("\n%sTemplate Information:%s\n", ui.ColorCyan+ui.ColorBold, ui.ColorReset)
 		printMetadata(os.Stdout, cfg, "")
 	}
 
-	if err := copyTemplate(name, templatePath, dest, opts.verbose); err != nil {
+	if err := copyTemplate(name, templatePath, dest); err != nil {
 		return err
 	}
-	if cfg != nil && cfg.HasHooks() {
-		if err := hooksStep(cfg.Hooks, dest, opts); err != nil {
+	var hooksErr error
+	if cfg.HasHooks() {
+		if hooksErr, err = hooksStep(cfg.Hooks, dest, opts); err != nil {
 			return err
 		}
 	}
 	if err := gitStep(dest, opts); err != nil {
 		return err
 	}
-	return metaFilesStep(dest, opts)
+	if err := metaFilesStep(dest, opts); err != nil {
+		return err
+	}
+	return hooksErr
 }
 
 func resolveTemplate(args []string, opts *newOptions) (string, error) {
@@ -125,12 +134,9 @@ func resolveTemplate(args []string, opts *newOptions) (string, error) {
 		fmt.Printf("%s✓ Template selected:%s %s\n", ui.ColorGreen, ui.ColorReset, name)
 	}
 
-	if err := ui.SanitizeTemplateName(name); err != nil {
-		return "", err
-	}
 	exists, err := storage.TemplateExists(name)
 	if err != nil {
-		return "", fmt.Errorf("failed to check template: %w", err)
+		return "", err
 	}
 	if !exists {
 		return "", fmt.Errorf("template '%s' not found", name)
@@ -197,67 +203,54 @@ func prepareDest(dest string, force bool) error {
 	return nil
 }
 
-func copyTemplate(name, templatePath, dest string, verbose bool) error {
-	var spinner *ui.Spinner
-	if verbose {
-		fmt.Printf("%sCreating project...%s\n", ui.ColorYellow, ui.ColorReset)
-	} else {
-		spinner = ui.NewSpinner("Creating project...")
-		spinner.Start()
-		defer spinner.Stop()
-	}
-
-	if err := project.Copy(templatePath, dest); err != nil {
+func copyTemplate(name, templatePath, dest string) error {
+	err := ui.Task("Creating project...", false, func() error {
+		return project.Copy(templatePath, dest)
+	})
+	if err != nil {
 		return fmt.Errorf("failed to create project: %w", err)
 	}
-
-	done := fmt.Sprintf("Project created from template '%s'", name)
-	if spinner != nil {
-		spinner.Success(done)
-	} else {
-		fmt.Printf("%s✓ %s%s\n", ui.ColorGreen, done, ui.ColorReset)
-	}
+	fmt.Printf("%s✓ Project created from template '%s'%s\n", ui.ColorGreen, name, ui.ColorReset)
 	fmt.Printf("  %sLocation:%s %s\n", ui.ColorYellow, ui.ColorReset, dest)
 	return nil
 }
 
-func hooksStep(hooks []string, dest string, opts *newOptions) error {
+// hooksStep runs the hooks if requested. A failed hook is returned as
+// hooksErr, so the remaining steps still run.
+func hooksStep(hooks []string, dest string, opts *newOptions) (hooksErr, err error) {
 	if opts.noHooks {
-		return nil
+		return nil, nil
 	}
 
 	fmt.Printf("\n%sHooks found:%s\n", ui.ColorCyan+ui.ColorBold, ui.ColorReset)
 	for i, hook := range hooks {
-		fmt.Printf("  %d. %s\n", i+1, hook)
+		fmt.Printf("  %d. %s\n", i+1, ui.Clean(hook))
 	}
 	fmt.Println()
 
 	if project.HasLancherCommands(hooks) {
 		fmt.Printf("%s⚠ Hooks call lancher: skipped. Run them manually if needed.%s\n", ui.ColorYellow, ui.ColorReset)
-		return nil
+		return nil, nil
 	}
 
 	run := opts.hooks
 	if !run && !opts.yes {
-		var err error
 		if run, err = ui.PromptConfirmWithDefault("Execute hooks?", false); err != nil {
-			return err
+			return nil, err
 		}
 	}
 	if !run {
 		fmt.Printf("%sSkipped hooks%s\n", ui.ColorYellow, ui.ColorReset)
-		return nil
+		return nil, nil
 	}
 
-	err := project.RunHooks(hooks, dest, os.Stdout, os.Stderr, func(i int) {
-		fmt.Printf("\n%sExecuting hook %d/%d:%s %s\n", ui.ColorCyan, i+1, len(hooks), ui.ColorReset, hooks[i])
+	hooksErr = project.RunHooks(hooks, dest, os.Stdout, os.Stderr, func(i int) {
+		fmt.Printf("\n%sExecuting hook %d/%d:%s %s\n", ui.ColorCyan, i+1, len(hooks), ui.ColorReset, ui.Clean(hooks[i]))
 	})
-	if err != nil {
-		fmt.Printf("%s⚠ Some hooks failed: %v%s\n", ui.ColorYellow, err, ui.ColorReset)
-	} else {
+	if hooksErr == nil {
 		fmt.Printf("%s✓ All hooks executed successfully%s\n", ui.ColorGreen, ui.ColorReset)
 	}
-	return nil
+	return hooksErr, nil
 }
 
 func gitStep(dest string, opts *newOptions) error {

@@ -60,18 +60,14 @@ func runAdd(args []string, force, verbose bool) error {
 		}
 	}
 
-	if err := ui.SanitizeTemplateName(name); err != nil {
-		return err
-	}
 	exists, err := storage.TemplateExists(name)
 	if err != nil {
-		return fmt.Errorf("failed to check template: %w", err)
+		return err
 	}
 	if exists && !force {
 		return fmt.Errorf("template '%s' already exists (use --force to replace it)", name)
 	}
 
-	var spinner *ui.Spinner
 	var log bytes.Buffer
 	var out io.Writer = &log
 	if verbose {
@@ -80,18 +76,11 @@ func runAdd(args []string, force, verbose bool) error {
 		// git fails instead of asking for credentials.
 		os.Setenv("GIT_TERMINAL_PROMPT", "0")
 	}
-	if msg := fetchMessage(src.Kind); msg != "" {
-		if verbose {
-			fmt.Printf("%s%s%s\n", ui.ColorYellow, msg, ui.ColorReset)
-		} else {
-			spinner = ui.NewSpinner(msg)
-			spinner.Start()
-			defer spinner.Stop()
-		}
-	}
 
-	err = storage.Replace(name, func(dest string) error {
-		return src.Fetch(dest, out)
+	err = ui.Task(fetchMessage(src.Kind), verbose, func() error {
+		return storage.Replace(name, func(dest string) error {
+			return src.Fetch(dest, out)
+		})
 	})
 	if err != nil {
 		if tail := lastLines(log.String(), 5); tail != "" {
@@ -100,15 +89,11 @@ func runAdd(args []string, force, verbose bool) error {
 		return err
 	}
 
-	done := fmt.Sprintf("Template '%s' added", name)
+	done := "added"
 	if exists {
-		done = fmt.Sprintf("Template '%s' replaced", name)
+		done = "replaced"
 	}
-	if spinner != nil {
-		spinner.Success(done)
-	} else {
-		fmt.Printf("%s✓ %s%s\n", ui.ColorGreen, done, ui.ColorReset)
-	}
+	fmt.Printf("%s✓ Template '%s' %s%s\n", ui.ColorGreen, name, done, ui.ColorReset)
 	path, _ := storage.GetTemplatePath(name)
 	fmt.Printf("  %sSource:%s %s\n", ui.ColorYellow, ui.ColorReset, src.Display())
 	fmt.Printf("  %sStored:%s %s\n", ui.ColorYellow, ui.ColorReset, path)
@@ -130,7 +115,7 @@ func fetchMessage(kind source.Kind) string {
 	case source.Zip:
 		return "Extracting ZIP file..."
 	}
-	return ""
+	return "Copying template..."
 }
 
 // lastLines returns the last n lines of s, without git's "Cloning into" line.

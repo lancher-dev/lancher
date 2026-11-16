@@ -22,6 +22,9 @@ func TestParseRemoteSources(t *testing.T) {
 		{"https://gitlab.com/group/sub/repo/", "https://gitlab.com/group/sub/repo/", "", "repo"},
 		{"git@github.com:owner/repo.git", "git@github.com:owner/repo.git", "", "repo"},
 		{"git@host:repo.git", "git@host:repo.git", "", "repo"},
+		{"ssh://git@host/owner/repo", "ssh://git@host/owner/repo", "", "repo"},
+		{"git://host/owner/repo", "git://host/owner/repo", "", "repo"},
+		{"file:///srv/git/repo", "file:///srv/git/repo", "", "repo"},
 		{"gh:owner/repo", "https://github.com/owner/repo.git", "gh", "repo"},
 		{"gh:owner/repo.git", "https://github.com/owner/repo.git", "gh", "repo"},
 		{"gl:group/sub/repo", "https://gitlab.com/group/sub/repo.git", "glab", "repo"},
@@ -189,4 +192,37 @@ func TestFetchRefusesExistingDestination(t *testing.T) {
 		t.Fatal("Fetch should refuse an existing destination")
 	}
 	assertExists(t, filepath.Join(dest, "keep"))
+}
+
+func TestFetchFallsBackToGit(t *testing.T) {
+	gitEnv(t)
+	repo := filepath.Join(t.TempDir(), "tpl.git")
+	writeFile(t, filepath.Join(repo, "main.go"), "v1")
+	git(t, repo, "init", "-q", "-b", "main")
+	git(t, repo, "add", ".")
+	git(t, repo, "commit", "-q", "-m", "v1")
+
+	bin := t.TempDir()
+	writeFile(t, filepath.Join(bin, "gh"), "#!/bin/sh\nmkdir -p \"$4\"\nexit 1\n")
+	os.Chmod(filepath.Join(bin, "gh"), 0755)
+	t.Setenv("PATH", bin+string(os.PathListSeparator)+os.Getenv("PATH"))
+
+	src := source.Source{Kind: source.Git, Location: repo, CLI: "gh", Repo: "owner/tpl"}
+	dest := filepath.Join(t.TempDir(), "out")
+	if err := src.Fetch(dest, io.Discard); err != nil {
+		t.Fatalf("Fetch failed: %v", err)
+	}
+	assertExists(t, filepath.Join(dest, "main.go"))
+}
+
+func TestFetchRejectsSourceContainingDestination(t *testing.T) {
+	src := t.TempDir()
+	writeFile(t, filepath.Join(src, "f"), "x")
+	s, err := source.Parse(src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Fetch(filepath.Join(src, "data", "new"), io.Discard); err == nil {
+		t.Error("Fetch into the source directory succeeded")
+	}
 }

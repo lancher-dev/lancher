@@ -191,3 +191,16 @@ func TestLoadConfigWithDetailsInvalidYAML(t *testing.T) {
 		t.Errorf("FoundFiles = %v, want 2 entries", result.FoundFiles)
 	}
 }
+
+func TestUnknownKeys(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "lancher.yml"), "name: x\nignore:\n  - dist\nhook:\n  - ls\n")
+
+	result := config.LoadConfigWithDetails(dir)
+	if result.Err != nil {
+		t.Fatal(result.Err)
+	}
+	if want := []string{"hook", "ignore"}; !slices.Equal(result.Unknown, want) {
+		t.Errorf("Unknown = %v, want %v", result.Unknown, want)
+	}
+}

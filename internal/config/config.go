@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 
 	"go.yaml.in/yaml/v3"
 )
@@ -30,6 +31,7 @@ type LoadResult struct {
 	Config     *Config
 	FoundFiles []string // All config files found
 	UsedFile   string   // The config file that was loaded
+	Unknown    []string // Top-level keys of UsedFile that lancher does not use
 	Err        error    // Read or parse error of UsedFile
 }
 
@@ -71,9 +73,27 @@ func LoadConfigWithDetails(templatePath string) *LoadResult {
 			continue
 		}
 		result.Config = &cfg
+		result.Unknown = unknownKeys(data)
 	}
 
 	return result
+}
+
+var knownKeys = []string{"name", "description", "author", "version", "hooks"}
+
+func unknownKeys(data []byte) []string {
+	var raw map[string]any
+	if yaml.Unmarshal(data, &raw) != nil {
+		return nil
+	}
+	var unknown []string
+	for key := range raw {
+		if !slices.Contains(knownKeys, key) {
+			unknown = append(unknown, key)
+		}
+	}
+	slices.Sort(unknown)
+	return unknown
 }
 
 // HasHooks returns true if config has hooks defined

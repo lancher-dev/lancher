@@ -139,3 +139,29 @@ func TestListTemplatesSkipsHidden(t *testing.T) {
 		t.Errorf("ListTemplates() = %v, want [tpl]", templates)
 	}
 }
+
+func TestReplaceClearsStaleStaging(t *testing.T) {
+	isolateDataDir(t)
+	dir, _ := storage.GetTemplatesDir()
+	writeFile(t, filepath.Join(dir, ".staging", "tpl", "new", "stale"), "x")
+
+	err := storage.Replace("tpl", func(dest string) error {
+		writeFile(t, filepath.Join(dest, "f"), "x")
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertMissing(t, filepath.Join(dir, "tpl", "stale"))
+	assertMissing(t, filepath.Join(dir, ".staging"))
+}
+
+func TestInvalidNamesAreRejected(t *testing.T) {
+	isolateDataDir(t)
+	if _, err := storage.GetTemplatePath("../x"); err == nil {
+		t.Error("GetTemplatePath accepted ../x")
+	}
+	if err := storage.Replace(".hidden", func(string) error { return nil }); err == nil {
+		t.Error("Replace accepted .hidden")
+	}
+}

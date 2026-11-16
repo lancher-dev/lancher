@@ -2,6 +2,7 @@ package ui
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -10,6 +11,9 @@ import (
 
 	"golang.org/x/term"
 )
+
+// ErrCancelled is returned by prompts when the user presses Ctrl+C.
+var ErrCancelled = errors.New("cancelled")
 
 // stdin buffers standard input for all prompts.
 var stdin = bufio.NewReader(os.Stdin)
@@ -31,7 +35,10 @@ func rawMode() (func(), error) {
 // readLine reads a line from stdin and returns def when it is empty.
 func readLine(def string) (string, error) {
 	line, err := stdin.ReadString('\n')
-	if err != nil && (err != io.EOF || line == "") {
+	if err == io.EOF && line == "" {
+		return "", errors.New("no answer: standard input is closed")
+	}
+	if err != nil && err != io.EOF {
 		return "", err
 	}
 	if line = strings.TrimSpace(line); line == "" {

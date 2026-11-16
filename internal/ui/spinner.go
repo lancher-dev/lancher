@@ -2,83 +2,35 @@ package ui
 
 import (
 	"fmt"
-	"sync"
 	"time"
 )
 
-// Spinner provides a simple ASCII spinner for long-running operations
-type Spinner struct {
-	message string
-	frames  []string
-	stop    chan bool
-	wg      sync.WaitGroup
-	active  bool
-	mu      sync.Mutex
-}
-
-// NewSpinner creates a new spinner with a message
-func NewSpinner(message string) *Spinner {
-	return &Spinner{
-		message: message,
-		frames:  []string{"-", "\\", "|", "/"},
-		stop:    make(chan bool),
-		active:  false,
-	}
-}
-
-// Start begins the spinner animation
-func (s *Spinner) Start() {
-	s.mu.Lock()
-	if s.active {
-		s.mu.Unlock()
-		return
-	}
-	s.active = true
-	s.mu.Unlock()
-
-	if !IsTTY {
-		return
+// Task runs fn while showing msg: next to a spinner, or on a line of its own
+// when verbose is set or stdout is not a terminal.
+func Task(msg string, verbose bool, fn func() error) error {
+	if verbose || !IsTTY {
+		fmt.Printf("%s%s%s\n", ColorYellow, msg, ColorReset)
+		return fn()
 	}
 
-	s.wg.Add(1)
+	done := make(chan struct{})
+	stopped := make(chan struct{})
 	go func() {
-		defer s.wg.Done()
-		i := 0
-		for {
+		defer close(stopped)
+		ticker := time.NewTicker(100 * time.Millisecond)
+		defer ticker.Stop()
+		for i := 0; ; i++ {
+			fmt.Printf("\r%s%c%s %s", ColorYellow, `-\|/`[i%4], ColorReset, msg)
 			select {
-			case <-s.stop:
-				// Clear the line
-				fmt.Printf("\r\033[K")
+			case <-done:
+				fmt.Print("\r\033[K")
 				return
-			default:
-				fmt.Printf("\r%s%s%s %s", ColorYellow, s.frames[i%len(s.frames)], ColorReset, s.message)
-				i++
-				time.Sleep(100 * time.Millisecond)
+			case <-ticker.C:
 			}
 		}
 	}()
-}
-
-// Stop terminates the spinner
-func (s *Spinner) Stop() {
-	s.mu.Lock()
-	if !s.active {
-		s.mu.Unlock()
-		return
-	}
-	s.active = false
-	s.mu.Unlock()
-
-	if !IsTTY {
-		return
-	}
-
-	s.stop <- true
-	s.wg.Wait()
-}
-
-// Success stops the spinner and shows success message
-func (s *Spinner) Success(message string) {
-	s.Stop()
-	fmt.Printf("%s✓%s %s\n", ColorGreen, ColorReset, message)
+	err := fn()
+	close(done)
+	<-stopped
+	return err
 }

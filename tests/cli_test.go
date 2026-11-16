@@ -197,6 +197,42 @@ func TestNewHooksNeedFlagWithYes(t *testing.T) {
 	assertExists(t, filepath.Join(hooked, "ran"))
 }
 
+func TestNewFailedHook(t *testing.T) {
+	isolateDataDir(t)
+	addTemplate(t, "web", map[string]string{"lancher.yml": "hooks:\n  - \"false\"\n", "f": "x"})
+	dest := filepath.Join(t.TempDir(), "app")
+
+	if _, err := runCLI(t, "new", "web", dest, "-y", "--hooks"); err == nil || !strings.Contains(err.Error(), "failed") {
+		t.Errorf("new with a failing hook: err = %v", err)
+	}
+	assertExists(t, filepath.Join(dest, "f"))
+	assertMissing(t, filepath.Join(dest, "lancher.yml"))
+}
+
+func TestNewKeepsDestinationOnInvalidConfig(t *testing.T) {
+	isolateDataDir(t)
+	addTemplate(t, "bad", map[string]string{"lancher.yml": "name: [unclosed\n"})
+	dest := filepath.Join(t.TempDir(), "app")
+	writeFile(t, filepath.Join(dest, "keep.txt"), "keep")
+
+	if _, err := runCLI(t, "new", "bad", dest, "-y", "--force"); err == nil {
+		t.Fatal("new with an invalid config succeeded")
+	}
+	assertExists(t, filepath.Join(dest, "keep.txt"))
+}
+
+func TestAddRejectsInvalidNames(t *testing.T) {
+	isolateDataDir(t)
+	src := filepath.Join(t.TempDir(), "src")
+	writeFile(t, filepath.Join(src, "f"), "x")
+
+	for _, name := range []string{".hidden", "-x", "a b", "a/b"} {
+		if _, err := runCLI(t, "add", src, "--", name); err == nil || !strings.Contains(err.Error(), "invalid template name") {
+			t.Errorf("add with name %q: err = %v", name, err)
+		}
+	}
+}
+
 func TestNewConflictingFlags(t *testing.T) {
 	isolateDataDir(t)
 	if _, err := runCLI(t, "new", "web", "x", "--git", "--no-git"); err == nil {

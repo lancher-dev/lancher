@@ -106,8 +106,7 @@ func IgnoreMatcher(dir string) func(rel string) bool {
 }
 
 // ApplyIgnorePatterns removes the paths in dir that its .lancherignore
-// matches. The root .git directory is always kept, so cloned templates can
-// still be updated.
+// matches. The root .git directory is always kept.
 func ApplyIgnorePatterns(dir string) error {
 	patterns := LoadIgnoreFile(dir)
 	if len(patterns) == 0 {
@@ -149,7 +148,7 @@ func CopyDir(src, dst string) error {
 }
 
 // CopyTree copies src into dst, leaving out the paths relative to src for
-// which skip returns true.
+// which skip returns true. Symbolic links are copied as links.
 func CopyTree(src, dst string, skip func(rel string) bool) error {
 	return filepath.WalkDir(src, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -167,6 +166,13 @@ func CopyTree(src, dst string, skip func(rel string) bool) error {
 		}
 
 		target := filepath.Join(dst, relPath)
+		if d.Type()&fs.ModeSymlink != 0 {
+			link, err := os.Readlink(path)
+			if err != nil {
+				return err
+			}
+			return os.Symlink(link, target)
+		}
 		if d.IsDir() {
 			info, err := d.Info()
 			if err != nil {
@@ -193,7 +199,7 @@ func CopyFile(src, dst string) error {
 	if err != nil {
 		return fmt.Errorf("failed to stat source file: %w", err)
 	}
-	return writeFile(dst, srcFile, srcInfo.Mode())
+	return writeFile(dst, srcFile, srcInfo.Mode().Perm())
 }
 
 // UnzipToDir extracts a ZIP file into destDir. When every entry is inside a
@@ -268,7 +274,7 @@ func extractZipFile(file *zip.File, destPath string) error {
 		return err
 	}
 	defer srcFile.Close()
-	return writeFile(destPath, srcFile, file.Mode())
+	return writeFile(destPath, srcFile, file.Mode().Perm())
 }
 
 // writeFile writes r to path with the given mode, reporting errors on close.
