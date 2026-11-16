@@ -70,6 +70,12 @@ func runRemove(names []string) error {
 		fmt.Printf("%s✓ Template '%s' removed%s\n", ui.ColorGreen, name, ui.ColorReset)
 		removed++
 	}
+	if removed > 0 {
+		// Loading the manifest drops the entries of removed templates.
+		if _, err := storage.LoadManifest(); err != nil {
+			errs = append(errs, err)
+		}
+	}
 	if removed > 1 {
 		fmt.Printf("\n%s✓ Removed %d templates%s\n", ui.ColorGreen, removed, ui.ColorReset)
 	}

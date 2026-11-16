@@ -1,11 +1,7 @@
 package cli
 
 import (
-	"bytes"
 	"fmt"
-	"io"
-	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -68,24 +64,17 @@ func runAdd(args []string, force, verbose bool) error {
 		return fmt.Errorf("template '%s' already exists (use --force to replace it)", name)
 	}
 
-	var log bytes.Buffer
-	var out io.Writer = &log
-	if verbose {
-		out = os.Stdout
-	} else {
-		// git fails instead of asking for credentials.
-		os.Setenv("GIT_TERMINAL_PROMPT", "0")
-	}
-
-	err = ui.Task(fetchMessage(src.Kind), verbose, func() error {
-		return storage.Replace(name, func(dest string) error {
-			return src.Fetch(dest, out)
-		})
-	})
+	m, err := storage.LoadManifest()
 	if err != nil {
-		if tail := lastLines(log.String(), 5); tail != "" {
-			return fmt.Errorf("%w\n%s", err, tail)
-		}
+		return err
+	}
+	entry, err := fetchTemplate(fetchMessage(src.Kind), name, src, verbose)
+	if err != nil {
+		return err
+	}
+	entry.Added = entry.Synced
+	m.Templates[name] = entry
+	if err := m.Save(); err != nil {
 		return err
 	}
 
@@ -106,28 +95,4 @@ func promptSource() (source.Source, error) {
 		return source.Source{}, err
 	}
 	return source.Parse(raw)
-}
-
-func fetchMessage(kind source.Kind) string {
-	switch kind {
-	case source.Git:
-		return "Cloning repository..."
-	case source.Zip:
-		return "Extracting ZIP file..."
-	}
-	return "Copying template..."
-}
-
-// lastLines returns the last n lines of s, without git's "Cloning into" line.
-func lastLines(s string, n int) string {
-	var lines []string
-	for _, line := range strings.Split(strings.TrimSpace(s), "\n") {
-		if !strings.HasPrefix(line, "Cloning into") {
-			lines = append(lines, line)
-		}
-	}
-	if len(lines) > n {
-		lines = lines[len(lines)-n:]
-	}
-	return strings.TrimSpace(strings.Join(lines, "\n"))
 }

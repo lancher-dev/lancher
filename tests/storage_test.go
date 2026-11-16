@@ -165,3 +165,20 @@ func TestInvalidNamesAreRejected(t *testing.T) {
 		t.Error("Replace accepted .hidden")
 	}
 }
+
+func TestListTemplatesSkipsInvalidNames(t *testing.T) {
+	isolateDataDir(t)
+	dir, _ := storage.GetTemplatesDir()
+	for _, name := range []string{"ok", "with space", ".staging"} {
+		if err := os.Mkdir(filepath.Join(dir, name), 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	got, err := storage.ListTemplates()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 1 || got[0] != "ok" {
+		t.Errorf("ListTemplates() = %v, want [ok]", got)
+	}
+}

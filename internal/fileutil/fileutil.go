@@ -141,10 +141,13 @@ func ApplyIgnorePatterns(dir string) error {
 	})
 }
 
-// CopyDir copies src into dst, leaving out the paths that the .lancherignore
-// of src matches.
+// CopyDir copies src into dst, leaving out the root .git directory and the
+// paths that the .lancherignore of src matches.
 func CopyDir(src, dst string) error {
-	return CopyTree(src, dst, IgnoreMatcher(src))
+	ignored := IgnoreMatcher(src)
+	return CopyTree(src, dst, func(rel string) bool {
+		return rel == ".git" || ignored(rel)
+	})
 }
 
 // CopyTree copies src into dst, leaving out the paths relative to src for

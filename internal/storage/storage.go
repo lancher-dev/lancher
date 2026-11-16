@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
-	"strings"
 )
 
 // stagingDir holds templates while they are fetched.
@@ -103,7 +102,7 @@ func ListTemplates() ([]string, error) {
 
 	templates := []string{}
 	for _, entry := range entries {
-		if entry.IsDir() && !strings.HasPrefix(entry.Name(), ".") {
+		if entry.IsDir() && ValidateName(entry.Name()) == nil {
 			templates = append(templates, entry.Name())
 		}
 	}
