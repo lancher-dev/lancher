@@ -148,7 +148,8 @@ func CopyDir(src, dst string) error {
 }
 
 // CopyTree copies src into dst, leaving out the paths relative to src for
-// which skip returns true. Symbolic links are copied as links.
+// which skip returns true. Files already in dst are overwritten. Symbolic
+// links are copied as links.
 func CopyTree(src, dst string, skip func(rel string) bool) error {
 	return filepath.WalkDir(src, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -171,6 +172,9 @@ func CopyTree(src, dst string, skip func(rel string) bool) error {
 			if err != nil {
 				return err
 			}
+			if err := os.Remove(target); err != nil && !os.IsNotExist(err) {
+				return err
+			}
 			return os.Symlink(link, target)
 		}
 		if d.IsDir() {
@@ -182,6 +186,11 @@ func CopyTree(src, dst string, skip func(rel string) bool) error {
 				return fmt.Errorf("failed to create directory: %w", err)
 			}
 			return nil
+		}
+		if info, err := os.Lstat(target); err == nil && info.Mode()&fs.ModeSymlink != 0 {
+			if err := os.Remove(target); err != nil {
+				return err
+			}
 		}
 		return CopyFile(path, target)
 	})

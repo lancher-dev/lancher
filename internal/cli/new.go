@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -36,9 +35,15 @@ func newNewCmd() *cobra.Command {
 		Long: `Create a project from a template.
 
 Without arguments, lancher asks for the template and the destination, which
-defaults to the template name. With --yes it asks nothing: hooks run only with
---hooks, git is initialized only with --git and lancher files are kept only
-with --keep-config.`,
+defaults to the template name. All questions come first; then the files are
+copied, git is initialized and the hooks run, in this order.
+
+With --yes it asks nothing: hooks run only with --hooks, git is initialized
+only with --git and lancher files are kept only with --keep-config.
+
+A destination that is not empty is an error unless --force is given: the
+template is then written into it, overwriting files with the same path and
+leaving the others alone.`,
 		Example: `  lancher new
   lancher new api ./my-api
   lancher new api ./my-api --yes --git --hooks`,
@@ -51,66 +56,145 @@ with --keep-config.`,
 
 	f := cmd.Flags()
 	f.BoolVarP(&opts.yes, "yes", "y", false, "do not ask anything, use the defaults")
-	f.BoolVar(&opts.force, "force", false, "replace a destination that is not empty")
+	f.BoolVar(&opts.force, "force", false, "write into a destination that is not empty, overwriting files")
 	f.BoolVar(&opts.git, "git", false, "initialize a git repository")
 	f.BoolVar(&opts.noGit, "no-git", false, "do not initialize a git repository")
 	f.BoolVar(&opts.hooks, "hooks", false, "run the template hooks")
 	f.BoolVar(&opts.noHooks, "no-hooks", false, "do not run the template hooks")
 	f.BoolVar(&opts.keepConfig, "keep-config", false, "keep lancher config and ignore files in the project")
-	f.BoolVar(&opts.noKeep, "no-keep-config", false, "remove lancher config and ignore files from the project")
+	f.BoolVar(&opts.noKeep, "no-keep-config", false, "do not copy lancher config and ignore files to the project")
 	cmd.MarkFlagsMutuallyExclusive("git", "no-git")
 	cmd.MarkFlagsMutuallyExclusive("hooks", "no-hooks")
 	cmd.MarkFlagsMutuallyExclusive("keep-config", "no-keep-config")
 	return cmd
 }
 
+// plan is what new does once every question is answered.
+type plan struct {
+	template     string
+	templatePath string
+	dest         string
+	hooks        []string
+	git          bool
+	keepMeta     bool
+}
+
 func runNew(args []string, opts *newOptions) error {
-	name, err := resolveTemplate(args, opts)
+	p, err := ask(args, opts)
 	if err != nil {
 		return err
 	}
-	dest, err := resolveDest(args, name, opts)
-	if err != nil {
-		return err
+	return p.apply()
+}
+
+// ask resolves the plan from arguments, flags and prompts, without touching
+// the destination.
+func ask(args []string, opts *newOptions) (*plan, error) {
+	p := &plan{}
+	var err error
+	if p.template, err = resolveTemplate(args, opts); err != nil {
+		return nil, err
 	}
-	templatePath, err := storage.GetTemplatePath(name)
-	if err != nil {
-		return err
+	if p.dest, err = resolveDest(args, p.template, opts); err != nil {
+		return nil, err
 	}
-	loaded := config.LoadConfigWithDetails(templatePath)
+	if p.templatePath, err = storage.GetTemplatePath(p.template); err != nil {
+		return nil, err
+	}
+
+	loaded := config.LoadConfigWithDetails(p.templatePath)
 	if loaded.Err != nil {
-		return fmt.Errorf("failed to load template config: %w", loaded.Err)
+		return nil, fmt.Errorf("failed to load template config: %w", loaded.Err)
 	}
 	cfg := loaded.Config
 	if len(loaded.Unknown) > 0 {
 		fmt.Printf("%s⚠ Warning: unknown keys in %s: %s%s\n",
 			ui.ColorYellow, loaded.UsedFile, ui.Clean(strings.Join(loaded.Unknown, ", ")), ui.ColorReset)
 	}
-
-	if err := prepareDest(dest, opts.force); err != nil {
-		return err
-	}
 	if len(cfg.Metadata()) > 0 {
 		fmt.Printf("\n%sTemplate Information:%s\n", ui.ColorCyan+ui.ColorBold, ui.ColorReset)
 		printMetadata(os.Stdout, cfg, "")
 	}
 
-	if err := copyTemplate(name, templatePath, dest); err != nil {
-		return err
-	}
-	var hooksErr error
 	if cfg.HasHooks() {
-		if hooksErr, err = hooksStep(cfg.Hooks, dest, opts); err != nil {
-			return err
+		if p.hooks, err = askHooks(cfg.Hooks, opts); err != nil {
+			return nil, err
 		}
 	}
-	if err := gitStep(dest, opts); err != nil {
-		return err
+	if p.git, err = confirm("Initialize git repository?", opts.git, opts.noGit, opts.yes); err != nil {
+		return nil, err
 	}
-	if err := metaFilesStep(dest, opts); err != nil {
-		return err
+	if files := project.MetaFiles(p.templatePath); len(files) > 0 {
+		if !opts.keepConfig && !opts.noKeep && !opts.yes {
+			fmt.Printf("\n%sLancher files in the template:%s %s\n", ui.ColorCyan+ui.ColorBold, ui.ColorReset, strings.Join(files, ", "))
+		}
+		if p.keepMeta, err = confirm("Copy them to the project?", opts.keepConfig, opts.noKeep, opts.yes); err != nil {
+			return nil, err
+		}
 	}
-	return hooksErr
+	return p, nil
+}
+
+// confirm returns the answer given by a pair of flags, or asks the question;
+// with yes, the answer is no.
+func confirm(question string, on, off, yes bool) (bool, error) {
+	if on || off || yes {
+		return on, nil
+	}
+	return ui.PromptConfirmWithDefault(question, false)
+}
+
+// askHooks lists the hooks and returns the ones to run.
+func askHooks(hooks []string, opts *newOptions) ([]string, error) {
+	if opts.noHooks {
+		return nil, nil
+	}
+	fmt.Printf("\n%sHooks found:%s\n", ui.ColorCyan+ui.ColorBold, ui.ColorReset)
+	for i, hook := range hooks {
+		fmt.Printf("  %d. %s\n", i+1, ui.Clean(hook))
+	}
+	if project.InHook() {
+		fmt.Printf("%s⚠ Hooks skipped: lancher is running inside a hook%s\n", ui.ColorYellow, ui.ColorReset)
+		return nil, nil
+	}
+	run, err := confirm("Execute hooks?", opts.hooks, false, opts.yes)
+	if err != nil || !run {
+		return nil, err
+	}
+	return hooks, nil
+}
+
+// apply copies the template, initializes git and runs the hooks.
+func (p *plan) apply() error {
+	err := ui.Task("Creating project...", false, func() error {
+		return project.Copy(p.templatePath, p.dest, p.keepMeta)
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create project: %w", err)
+	}
+	fmt.Printf("%s✓ Project created from template '%s'%s\n", ui.ColorGreen, p.template, ui.ColorReset)
+	fmt.Printf("  %sLocation:%s %s\n", ui.ColorYellow, ui.ColorReset, p.dest)
+
+	if p.git {
+		if _, err := os.Stat(filepath.Join(p.dest, ".git")); err == nil {
+			fmt.Printf("%sGit repository already present%s\n", ui.ColorYellow, ui.ColorReset)
+		} else if output, err := project.InitGit(p.dest); err != nil {
+			return fmt.Errorf("failed to initialize git: %w\n%s", err, strings.TrimSpace(string(output)))
+		} else {
+			fmt.Printf("%s✓ Git repository initialized%s\n", ui.ColorGreen, ui.ColorReset)
+		}
+	}
+
+	if len(p.hooks) > 0 {
+		err := project.RunHooks(p.hooks, p.dest, os.Stdout, os.Stderr, func(i int) {
+			fmt.Printf("\n%sExecuting hook %d/%d:%s %s\n", ui.ColorCyan, i+1, len(p.hooks), ui.ColorReset, ui.Clean(p.hooks[i]))
+		})
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%s✓ All hooks executed successfully%s\n", ui.ColorGreen, ui.ColorReset)
+	}
+	return nil
 }
 
 func resolveTemplate(args []string, opts *newOptions) (string, error) {
@@ -144,7 +228,8 @@ func resolveTemplate(args []string, opts *newOptions) (string, error) {
 	return name, nil
 }
 
-// resolveDest returns the absolute destination, asking for it if missing.
+// resolveDest returns the absolute destination, asking for it if missing,
+// and checks that it can be written.
 func resolveDest(args []string, name string, opts *newOptions) (string, error) {
 	var dest string
 	switch {
@@ -167,12 +252,12 @@ func resolveDest(args []string, name string, opts *newOptions) (string, error) {
 	if _, err := os.Stat(filepath.Dir(abs)); os.IsNotExist(err) {
 		return "", fmt.Errorf("parent directory does not exist: %s", filepath.Dir(abs))
 	}
-	return abs, nil
+	return abs, checkDest(abs, opts.force)
 }
 
-// prepareDest accepts a missing or empty destination and, with force, clears
-// one that is not empty.
-func prepareDest(dest string, force bool) error {
+// checkDest accepts a missing or empty destination and, with force, one that
+// already contains files.
+func checkDest(dest string, force bool) error {
 	stat, err := os.Stat(dest)
 	if os.IsNotExist(err) {
 		return nil
@@ -187,128 +272,8 @@ func prepareDest(dest string, force bool) error {
 	if err != nil {
 		return fmt.Errorf("failed to read destination directory: %w", err)
 	}
-	if len(entries) == 0 {
-		return nil
+	if len(entries) > 0 && !force {
+		return fmt.Errorf("destination is not empty: %s (use --force to write into it)", dest)
 	}
-	if !force {
-		return fmt.Errorf("destination is not empty: %s (use --force to replace it)", dest)
-	}
-	if err := project.CheckReplaceable(dest); err != nil {
-		return err
-	}
-	if err := os.RemoveAll(dest); err != nil {
-		return fmt.Errorf("failed to remove existing directory: %w", err)
-	}
-	fmt.Printf("%s✓ Removed existing directory%s\n", ui.ColorGreen, ui.ColorReset)
-	return nil
-}
-
-func copyTemplate(name, templatePath, dest string) error {
-	err := ui.Task("Creating project...", false, func() error {
-		return project.Copy(templatePath, dest)
-	})
-	if err != nil {
-		return fmt.Errorf("failed to create project: %w", err)
-	}
-	fmt.Printf("%s✓ Project created from template '%s'%s\n", ui.ColorGreen, name, ui.ColorReset)
-	fmt.Printf("  %sLocation:%s %s\n", ui.ColorYellow, ui.ColorReset, dest)
-	return nil
-}
-
-// hooksStep runs the hooks if requested. A failed hook is returned as
-// hooksErr, so the remaining steps still run.
-func hooksStep(hooks []string, dest string, opts *newOptions) (hooksErr, err error) {
-	if opts.noHooks {
-		return nil, nil
-	}
-
-	fmt.Printf("\n%sHooks found:%s\n", ui.ColorCyan+ui.ColorBold, ui.ColorReset)
-	for i, hook := range hooks {
-		fmt.Printf("  %d. %s\n", i+1, ui.Clean(hook))
-	}
-	fmt.Println()
-
-	if project.HasLancherCommands(hooks) {
-		fmt.Printf("%s⚠ Hooks call lancher: skipped. Run them manually if needed.%s\n", ui.ColorYellow, ui.ColorReset)
-		return nil, nil
-	}
-
-	run := opts.hooks
-	if !run && !opts.yes {
-		if run, err = ui.PromptConfirmWithDefault("Execute hooks?", false); err != nil {
-			return nil, err
-		}
-	}
-	if !run {
-		fmt.Printf("%sSkipped hooks%s\n", ui.ColorYellow, ui.ColorReset)
-		return nil, nil
-	}
-
-	hooksErr = project.RunHooks(hooks, dest, os.Stdout, os.Stderr, func(i int) {
-		fmt.Printf("\n%sExecuting hook %d/%d:%s %s\n", ui.ColorCyan, i+1, len(hooks), ui.ColorReset, ui.Clean(hooks[i]))
-	})
-	if hooksErr == nil {
-		fmt.Printf("%s✓ All hooks executed successfully%s\n", ui.ColorGreen, ui.ColorReset)
-	}
-	return hooksErr, nil
-}
-
-func gitStep(dest string, opts *newOptions) error {
-	if opts.noGit {
-		return nil
-	}
-	fmt.Println()
-
-	initGit := opts.git
-	if !initGit && !opts.yes {
-		var err error
-		if initGit, err = ui.PromptConfirmWithDefault("Initialize git repository?", false); err != nil {
-			return err
-		}
-	}
-	if !initGit {
-		fmt.Printf("%sSkipped git initialization%s\n", ui.ColorYellow, ui.ColorReset)
-		return nil
-	}
-
-	cmd := exec.Command("git", "init")
-	cmd.Dir = dest
-	if output, err := cmd.CombinedOutput(); err != nil {
-		fmt.Printf("%s⚠ Failed to initialize git: %v%s\n", ui.ColorYellow, err, ui.ColorReset)
-		if len(output) > 0 {
-			fmt.Printf("%s%s%s\n", ui.ColorGray, output, ui.ColorReset)
-		}
-		return nil
-	}
-	fmt.Printf("%s✓ Git repository initialized%s\n", ui.ColorGreen, ui.ColorReset)
-	return nil
-}
-
-func metaFilesStep(dest string, opts *newOptions) error {
-	files := project.MetaFiles(dest)
-	if len(files) == 0 {
-		return nil
-	}
-	fmt.Println()
-
-	keep := opts.keepConfig
-	if !keep && !opts.noKeep && !opts.yes {
-		fmt.Printf("%sLancher files found in project:%s\n", ui.ColorCyan+ui.ColorBold, ui.ColorReset)
-		for _, f := range files {
-			fmt.Printf("  • %s\n", f)
-		}
-		var err error
-		if keep, err = ui.PromptConfirmWithDefault("Keep lancher config and ignore files in the project?", false); err != nil {
-			return err
-		}
-	}
-	if keep {
-		fmt.Printf("%s✓ Kept lancher config files in project%s\n", ui.ColorGreen, ui.ColorReset)
-		return nil
-	}
-	if err := project.RemoveMetaFiles(dest, files); err != nil {
-		return err
-	}
-	fmt.Printf("%s✓ Removed lancher config files from project%s\n", ui.ColorGreen, ui.ColorReset)
 	return nil
 }
