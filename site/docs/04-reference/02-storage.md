@@ -45,17 +45,17 @@ Each directory in `templates/` is a template, named after the directory. Directo
 ```yaml
 version: 1
 templates:
-  api-base:
-    kind: local
-    source: /home/me/projects/api-base
-    added: 2026-11-16T17:12:14Z
-    synced: 2026-11-16T17:12:14Z
-  web:
-    kind: git
-    source: https://github.com/user/web-template
-    ref: 6f9a967c2cd11dee2620939b26f98068f0744181
-    added: 2026-11-16T17:12:14Z
-    synced: 2026-11-16T17:12:14Z
+    api-base:
+        kind: local
+        source: /home/me/projects/api-base
+        added: 2026-11-16T17:12:14Z
+        synced: 2026-11-16T17:12:14Z
+    web:
+        kind: git
+        source: https://github.com/user/web-template
+        ref: 6f9a967c2cd11dee2620939b26f98068f0744181
+        added: 2026-11-16T17:12:14Z
+        synced: 2026-11-16T17:12:14Z
 ```
 
 | Field    | Meaning                                                 |

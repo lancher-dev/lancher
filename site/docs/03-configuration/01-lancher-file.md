@@ -12,8 +12,8 @@ description: Brief description
 author: Author Name
 version: 1.0.0
 hooks:
-  - command1
-  - command2
+    - command1
+    - command2
 ```
 
 The file can be named `.lancher.yaml`, `.lancher.yml`, `lancher.yaml`, or `lancher.yml`. If multiple configuration files exist, a warning is displayed and lancher uses the highest-priority one (`.lancher.yaml` > `.lancher.yml` > `lancher.yaml` > `lancher.yml`). Keys that lancher does not know are reported with a warning. Check a template's configuration with `lancher info <template>`.
@@ -75,9 +75,9 @@ Shell commands executed in the project directory after file copy, requiring user
 
 ```yaml
 hooks:
-  - npm install
-  - git init
-  - chmod +x scripts/setup.sh
+    - npm install
+    - git init
+    - chmod +x scripts/setup.sh
 ```
 
 Commands run one after another with `sh` in the project directory, after a confirmation, and stop at the first failure. See [Hooks](/docs/configuration/hooks).
@@ -96,9 +96,9 @@ author: API Team
 version: 1.0.0
 
 hooks:
-  - npm install
-  - npm run build
-  - git init
+    - npm install
+    - npm run build
+    - git init
 ```
 
 </details>
@@ -112,8 +112,8 @@ description: Python CLI application template
 version: 1.0.0
 
 hooks:
-  - python3 -m venv venv
-  - venv/bin/pip install -r requirements.txt
+    - python3 -m venv venv
+    - venv/bin/pip install -r requirements.txt
 ```
 
 </details>
@@ -127,9 +127,9 @@ description: React + Node.js monorepo with workspaces
 version: 2.0.0
 
 hooks:
-  - npm install
-  - npm run bootstrap
-  - npx husky install
+    - npm install
+    - npm run bootstrap
+    - npx husky install
 ```
 
 </details>

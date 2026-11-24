@@ -1,86 +1,86 @@
-@import "@fontsource-variable/fira-code";
+@import '@fontsource-variable/fira-code';
 
 :root,
 html.dark {
-  --color-primary: #89b29e;
-  --color-primary-light: #c5d4c8;
-  --color-primary-dark: #c5d4c8;
+    --color-primary: #89b29e;
+    --color-primary-light: #c5d4c8;
+    --color-primary-dark: #c5d4c8;
 
-  --color-foreground: #e0e0e0;
-  --color-foreground-secondary: #e0e0e090;
-  --color-foreground-muted: #bbb;
-  --color-foreground-bright: #f2f2f2e6;
+    --color-foreground: #e0e0e0;
+    --color-foreground-secondary: #e0e0e090;
+    --color-foreground-muted: #bbb;
+    --color-foreground-bright: #f2f2f2e6;
 
-  --color-background: #221e22;
-  --color-background-secondary: #1a1a1a;
-  --color-background-tertiary: #2a2a2a;
-  --color-surface: #0d1117;
-  --color-surface-hover: #222;
+    --color-background: #221e22;
+    --color-background-secondary: #1a1a1a;
+    --color-background-tertiary: #2a2a2a;
+    --color-surface: #0d1117;
+    --color-surface-hover: #222;
 
-  --color-border: #444;
-  --color-border-light: #555;
-  --color-border-dark: #333;
+    --color-border: #444;
+    --color-border-light: #555;
+    --color-border-dark: #333;
 
-  --color-error: #f7768e;
-  --color-warning: #e0af68;
-  --color-info: #7aa2f7;
-  --color-success: #89b29e;
+    --color-error: #f7768e;
+    --color-warning: #e0af68;
+    --color-info: #7aa2f7;
+    --color-success: #89b29e;
 }
 
 :root {
-  --jaad-chrome-width: 80rem;
-  --jaad-sidebar-width: 14rem;
+    --jaad-chrome-width: 80rem;
+    --jaad-sidebar-width: 14rem;
 
-  --font-mono: "Fira Code Variable", ui-monospace, monospace;
+    --font-mono: 'Fira Code Variable', ui-monospace, monospace;
 }
 
 header .font-brand {
-  font-family: var(--font-mono);
-  font-style: normal;
-  font-weight: 700;
-  letter-spacing: normal;
+    font-family: var(--font-mono);
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: normal;
 }
 
 header .font-brand::before {
-  content: "$ ";
-  color: var(--color-foreground-bright);
+    content: '$ ';
+    color: var(--color-foreground-bright);
 }
 
 .jaad-header {
-  border-bottom: 1px solid var(--color-border-dark);
+    border-bottom: 1px solid var(--color-border-dark);
 }
 
-[data-docs] .jaad-nav-link[href="/docs"] {
-  color: var(--color-primary-light);
-  font-weight: 600;
+[data-docs] .jaad-nav-link[href='/docs'] {
+    color: var(--color-primary-light);
+    font-weight: 600;
 }
 
 /* The docs have their own mobile navigation. */
 [data-docs] .jaad-nav-mobile {
-  display: none;
+    display: none;
 }
 
 .jaad-footer-credit {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 0.25rem 1.5rem;
-  font-size: 13px;
-  font-style: normal;
-  text-align: left;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.25rem 1.5rem;
+    font-size: 13px;
+    font-style: normal;
+    text-align: left;
 }
 
 .jaad-footer-credit a {
-  color: var(--color-foreground-muted);
-  text-decoration: none;
+    color: var(--color-foreground-muted);
+    text-decoration: none;
 }
 
 .jaad-footer-credit a:hover {
-  color: var(--color-foreground-bright);
+    color: var(--color-foreground-bright);
 }
 
 .site-footer-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
 }

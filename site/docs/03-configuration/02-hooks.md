@@ -8,8 +8,8 @@ Define hooks as a list of commands in `.lancher.yaml`:
 
 ```yaml
 hooks:
-  - npm install
-  - ./scripts/setup.sh
+    - npm install
+    - ./scripts/setup.sh
 ```
 
 Keep each hook focused on one task, and move longer logic into a script inside the template.
@@ -36,12 +36,12 @@ Hooks run with `sh`, which is `dash` on Debian and Ubuntu: write them in POSIX s
 
 ```yaml
 hooks:
-  - npm install
+    - npm install
 ```
 
 ```yaml
 hooks:
-  - pip install -r requirements.txt
+    - pip install -r requirements.txt
 ```
 
 ### First Commit
@@ -50,31 +50,31 @@ Run `lancher new` with `--git`, then commit with a hook:
 
 ```yaml
 hooks:
-  - git add -A
-  - git commit -m "Initial commit"
+    - git add -A
+    - git commit -m "Initial commit"
 ```
 
 ### Script Execution
 
 ```yaml
 hooks:
-  - chmod +x scripts/*.sh
-  - ./scripts/setup.sh
+    - chmod +x scripts/*.sh
+    - ./scripts/setup.sh
 ```
 
 ### Environment Setup
 
 ```yaml
 hooks:
-  - cp .env.example .env
+    - cp .env.example .env
 ```
 
 ### Database Setup
 
 ```yaml
 hooks:
-  - npm run db:migrate
-  - npm run db:seed
+    - npm run db:migrate
+    - npm run db:seed
 ```
 
 ## Conditional Execution
@@ -83,24 +83,24 @@ hooks:
 
 ```yaml
 hooks:
-  - if command -v pnpm >/dev/null; then pnpm install; else npm install; fi
+    - if command -v pnpm >/dev/null; then pnpm install; else npm install; fi
 ```
 
 ### Platform-Specific
 
 ```yaml
 hooks:
-  - |
-    if [ "$(uname -s)" = Darwin ]; then
-      brew bundle
-    fi
+    - |
+        if [ "$(uname -s)" = Darwin ]; then
+          brew bundle
+        fi
 ```
 
 ### File Existence
 
 ```yaml
 hooks:
-  - if [ -f package.json ]; then npm install; fi
+    - if [ -f package.json ]; then npm install; fi
 ```
 
 ## Security

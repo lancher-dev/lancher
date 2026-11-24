@@ -1,1 +1,1 @@
-export { default } from "@jaamd/jaad/site";
+export { default } from '@jaamd/jaad/site'

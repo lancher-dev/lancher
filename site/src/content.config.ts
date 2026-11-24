@@ -1,1 +1,1 @@
-export { collections } from "@jaamd/jaad/content";
+export { collections } from '@jaamd/jaad/content'
