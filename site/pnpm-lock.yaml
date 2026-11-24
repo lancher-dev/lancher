@@ -17,8 +17,8 @@ importers:
         specifier: 5.3.0
         version: 5.3.0
       '@jaamd/jaad':
-        specifier: ^1.0.2
-        version: 1.0.2(@astrojs/markdown-remark@7.3.2(supports-color@10.2.2))(@tailwindcss/vite@4.3.5(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)))(astro@7.4.11(@astrojs/markdown-remark@7.3.2(supports-color@10.2.2))(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(satteri@0.11.7)(supports-color@10.2.2)(tailwindcss@4.3.5)
+        specifier: ^1.1.0
+        version: 1.1.0(@astrojs/markdown-remark@7.3.2(supports-color@10.2.2))(@tailwindcss/vite@4.3.5(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)))(astro@7.4.11(@astrojs/markdown-remark@7.3.2(supports-color@10.2.2))(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(satteri@0.11.7)(supports-color@10.2.2)(tailwindcss@4.3.5)
       astro:
         specifier: 7.4.11
         version: 7.4.11(@astrojs/markdown-remark@7.3.2(supports-color@10.2.2))(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
@@ -827,9 +827,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@jaamd/astro@1.0.2':
-    resolution: {integrity: sha512-kqTP3ml9xU7l2Pbw/0n7+dBfcRTo/KTAmDYfGRjXEWg0lMTqzpcMps7Q3wJlnu+Sx6eWpIkoHwYQUMS1VBTmvQ==}
-    engines: {node: '>=22.12.0'}
+  '@jaamd/astro@1.1.0':
+    resolution: {integrity: sha512-kLQUZmUa+xJWwEvyY8MmrxEjSsZA1jw/97zVmqyJcQ4CHnjT/eR8Zwvn2A7QUvqx+9lN8hq6QGvFbi3eukfEww==}
+    engines: {node: '>=22.23.4'}
     peerDependencies:
       '@astrojs/markdown-remark': ^7.3.0
       astro: ^7.3.0
@@ -837,18 +837,18 @@ packages:
       '@astrojs/markdown-remark':
         optional: true
 
-  '@jaamd/core@1.0.2':
-    resolution: {integrity: sha512-zxq4rmJw/kyHYdl9ApZghb599GQrGH/K56bFjZ8LjPypZnPKYRzmVJBcQK/NxTanuSd4IgAmjIHdnP8JZw74cA==}
-    engines: {node: '>=22.12.0'}
+  '@jaamd/core@1.1.0':
+    resolution: {integrity: sha512-evB4dz/1llA+iMtTBjnLtgb1vOrjIZ+d5Lw7AvjXv+QaO0T2ctmayXSNV8xcH+tEWNziIqbSddj/ROCIH2JP+w==}
+    engines: {node: '>=22.23.4'}
     peerDependencies:
       satteri: '>=0.10.0 <1'
     peerDependenciesMeta:
       satteri:
         optional: true
 
-  '@jaamd/jaad@1.0.2':
-    resolution: {integrity: sha512-HI9OZjcQwsBJn4+a6HbgRsWEQ9cY3fDqseoULl4N/aY6XQklu5JQVmh/Qnwj202E5fEZSOinukS5DkLuhtowyw==}
-    engines: {node: '>=22.12.0'}
+  '@jaamd/jaad@1.1.0':
+    resolution: {integrity: sha512-JpooSwN+1/IEKA11lDbam42OZfPOkwvBjPFShVWZZe+IgI7Wt0IAsPYVYrhLaod4fcw+ejyEXKzbllpo+5efMg==}
+    engines: {node: '>=22.23.4'}
     peerDependencies:
       '@tailwindcss/vite': ^4.3.0
       astro: ^7.3.0
@@ -3713,9 +3713,9 @@ snapshots:
   '@img/sharp-win32-x64@0.35.5':
     optional: true
 
-  '@jaamd/astro@1.0.2(@astrojs/markdown-remark@7.3.2(supports-color@10.2.2))(astro@7.4.11(@astrojs/markdown-remark@7.3.2(supports-color@10.2.2))(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(satteri@0.11.7)(supports-color@10.2.2)':
+  '@jaamd/astro@1.1.0(@astrojs/markdown-remark@7.3.2(supports-color@10.2.2))(astro@7.4.11(@astrojs/markdown-remark@7.3.2(supports-color@10.2.2))(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(satteri@0.11.7)(supports-color@10.2.2)':
     dependencies:
-      '@jaamd/core': 1.0.2(satteri@0.11.7)(supports-color@10.2.2)
+      '@jaamd/core': 1.1.0(satteri@0.11.7)(supports-color@10.2.2)
       astro: 7.4.11(@astrojs/markdown-remark@7.3.2(supports-color@10.2.2))(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
     optionalDependencies:
       '@astrojs/markdown-remark': 7.3.2(supports-color@10.2.2)
@@ -3723,7 +3723,7 @@ snapshots:
       - satteri
       - supports-color
 
-  '@jaamd/core@1.0.2(satteri@0.11.7)(supports-color@10.2.2)':
+  '@jaamd/core@1.1.0(satteri@0.11.7)(supports-color@10.2.2)':
     dependencies:
       '@types/hast': 3.0.5
       '@types/mdast': 4.0.4
@@ -3735,12 +3735,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@jaamd/jaad@1.0.2(@astrojs/markdown-remark@7.3.2(supports-color@10.2.2))(@tailwindcss/vite@4.3.5(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)))(astro@7.4.11(@astrojs/markdown-remark@7.3.2(supports-color@10.2.2))(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(satteri@0.11.7)(supports-color@10.2.2)(tailwindcss@4.3.5)':
+  '@jaamd/jaad@1.1.0(@astrojs/markdown-remark@7.3.2(supports-color@10.2.2))(@tailwindcss/vite@4.3.5(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)))(astro@7.4.11(@astrojs/markdown-remark@7.3.2(supports-color@10.2.2))(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(satteri@0.11.7)(supports-color@10.2.2)(tailwindcss@4.3.5)':
     dependencies:
       '@astrojs/sitemap': 3.7.4
-      '@jaamd/astro': 1.0.2(@astrojs/markdown-remark@7.3.2(supports-color@10.2.2))(astro@7.4.11(@astrojs/markdown-remark@7.3.2(supports-color@10.2.2))(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(satteri@0.11.7)(supports-color@10.2.2)
+      '@jaamd/astro': 1.1.0(@astrojs/markdown-remark@7.3.2(supports-color@10.2.2))(astro@7.4.11(@astrojs/markdown-remark@7.3.2(supports-color@10.2.2))(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(satteri@0.11.7)(supports-color@10.2.2)
       astro: 7.4.11(@astrojs/markdown-remark@7.3.2(supports-color@10.2.2))(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
       github-slugger: 2.0.0
+      yaml: 2.9.1
     optionalDependencies:
       '@tailwindcss/vite': 4.3.5(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
       tailwindcss: 4.3.5
