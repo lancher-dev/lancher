@@ -93,7 +93,7 @@ jobs:
         run: pnpm lint
 
       - name: Check formatting
-        run: pnpm format
+        run: pnpm format:check
 
       - name: Check types
         run: pnpm check
